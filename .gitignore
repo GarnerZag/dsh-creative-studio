@@ -1,0 +1,10 @@
+node_modules/
+lib/
+.test-build/
+test-results/
+playwright-report/
+*.tgz
+.env*
+!.env.example
+*.log
+.DS_Store

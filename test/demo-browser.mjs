@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import {chromium} from '@playwright/test';
+import {demoDocument} from '../.test-build/src/domain/demo-document.js';
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH??'/dsh-home/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome',args:['--no-sandbox']});
+try{
+ const page=await browser.newPage({viewport:{width:1600,height:1000}});
+ const scene={id:'test',title:'<img src=x onerror=alert(1)>',contentRevision:0,requirementIds:[],state:{query:'',open:false},components:[{id:'search',kind:'input',label:'Search',binding:'query'},{id:'results',kind:'list',label:'Results',binding:'query',rows:['Apple','Banana']},{id:'button',kind:'button',label:'Open',actionId:'open'},{id:'notice',kind:'notice',label:'Mock success',binding:'open'}],actions:[{id:'open',changes:[{key:'open',value:true}]}],steps:[{componentId:'search',value:'Apple'},{actionId:'open'}]};
+ await page.route('http://studio.test/',route=>route.fulfill({contentType:'text/html',body:'<iframe sandbox="allow-scripts" width="1440" height="900"></iframe>'}));
+ await page.goto('http://studio.test/');
+ await page.locator('iframe').evaluate((iframe,html)=>{iframe.srcdoc=html;},demoDocument(scene,'test-renderer-nonce'));
+ const frame=page.frameLocator('iframe');await frame.getByRole('textbox',{name:'Search'}).waitFor();
+ assert.equal(await frame.locator('li').count(),2);
+ await frame.getByRole('textbox',{name:'Search'}).fill('Banana');assert.equal(await frame.locator('li').innerText(),'Banana');
+ await frame.getByRole('button',{name:'Open',exact:true}).click();await frame.getByText('Mock success',{exact:true}).waitFor();
+ await frame.locator('#reset').click();assert.equal(await frame.locator('li').count(),2);
+ await frame.locator('#play').click();await frame.getByText('Mock success',{exact:true}).waitFor();assert.equal(await frame.locator('li').innerText(),'Apple');
+ const inner=page.frames().find(f=>f!==page.mainFrame());
+ const safety=await inner.evaluate(async()=>{let parentBlocked=false,storageBlocked=false,networkBlocked=false;try{void parent.document.body;}catch{parentBlocked=true;}try{localStorage.setItem('x','x');}catch{storageBlocked=true;}try{await fetch('https://example.com/');}catch{networkBlocked=true;}return{parentBlocked,storageBlocked,networkBlocked,width:innerWidth,columns:getComputedStyle(document.getElementById('root')).gridTemplateColumns.split(' ').length};});
+ assert.deepEqual(safety,{parentBlocked:true,storageBlocked:true,networkBlocked:true,width:1440,columns:2});
+ assert.equal(await frame.locator('img').count(),0);
+ await page.locator('iframe').evaluate(f=>f.width='390');
+ await page.waitForFunction(()=>document.querySelector('iframe').getBoundingClientRect().width<400);
+ const mobile=await inner.evaluate(()=>({width:innerWidth,columns:getComputedStyle(document.getElementById('root')).gridTemplateColumns.split(' ').length}));
+ assert.deepEqual(mobile,{width:390,columns:1});
+ console.log('PASS: input/filter, action, reset/playback, desktop/mobile layout, text escaping, parent/storage/network isolation');
+}finally{await browser.close();}

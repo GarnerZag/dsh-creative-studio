@@ -1,0 +1,89 @@
+import * as React from 'react';
+import {ResearchPanel} from './research.js';
+import {ReportsPanel} from './reports.js';
+import {HandoffPanel,type HandoffActions} from './handoff.js';
+import {Workbench} from './workbench.js';
+import {DemoPanel} from './demo.js';
+import {FeaturePanel} from './features.js';
+import type {FeatureChange} from '../types.js';
+import {ReferencesPanel} from './references.js';
+import type {ReferenceChange} from '../types.js';
+import { GeneratePanel } from './generate.js';
+import { ProposalPanel } from './proposals.js';
+import { VersionPanel } from './versions.js';
+import type { ProjectHead, ProjectSnapshot, RequirementChange } from '../types.js';
+import { ArchitectureEditor } from './architecture.js';
+import type { ArchitectureChange } from '../types.js';
+import { RequirementsEditor } from './requirements.js';
+
+export interface ProjectActions {
+  research(project:ProjectSnapshot,referenceId:string,request:string,workspaceId:string):Promise<ProjectSnapshot>;
+  acceptReport(project:ProjectSnapshot,reportId:string,accepted:boolean):Promise<ProjectSnapshot>;
+  listWorkspaces():Promise<import('../types.js').WorkspaceOption[]>;
+  handoff:HandoffActions;
+  dispatch:import('./dispatch.js').DispatchActions;
+  confirmTasks(project:ProjectSnapshot,versionId:string):Promise<ProjectSnapshot>;
+  demo(project:ProjectSnapshot,scene:NonNullable<ProjectSnapshot['demo']>):Promise<ProjectSnapshot>;
+  feature(project:ProjectSnapshot,change:FeatureChange):Promise<ProjectSnapshot>;
+  reference(project:ProjectSnapshot,change:ReferenceChange):Promise<ProjectSnapshot>;
+  generate(project:ProjectSnapshot,request:string,workspaceId:string):Promise<ProjectSnapshot>;
+  list(): Promise<ProjectHead[]>;
+  adopt(project: ProjectSnapshot, proposalId: string): Promise<ProjectSnapshot>;
+  approve(project: ProjectSnapshot, label: string): Promise<ProjectSnapshot>;
+  create(name: string): Promise<ProjectSnapshot>;
+  get(id: string): Promise<ProjectSnapshot>;
+  architecture(project: ProjectSnapshot, change: ArchitectureChange): Promise<ProjectSnapshot>;
+  edit(project: ProjectSnapshot, change: RequirementChange): Promise<ProjectSnapshot>;
+}
+
+export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: string) => string }): React.ReactElement {
+  const [projects, setProjects] = React.useState<ProjectHead[]>([]);
+  const [project, setProject] = React.useState<ProjectSnapshot>();
+  const [name, setName] = React.useState('');
+  const [error, setError] = React.useState('');
+  const [busy, setBusy] = React.useState(false);
+  const [editorEpoch,setEditorEpoch]=React.useState(0);
+  const generation = React.useRef(0);
+  React.useEffect(() => {
+    const token = ++generation.current;
+    void api.list().then(items => { if (generation.current === token) setProjects(items); }).catch(e => { if (generation.current === token) setError(String(e)); });
+    return () => { generation.current++; };
+  }, [api]);
+  const run = async (operation: () => Promise<ProjectSnapshot>, resetEditors=false) => {
+    if (busy) return;
+    const token = ++generation.current;
+    setBusy(true); setError('');
+    try {
+      const next = await operation();
+      if (generation.current !== token) return;
+      setProject(next);
+      if(resetEditors) setEditorEpoch(epoch=>epoch+1);
+      const items = await api.list();
+      if (generation.current === token) setProjects(items);
+    } catch (e) { if (generation.current === token) setError(e instanceof Error ? e.message : String(e)); }
+    finally { if (generation.current === token) setBusy(false); }
+  };
+  return <section className="cs-projects" aria-label={t('projects')}>
+    <h2>{t('projects')}</h2>
+    <form onSubmit={e => { e.preventDefault(); if (name.trim()) void run(() => api.create(name.trim())); }}>
+      <input aria-label={t('projectName')} placeholder={t('projectName')} value={name} onChange={e => setName(e.target.value)} disabled={busy} />
+      <button disabled={busy || !name.trim()} type="submit">{t('newProject')}</button>
+    </form>
+    <nav aria-label={t('projects')} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{projects.map(p => <button type="button" key={p.id} aria-pressed={project?.id === p.id} disabled={busy} onClick={() => void run(() => api.get(p.id))}>{p.name}</button>)}</nav>
+    {error && <p role="alert" className="cs-error">{error}</p>}
+    {project && <article><h3>{project.name}</h3><small>{t('draftRevision')} {project.contentRevision}</small>
+      <Workbench key={project.id} projectId={project.id} t={t}
+        idea={<><GeneratePanel listWorkspaces={api.listWorkspaces} key={`generate-${project.id}`} project={project} busy={busy} t={t} generate={(request,workspaceId)=>{void run(()=>api.generate(project,request,workspaceId));}} refresh={()=>{void run(()=>api.get(project.id));}}/><ProposalPanel key={`proposals-${project.id}`} project={project} busy={busy} t={t} adopt={id=>{void run(()=>api.adopt(project,id),true);}}/></>}
+        panels={[
+          {id:'research',label:t('researchTitle'),content:<ResearchPanel project={project} busy={busy} t={t} listWorkspaces={api.listWorkspaces} start={(referenceId,request,workspaceId)=>void run(()=>api.research(project,referenceId,request,workspaceId))} refresh={()=>void run(()=>api.get(project.id))}/>},
+          {id:'reports',label:t('reportsTitle'),content:<ReportsPanel project={project} busy={busy} t={t} refresh={()=>void run(()=>api.get(project.id))} accept={(id,value)=>void run(()=>api.acceptReport(project,id,value))}/>},
+          {id:'handoff',label:t('handoffTitle'),content:<HandoffPanel key={`handoff-${project.id}`} project={project} api={api.handoff} dispatch={api.dispatch} onProject={next=>setProject(current=>current?.id===next.id&&next.projectRevision>=current.projectRevision?next:current)} t={t}/>},
+          {id:'requirements',label:t('layoutRequirements'),content:<RequirementsEditor key={`${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change => { void run(() => api.edit(project, change)); }}/>},
+          {id:'architecture',label:t('layoutArchitecture'),content:<ArchitectureEditor key={`architecture-${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change=>{void run(()=>api.architecture(project,change));}}/>},
+          {id:'references',label:t('layoutReferences'),content:<>{<ReferencesPanel key={`references-${project.id}`} project={project} busy={busy} t={t} save={change=>{void run(()=>api.reference(project,change));}}/>}{<FeaturePanel key={`features-${project.id}`} project={project} busy={busy} t={t} save={change=>{void run(()=>api.feature(project,change));}}/>}</>},
+          {id:'versions',label:t('layoutVersions'),content:<VersionPanel key={`versions-${project.id}`} project={project} busy={busy} t={t} confirmTasks={id=>{void run(()=>api.confirmTasks(project,id));}} approve={label=>{void run(()=>api.approve(project,label));}}/>},
+        ]}
+        demo={compare=><DemoPanel key={`demo-${project.id}`} project={project} t={t} stacked={compare} busy={busy} save={scene=>{void run(()=>api.demo(project,scene));}}/>}
+      /></article>}
+  </section>;
+}

@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {ProjectStore} from '../../src/host/store.js';
+import type {Project} from '../../src/domain/project.js';
+import {proposalTools,proposalGuard} from '../../src/host/proposal-tools.js';
+test('proposal tools reject foreign sessions and guard blocks execution tools',async()=>{
+ const rows=new Map<string,Project>();const s=new ProjectStore({get:id=>rows.get(id),entries:()=>rows.entries(),put:async(id,p)=>{rows.set(id,p);},update:async(id,fn)=>{const p=fn(rows.get(id)!);rows.set(id,p);return p;}});
+ const p=await s.create('测试');await s.beginProposalJob(p.id,0,'job','session','改善搜索');
+ const read=proposalTools(s)[0]!,signal=new AbortController().signal;
+ await assert.rejects(read.execute({projectId:p.id,jobId:'job'},{name:read.name,agent:{id:'foreign'},signal}),/JOB_SCOPE_MISMATCH/);
+ const result=await read.execute({projectId:p.id,jobId:'job'},{name:read.name,agent:{id:'session'},signal});
+ assert.equal((result as {baseContentRevision:number}).baseContentRevision,0);
+ const guard=proposalGuard(s);
+ assert.ok(guard({name:'bash',agent:{id:'session'},signal}));
+ assert.equal(guard({name:read.name,agent:{id:'session'},signal}),undefined);
+ assert.equal(guard({name:'bash',agent:{id:'unrelated'},signal}),undefined);
+ const old=rows.get(p.id)!;old.proposalJob!.status='finished';
+ await s.beginProposalJob(p.id,old.projectRevision,'job2','session2','下一轮');
+ assert.ok(guard({name:'bash',agent:{id:'session'},signal}));
+ assert.ok(guard({name:'bash',agent:{id:'session2'},signal}));
+ await assert.rejects(read.execute({projectId:p.id,jobId:'job'},{name:read.name,agent:{id:'session'},signal}),/JOB_SCOPE_MISMATCH/);
+});

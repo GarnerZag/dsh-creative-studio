@@ -1,0 +1,168 @@
+import { TYPERT_REMOTE } from '../lib/typert.remote-client.js';
+import type { TypertDisposer } from '@deepseek-ai/dsh-typert-protocol';
+import type { StudioClientContext } from './client/context.js';
+import { createStudioPanel, StudioIcon, type ConnectionState } from './client/app.js';
+
+export const inject: string[] = ['slots', 'remote', 'locale'];
+const namespace = 'creativeStudio';
+const dictionaries = {
+  zh: {
+    researchTitle:'参考实现研究',researchSource:'选择参考来源',researchWorkspace:'选择研究工作区',researchQuestion:'希望梳理哪些功能和实现？',researchStart:'开始只读研究',researchRefresh:'刷新研究结果',researchEvidence:'实际工具调用',researchScopeNotice:'网页先读取指定页面；Host制品使用可用静态工具。不会执行目标程序或切换共享REA目标。',researchConfirm:'确认创建研究会话并调用模型？选定参考内容可能发送给配置的模型；请确认拥有使用权限。可能产生费用。',researchInferenceNotice:'总结是模型推断；工具返回不等于证明所有功能结论。请核对证据与限制。',
+    candidateDemo:'查看/收起候选双端 Demo',candidateDemoNotice:'候选预览：未采纳、未审批。仅模拟声明的交互；不代表生产实现。',
+    reportsTitle:'实施报告',reportsNotice:'报告和测试证据由 Agent 自报，未独立验证。会话空闲不表示完成；只有你能确认验收。',reportsRefresh:'刷新报告',reportsEmpty:'尚无实施报告。',reportsAccepted:'用户已验收',reportsPending:'待用户验收',reportsDetails:'文件、验收项与测试证据',reportsEvidence:'附带测试证据（Agent 自报）',reportsNoEvidence:'未附测试证据，仅实现自报。',reportsAccept:'确认验收',reportsRevoke:'撤销验收',reportsAcceptConfirm:'确认已亲自核对该任务、验收项、未完成项及证据？这只确认本报告，不自动验收整个项目。',reportsRevokeConfirm:'撤销这份报告的用户验收？',
+    generateTitle:'从模糊想法推导方案',generateNotice:'创建独立推导会话并调用已配置模型（可能产生费用）。只使用已保存草稿，候选不会自动采纳。当前手动填写已有 Harness 工作区 ID。',generateConfirm:'确认创建推导会话并调用模型？这不会开始产品开发。',workspaceId:'Harness 工作区 ID',roughIdea:'想解决什么问题？',generateProposal:'生成候选方案',refreshProposal:'刷新状态与候选',jobStatus:'作业状态',sessionId:'会话 ID',job_queued:'准备派发',job_submitted:'已提交，尚未收到候选',job_finished:'候选已返回',job_failed:'失败',job_unknown:'结果待确认',unknownJob:'派发结果不明确，不会自动重试。请通过对应会话检查执行状态。',
+    referencesTitle:'参考产品',referencesNotice:'手动指定来源；登记不等于完成研究。本地路径指 Host 文件，不是当前浏览器的电脑文件。',referenceName:'产品或资料名称',sourceKind:'来源类型',source_url:'网页',source_repository:'代码仓库', 'source_host-file':'Host 本地文件', 'source_saved-analysis':'已有分析',sourceLocation:'网址或 Host 文件路径',referenceNotes:'想借鉴的内容',referenceLicense:'许可证/使用范围',addReference:'添加参考',origin_manual:'手动指定',origin_recommended:'推荐',referenceUnverified:'尚未验证具体功能与实现',removeReference:'移除来源',removeReferenceConfirm:'从项目移除此参考？不会删除原文件。',
+    featureMatrix:'需求 × 参考功能对照',featureNotice:'空白代表未知，不代表产品没有此功能。当前为人工研究笔记，尚非 REA 实测证据。',newFeature:'新功能笔记',feature_name:'功能名称',feature_description:'具体功能',feature_implementation:'实现理解',feature_adaptation:'如何借鉴',feature_sourceLocator:'出处/代码位置',assessment:'证据程度',assessment_unknown:'未知/待核实',assessment_inferred:'推断',saveFeature:'保存功能笔记',removeFeature:'移除功能笔记',removeFeatureConfirm:'移除此功能笔记？',
+    layoutExplore:'推敲模式',layoutCompare:'对照模式',layoutWidth:'左侧宽度',layoutFocus:'专注预览',layoutRequirements:'需求导图',layoutArchitecture:'产品架构',layoutReferences:'参考研究',layoutVersions:'版本对比',
+    dispatchTitle:'启动开发',dispatchScope:'先导出就绪交接包。启动将新建开发会话、调用模型并允许修改所选目录内的产品代码；不授权部署、发布或付费服务。',dispatchConfirm:'确认按此冻结交接包启动开发？将创建新会话并可能修改目标目录文件、产生模型费用。',targetSubdirectory:'工作区内现有子目录（. 表示根目录）',agentPreset:'已配置的 Agent preset ID（可留空）',defaultAgent:'使用当前默认 Agent',dispatchStart:'确认并启动开发',selectWorkspace:'选择现有工作区',refreshWorkspaces:'刷新工作区',handoffTitle:'交付开发',handoffExplanation:'导出选定审批版本，不含当前草稿或未冻结的参考资料。此入口不会启动开发。',handoffVersion:'选择审批版本',handoffCheck:'检查就绪状态',handoffReady:'可交接（启动开发仍需确认）',handoffReviewOnly:'仅供评审，不可直接实施',handoffDownload:'导出并下载 ZIP',handoffWorking:'处理中…',handoffExportNotice:'导出已选版本的需求、架构、任务、验收与离线 Demo？未就绪包只能用于评审。不会启动开发或附带私人参考源。',demoTitle:'交互 Demo',demoSearch:'搜索',demoItems:'示例列表',demoSample:'示例条目',demoShow:'展示反馈',demoMock:'这是模拟反馈，没有调用生产服务。',demoTemplateNotice:'通用列表交互示例：以需求标题作样本数据，不表示已实现这些需求。',demoCustom:'自定义声明式场景（模拟数据）',demoStale:'此预览基于较旧的需求修订，请核对覆盖范围。',demoViewport:'产品视口',demoBoth:'桌面与手机',demoDesktop:'桌面',demoMobile:'手机',demoSceneEditor:'编辑场景 JSON',taskPlanReview:'查看任务计划',confirmTasks:'确认此版本任务计划',tasksConfirmed:'任务计划已确认',confirmTasksNotice:'确认已审阅此版本的任务、依赖、产出和验证要求？此操作不启动开发。',demoSave:'保存当前场景',demoLocalOnly:'应用场景仅更新本地预览；点击保存当前场景后才会写入项目。不执行任意脚本。',demoApply:'应用场景',demoLoad:'载入当前场景',demoReset:'返回通用示例',
+    proposals:'候选方案', proposalRule:'候选与草稿隔离；采纳仅更新草稿，不等于审批。', noProposals:'暂无候选方案，可通过上方入口生成。', proposalBase:'基于修订', proposal_pending:'待审阅', proposal_adopted:'已采纳', proposal_rejected:'已拒绝', staleProposal:'草稿已有后续修改。此候选仅供查看，需重新生成或合并后才能采纳。', assumptions:'待验证假设', alternatives:'备选方案', proposedContent:'查看候选完整内容', proposalDiff:'与当前已保存草稿的差异', confirmAdopt:'将此候选完整替换为当前草稿？未保存的表单修改不会合并。这不会审批或开始开发。', adoptProposal:'采纳为草稿',
+    versions:'版本与审批', approvalScope:'批准当前已保存的全部需求与架构。未保存的表单输入不包含在内；这不是开发派发，也不代表测试验收通过。', confirmApproval:'确认冻结此已保存版本？内容修订', versionLabel:'版本名称', approveVersion:'批准并冻结', compareFrom:'对比基线', compareTo:'对比目标', selectVersion:'选择冻结版本', currentDraft:'当前草稿', noDifferences:'没有内容差异', differences:'差异', added:'新增', removed:'删除', changed:'修改',
+    architectureType:'类型', architectureTitle:'名称', architectureBody:'设计说明', architecture_module:'模块', architecture_contract:'数据/API契约', architecture_decision:'决策', architecture_task:'开发任务', addArchitecture:'新增架构项', linkedRequirements:'关联需求', dependencies:'依赖关系', removeArchitecture:'删除该架构项？被其他项引用时会拒绝删除。',
+    hint_module:'职责、边界、输入输出、桌面/手机差异', hint_contract:'实体/字段、请求响应、状态变化、权限与错误', hint_decision:'选择、备选方案、理由、约束和风险', hint_task:'输入、产出、涉及范围、验证步骤和验收条件',
+    discardEdits: '尚有未保存的编辑，放弃并切换节点？',
+    newRequirement: '新需求', addChild: '添加子节点', addRoot: '添加根节点', selectRoot: '项目根', nodeTitle: '需求名称', rename: '重命名', parentNode: '父节点', nodeDescription: '需求说明', desktopAcceptance: '桌面端验收（每行一条）', mobileAcceptance: '手机端验收（每行一条）', saveDetails: '保存详情', confirmRemove: '删除该需求及其全部子节点？', removeNode: '删除节点', selectNode: '选择一个需求节点进行编辑。',
+    projects: '产品项目', projectName: '项目名称', newProject: '新建项目', draftRevision: '草稿修订', emptyRequirements: '尚无需求节点。',
+    title: '创意工坊', eyebrow: '把想法打磨成可以开发的产品', headline: '从一个想法，到一份清晰的开发起点。',
+    description: '把需求、参考产品、实现方案与交互演示放在同一个工作台中。先看清楚，再决定做什么。',
+    flow: '产品打磨流程', idea: '模糊想法', requirements: '需求导图', research: '参考研究', architecture: '架构方案', demo: '双端演示', handoff: '交付开发',
+    connecting: '正在连接 Host', connected: 'Host 已连接', error: '连接未就绪', retry: '检查 Host 连接',
+    readyTitle: '你的产品工作台', initialStage: '原生入口与 Host 通信已接入，项目编辑功能正在开发中。这里不会把未完成的功能展示成可用。',
+    draftRule: 'AI 提供候选，你决定批准。', native: 'Harness 原生插件',
+  },
+  en: {
+    researchTitle:'Reference implementation research',researchSource:'Select reference',researchWorkspace:'Select research workspace',researchQuestion:'Which features and implementation details should be examined?',researchStart:'Start read-only research',researchRefresh:'Refresh research',researchEvidence:'Actual tool calls',researchScopeNotice:'Web references read the selected page; Host artifacts use available static tools. No target execution or shared REA target switching.',researchConfirm:'Create a research session and call the model? Selected source content may be sent to your configured model. Confirm you have permission; charges may apply.',researchInferenceNotice:'The summary is model inference. Tool output does not prove every feature claim. Review evidence and limitations.',
+    candidateDemo:'Show/hide candidate dual-viewport demo',candidateDemoNotice:'Candidate preview, not adopted or approved. Simulated declared interactions only, not a production implementation.',
+    reportsTitle:'Implementation reports',reportsNotice:'Reports and test evidence are agent-reported, not independently verified. An idle session is not completion. Only you may accept work.',reportsRefresh:'Refresh reports',reportsEmpty:'No implementation reports yet.',reportsAccepted:'Accepted by user',reportsPending:'Awaiting user acceptance',reportsDetails:'Files, acceptance items and test evidence',reportsEvidence:'Test evidence attached (agent-reported)',reportsNoEvidence:'No test evidence; implementation self-report only.',reportsAccept:'Accept report',reportsRevoke:'Revoke acceptance',reportsAcceptConfirm:'Have you personally checked this task, acceptance items, unfinished work and evidence? This accepts only this report, not the entire project.',reportsRevokeConfirm:'Revoke your acceptance of this report?',
+    generateTitle:'Turn an idea into a proposal',generateNotice:'Creates a dedicated session using the configured model (charges may apply). Uses saved content only; never auto-adopts. Enter an existing Harness workspace ID.',generateConfirm:'Create a proposal session and call the model? This does not begin product development.',workspaceId:'Harness workspace ID',roughIdea:'What problem should this solve?',generateProposal:'Generate proposal',refreshProposal:'Refresh status and proposals',jobStatus:'Job status',sessionId:'Session ID',job_queued:'Preparing',job_submitted:'Submitted, awaiting proposal',job_finished:'Proposal received',job_failed:'Failed',job_unknown:'Outcome unknown',unknownJob:'Dispatch outcome is uncertain. No automatic retry. Check the referenced session.',
+    referencesTitle:'Product references',referencesNotice:'Register sources manually; this is not completed research. Local paths refer to the Host, not your browser computer.',referenceName:'Product or resource name',sourceKind:'Source type',source_url:'Web page',source_repository:'Repository','source_host-file':'Host file','source_saved-analysis':'Saved analysis',sourceLocation:'URL or Host file path',referenceNotes:'What to learn from it',referenceLicense:'License / permitted use',addReference:'Add reference',origin_manual:'Manually selected',origin_recommended:'Recommended',referenceUnverified:'Features and implementation not yet verified',removeReference:'Remove source',removeReferenceConfirm:'Remove this reference? The original file is not deleted.',
+    featureMatrix:'Requirements × reference features',featureNotice:'Empty means unknown, not absent. These are analyst notes, not REA observations.',newFeature:'New feature note',feature_name:'Feature name',feature_description:'Functionality',feature_implementation:'Implementation understanding',feature_adaptation:'Adaptation approach',feature_sourceLocator:'Source / code location',assessment:'Evidence level',assessment_unknown:'Unknown / unverified',assessment_inferred:'Inferred',saveFeature:'Save feature note',removeFeature:'Remove feature note',removeFeatureConfirm:'Remove this feature note?',
+    layoutExplore:'Explore',layoutCompare:'Compare',layoutWidth:'Left pane width',layoutFocus:'Focus preview',layoutRequirements:'Requirements',layoutArchitecture:'Architecture',layoutReferences:'References',layoutVersions:'Version comparison',
+    dispatchTitle:'Start development',dispatchScope:'Export a ready package first. Starting creates a new session, calls a model and may modify product files in the selected directory. No deployment, publication or paid services are authorized.',dispatchConfirm:'Start development from this frozen package? A new session may change files in the selected directory and incur model costs.',targetSubdirectory:'Existing workspace subdirectory (. for root)',agentPreset:'Configured Agent preset ID (optional)',defaultAgent:'Use current default Agent',dispatchStart:'Confirm and start development',selectWorkspace:'Select existing workspace',refreshWorkspaces:'Refresh workspaces',handoffTitle:'Development handoff',handoffExplanation:'Export one approved baseline, excluding later drafts and unfrozen research. This does not start development.',handoffVersion:'Select approved version',handoffCheck:'Check readiness',handoffReady:'Ready for handoff; development still requires confirmation',handoffReviewOnly:'Review only; not ready for implementation',handoffDownload:'Export and download ZIP',handoffWorking:'Working…',handoffExportNotice:'Export requirements, architecture, tasks, acceptance and offline Demo? Unready packages are review-only. No development is started or private reference sources included.',demoTitle:'Interactive demo',demoSearch:'Search',demoItems:'Sample list',demoSample:'Sample item',demoShow:'Show feedback',demoMock:'Mock feedback. No production service called.',demoTemplateNotice:'Generic list interaction using requirement titles as sample data; this does not implement those requirements.',demoCustom:'Custom declarative scene (mock data)',demoStale:'This preview belongs to an older requirement revision. Review its coverage.',demoViewport:'Product viewport',demoBoth:'Desktop and mobile',demoDesktop:'Desktop',demoMobile:'Mobile',demoSceneEditor:'Edit scene JSON',taskPlanReview:'Review task plan',confirmTasks:'Confirm this version’s task plan',tasksConfirmed:'Task plan confirmed',confirmTasksNotice:'Confirm review of tasks, dependencies, outputs and verification? This does not start development.',demoSave:'Save current scene',demoLocalOnly:'Apply updates the local preview; Save current scene persists it to the project. Arbitrary scripts are not executed.',demoApply:'Apply scene',demoLoad:'Load current scene',demoReset:'Return to example',
+    proposals:'Proposals', proposalRule:'Proposals are isolated from the draft. Adoption updates the draft, not approval.', noProposals:'No proposals yet. Use the generation form above.', proposalBase:'Based on revision', proposal_pending:'Pending review', proposal_adopted:'Adopted', proposal_rejected:'Rejected', staleProposal:'The draft has changed. Review only; regenerate or merge before adoption.', assumptions:'Assumptions to validate', alternatives:'Alternatives', proposedContent:'View full proposed content', proposalDiff:'Changes against the current saved draft', confirmAdopt:'Replace the entire saved draft with this proposal? Unsaved form edits will not be merged. This does not approve or start development.', adoptProposal:'Adopt into draft',
+    versions:'Versions and approval', approvalScope:'Approve all saved requirements and architecture. Unsaved form inputs are excluded. This neither starts development nor confirms test acceptance.', confirmApproval:'Freeze this saved version? Content revision', versionLabel:'Version label', approveVersion:'Approve and freeze', compareFrom:'Baseline', compareTo:'Compare to', selectVersion:'Select frozen version', currentDraft:'Current draft', noDifferences:'No content differences', differences:'Differences', added:'Added', removed:'Removed', changed:'Changed',
+    architectureType:'Type', architectureTitle:'Title', architectureBody:'Design notes', architecture_module:'Module', architecture_contract:'Data/API contract', architecture_decision:'Decision', architecture_task:'Development task', addArchitecture:'Add architecture item', linkedRequirements:'Linked requirements', dependencies:'Dependencies', removeArchitecture:'Remove this item? Referenced items cannot be removed.',
+    hint_module:'Responsibilities, boundaries, inputs/outputs, desktop/mobile differences', hint_contract:'Entities/fields, requests/responses, states, permissions and errors', hint_decision:'Choice, alternatives, rationale, constraints and risks', hint_task:'Inputs, outputs, scope, verification steps and acceptance',
+    discardEdits: 'Discard unsaved edits and select another node?',
+    newRequirement: 'New requirement', addChild: 'Add child', addRoot: 'Add root', selectRoot: 'Project root', nodeTitle: 'Requirement title', rename: 'Rename', parentNode: 'Parent', nodeDescription: 'Description', desktopAcceptance: 'Desktop acceptance (one per line)', mobileAcceptance: 'Mobile acceptance (one per line)', saveDetails: 'Save details', confirmRemove: 'Delete this requirement and all descendants?', removeNode: 'Delete node', selectNode: 'Select a requirement to edit.',
+    projects: 'Product projects', projectName: 'Project name', newProject: 'Create project', draftRevision: 'Draft revision', emptyRequirements: 'No requirement nodes yet.',
+    title: 'Creative Studio', eyebrow: 'SHAPE AN IDEA INTO A BUILDABLE PRODUCT', headline: 'From an idea to a clear development starting point.',
+    description: 'Explore requirements, reference products, implementation choices and interactive demos in one workspace. Understand first, then decide what to build.',
+    flow: 'Product discovery flow', idea: 'Idea', requirements: 'Requirements', research: 'References', architecture: 'Architecture', demo: 'Dual demos', handoff: 'Handoff',
+    connecting: 'Connecting to Host', connected: 'Host connected', error: 'Connection unavailable', retry: 'Check Host connection',
+    readyTitle: 'Your product workspace', initialStage: 'The native entry and Host connection are being integrated. Project editing is still in development; unfinished features are not represented as available.',
+    draftRule: 'AI proposes. You approve.', native: 'Native Harness plugin',
+  },
+};
+
+export function apply(ctx: StudioClientContext): void {
+  ctx.effect(() => ctx.locale.register(namespace, dictionaries));
+  const t = ctx.locale.bind(namespace);
+  let disposed = false;
+  let mounted = false;
+  let remoteContext = ctx;
+  let release: TypertDisposer | undefined;
+  let state: ConnectionState = { status: 'connecting' };
+  const listeners = new Set<() => void>();
+  const update = (next: ConnectionState): void => {
+    if (disposed) return;
+    state = next;
+    for (const listener of listeners) listener();
+  };
+  const refresh = async (): Promise<void> => {
+    if (!mounted || disposed) return;
+    update({ status: 'connecting' });
+    try {
+      const result = await TYPERT_REMOTE.methods['creativeStudio/health'].invoke(remoteContext.remote, {});
+      if (!result.ok) update({ status: 'error', error: result.error.message });
+      else update({ status: result.value.status });
+    } catch (error) {
+      update({ status: 'error', error: error instanceof Error ? error.message : String(error) });
+    }
+  };
+  const Panel = createStudioPanel({
+    getSnapshot: () => state,
+    subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener); },
+    retry: () => { void refresh(); },
+  }, t, {
+    async acceptReport(project,reportId,accepted){const r=await TYPERT_REMOTE.methods['creativeStudio/acceptImplementationReport'].invoke(remoteContext.remote,{id:project.id,expectedProjectRevision:project.projectRevision,reportId,accepted});if(!r.ok)throw new Error(r.error.message);return r.value;},
+    async listWorkspaces(){const r=await TYPERT_REMOTE.methods['creativeStudio/listWorkspaces'].invoke(remoteContext.remote,{});if(!r.ok)throw new Error(r.error.message);return r.value;},
+    dispatch:{
+      async workspaces(){const r=await TYPERT_REMOTE.methods['creativeStudio/listWorkspaces'].invoke(remoteContext.remote,{});if(!r.ok)throw new Error(r.error.message);return r.value;},
+      async get(id){const r=await TYPERT_REMOTE.methods['creativeStudio/getProject'].invoke(remoteContext.remote,{id});if(!r.ok)throw new Error(r.error.message);return r.value;},
+      async send(project,info,workspaceId,relativeDirectory,agentPreset){const r=await TYPERT_REMOTE.methods['creativeStudio/dispatchHandoff'].invoke(remoteContext.remote,{id:project.id,expectedProjectRevision:project.projectRevision,handoffId:info.handoffId,workspaceId,relativeDirectory,agentPreset,confirmed:true});if(!r.ok)throw new Error(r.error.message);return r.value;},
+    },
+    handoff:{
+      async readiness(id,versionId){const r=await TYPERT_REMOTE.methods['creativeStudio/handoffReadiness'].invoke(remoteContext.remote,{id,versionId});if(!r.ok)throw new Error(r.error.message);return r.value;},
+      async export(id,versionId){const r=await TYPERT_REMOTE.methods['creativeStudio/exportHandoff'].invoke(remoteContext.remote,{id,versionId});if(!r.ok)throw new Error(r.error.message);return r.value;},
+      async chunk(id,handoffId,offset,maxBytes){const r=await TYPERT_REMOTE.methods['creativeStudio/readHandoffChunk'].invoke(remoteContext.remote,{id,handoffId,offset,maxBytes});if(!r.ok)throw new Error(r.error.message);return r.value;},
+    },
+    async confirmTasks(project,versionId){const result=await TYPERT_REMOTE.methods['creativeStudio/confirmTaskPlan'].invoke(remoteContext.remote,{id:project.id,expectedProjectRevision:project.projectRevision,versionId});if(!result.ok)throw new Error(result.error.message);return result.value;},
+    async demo(project,scene){const result=await TYPERT_REMOTE.methods['creativeStudio/saveDemo'].invoke(remoteContext.remote,{id:project.id,expectedProjectRevision:project.projectRevision,expectedContentRevision:project.contentRevision,scene});if(!result.ok)throw new Error(result.error.message);return result.value;},
+    async feature(project,change){const result=await TYPERT_REMOTE.methods['creativeStudio/editFeature'].invoke(remoteContext.remote,{id:project.id,expectedProjectRevision:project.projectRevision,change});if(!result.ok)throw new Error(result.error.message);return result.value;},
+    async reference(project,change){
+      const result=await TYPERT_REMOTE.methods['creativeStudio/editReference'].invoke(remoteContext.remote,{id:project.id,expectedProjectRevision:project.projectRevision,change});
+      if(!result.ok)throw new Error(result.error.message);
+      return result.value;
+    },
+    async research(project,referenceId,request,workspaceId){const result=await TYPERT_REMOTE.methods['creativeStudio/researchReference'].invoke(remoteContext.remote,{id:project.id,expectedProjectRevision:project.projectRevision,referenceId,request,workspaceId,confirmed:true});if(!result.ok)throw new Error(result.error.message);return result.value;},
+    async generate(project,request,workspaceId) {
+      const result=await TYPERT_REMOTE.methods['creativeStudio/generateProposal'].invoke(remoteContext.remote,{id:project.id,expectedProjectRevision:project.projectRevision,request,workspaceId});
+      if(!result.ok) throw new Error(result.error.message);
+      return result.value;
+    },
+    async list() {
+      const result = await TYPERT_REMOTE.methods['creativeStudio/listProjects'].invoke(remoteContext.remote, {});
+      if (!result.ok) throw new Error(result.error.message);
+      return result.value;
+    },
+    async create(name) {
+      const result = await TYPERT_REMOTE.methods['creativeStudio/createProject'].invoke(remoteContext.remote, { name });
+      if (!result.ok) throw new Error(result.error.message);
+      return result.value;
+    },
+    async edit(project, change) {
+      const result = await TYPERT_REMOTE.methods['creativeStudio/editRequirements'].invoke(remoteContext.remote, { id: project.id, expectedProjectRevision: project.projectRevision, expectedContentRevision: project.contentRevision, change });
+      if (!result.ok) throw new Error(result.error.message);
+      return result.value;
+    },
+    async architecture(project, change) {
+      const result = await TYPERT_REMOTE.methods['creativeStudio/editArchitecture'].invoke(remoteContext.remote, { id: project.id, expectedProjectRevision: project.projectRevision, expectedContentRevision: project.contentRevision, change });
+      if (!result.ok) throw new Error(result.error.message);
+      return result.value;
+    },
+    async approve(project, label) {
+      const result=await TYPERT_REMOTE.methods['creativeStudio/approveVersion'].invoke(remoteContext.remote,{id:project.id,expectedProjectRevision:project.projectRevision,expectedContentRevision:project.contentRevision,label});
+      if(!result.ok) throw new Error(result.error.message);
+      return result.value;
+    },
+    async adopt(project, proposalId) {
+      const result=await TYPERT_REMOTE.methods['creativeStudio/adoptProposal'].invoke(remoteContext.remote,{id:project.id,expectedProjectRevision:project.projectRevision,expectedContentRevision:project.contentRevision,proposalId});
+      if(!result.ok) throw new Error(result.error.message);
+      return result.value;
+    },
+    async get(id) {
+      const result = await TYPERT_REMOTE.methods['creativeStudio/getProject'].invoke(remoteContext.remote, { id });
+      if (!result.ok) throw new Error(result.error.message);
+      return result.value;
+    },
+  });
+  ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({ name: 'sidebar.panellist', id: 'creative-studio', order: 5, locale: namespace, label: () => t('title') }, StudioIcon));
+  ctx.slots.inject('main', () => ctx.slots.register({ name: 'main', key: 'creative-studio', locale: namespace }, Panel));
+  ctx.effect(() => {
+    void ctx.remote.$mount(TYPERT_REMOTE).then(async unmount => {
+      if (disposed) { await unmount(); return; }
+      release = unmount;
+      ctx.inject(['remote', 'remote.creativeStudio'], child => {
+        remoteContext = child;
+        mounted = true;
+        void refresh();
+        child.effect(() => () => { mounted = false; });
+      });
+    }).catch(error => update({ status: 'error', error: error instanceof Error ? error.message : String(error) }));
+    return () => {
+      disposed = true;
+      listeners.clear();
+      if (release) void release().catch(() => undefined);
+    };
+  });
+}
