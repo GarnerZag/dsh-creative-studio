@@ -26,7 +26,7 @@ const dictionaries = {
     description: '把需求、参考产品、实现方案与交互演示放在同一个工作台中。先看清楚，再决定做什么。',
     flow: '产品打磨流程', idea: '模糊想法', requirements: '需求导图', research: '参考研究', architecture: '架构方案', demo: '双端演示', handoff: '交付开发',
     connecting: '正在连接 Host', connected: 'Host 已连接', error: '连接未就绪', retry: '检查 Host 连接',
-    readyTitle: '你的产品工作台', initialStage: '原生入口与 Host 通信已接入，项目编辑功能正在开发中。这里不会把未完成的功能展示成可用。',
+    readyTitle: '你的产品工作台', initialStage: '在上方选择或创建项目，梳理需求、审阅候选并验证交互。Demo 使用模拟数据；采纳、审批和启动开发是相互独立的操作。',
     draftRule: 'AI 提供候选，你决定批准。', native: 'Harness 原生插件',
   },
   en: {
@@ -49,7 +49,7 @@ const dictionaries = {
     description: 'Explore requirements, reference products, implementation choices and interactive demos in one workspace. Understand first, then decide what to build.',
     flow: 'Product discovery flow', idea: 'Idea', requirements: 'Requirements', research: 'References', architecture: 'Architecture', demo: 'Dual demos', handoff: 'Handoff',
     connecting: 'Connecting to Host', connected: 'Host connected', error: 'Connection unavailable', retry: 'Check Host connection',
-    readyTitle: 'Your product workspace', initialStage: 'The native entry and Host connection are being integrated. Project editing is still in development; unfinished features are not represented as available.',
+    readyTitle: 'Your product workspace', initialStage: 'Select or create a project above to refine requirements, review proposals and verify interactions. Demos use mock data; adoption, approval and starting development are separate actions.',
     draftRule: 'AI proposes. You approve.', native: 'Native Harness plugin',
   },
 };

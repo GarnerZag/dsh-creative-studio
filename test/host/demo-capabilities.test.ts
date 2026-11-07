@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {demoCapabilities} from '../../src/host/proposal-tools.js';import {validateScene,runDemoAction,visibleRows} from '../../src/domain/demo.js';
+test('agent filter example matches the actual renderer state semantics',()=>{const scene=validateScene({id:'example',title:'Example',contentRevision:1,requirementIds:[],...demoCapabilities.filterExample});const list=scene.components.find(c=>c.kind==='list');assert.ok(list?.kind==='list');assert.deepEqual(visibleRows(list.rows,'ALPHA'),['Alpha']);const cleared=runDemoAction(scene,{query:'ALPHA'},'clear');assert.deepEqual(visibleRows(list.rows,String(cleared.query)),['Alpha','Beta']);assert.ok(JSON.stringify(demoCapabilities).length<2200);});

@@ -20,6 +20,7 @@ export function checkHandoff(current:Project,versionId:string):HandoffReadiness{
   if(!n.mobileAcceptance.some(s=>s.trim()))block('MOBILE_ACCEPTANCE',n.id,'Add mobile acceptance or explicit not-applicable rationale.');
   if(!version.architecture.some(a=>a.kind==='task'&&a.requirementIds.includes(n.id)))block('TASK_COVERAGE',n.id,'Link an implementation task.');
  }
+ for(const n of version.nodes.filter(n=>n.kind!=='feature'))if([...n.desktopAcceptance,...n.mobileAcceptance].some(s=>s.trim())&&!version.architecture.some(a=>a.kind==='task'&&a.requirementIds.includes(n.id)))block('TASK_COVERAGE',n.id,'Every declared acceptance criterion, including goal-level criteria, needs an owning task.');
  if(!version.architecture.some(a=>a.kind==='module'))block('ARCHITECTURE_MISSING',versionId,'Approve product module boundaries.');
  for(const a of version.architecture)if(!a.body.trim())block('ARCHITECTURE_DETAILS',a.id,'Fill in implementation contract, decision rationale or task outputs and verification.');
  if(!version.taskPlanConfirmed)block('TASK_PLAN_UNCONFIRMED',versionId,'Explicit user confirmation of this task plan is required.');
