@@ -12,7 +12,7 @@ import { randomUUID } from 'node:crypto';
 import { beginProposalJob, submitJobProposal } from '../domain/jobs.js';
 import { saveProposal, adoptProposal, rejectProposal } from '../domain/proposals.js';
 import type { ProposalInput } from '../domain/project.js';
-import { approveVersion } from '../domain/versions.js';
+import { approveReviewedVersion, type ApprovalReview } from '../domain/approval-review.js';
 import { editArchitecture, type ArchitectureEdit } from '../domain/architecture.js';
 import type { KvTable } from '@deepseek-ai/dsh-storage-domain';
 import { createProject, editRequirements, validateProject, type Project, type RequirementEdit } from '../domain/project.js';
@@ -109,11 +109,11 @@ export class ProjectStore {
     }));
   }
 
-  async approve(id: string, expectedProjectRevision: number, expectedContentRevision: number, label: string): Promise<Project> {
+  async approve(id: string, expectedProjectRevision: number, expectedContentRevision: number, label: string, review?:ApprovalReview): Promise<Project> {
     const versionId=randomUUID();
     const result=await this.table.update(id,current=>{
       if(current.projectRevision!==expectedProjectRevision) throw new Error('CONFLICT');
-      return approveVersion(current,expectedContentRevision,versionId,label,new Date().toISOString());
+      return approveReviewedVersion(current,expectedContentRevision,versionId,label,new Date().toISOString(),review??{baselineVersionId:current.versions.at(-1)?.id??null,acknowledgeUnverified:false});
     });
     return validateProject(result);
   }

@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createProject,editRequirements} from '../../src/domain/project.js';
+import {approveVersion} from '../../src/domain/versions.js';
+import {approveReviewedVersion} from '../../src/domain/approval-review.js';
+import {handoffContents} from '../../src/domain/handoff-content.js';
+test('handoff exports frozen acknowledgement without inventing legacy acknowledgement or test results',()=>{
+ let p=createProject('p','test');
+ p=editRequirements(p,0,{kind:'add',node:{id:'n',parentId:null,title:'scope',kind:'feature',description:'',priority:'normal',desktopAcceptance:['Works'],mobileAcceptance:[]}});
+ p=approveVersion(p,1,'legacy','legacy','2026-11-07T00:00:00Z');
+ p=approveReviewedVersion(p,1,'reviewed','reviewed','2026-11-07T00:01:00Z',{baselineVersionId:'legacy',acknowledgeUnverified:true});
+ const original=handoffContents(p,'reviewed').files;
+ const receipt=JSON.parse(original['approval.json']!);
+ assert.equal(receipt.versionId,'reviewed');assert.deepEqual(receipt.record,p.versions[1]!.approval);
+ assert.deepEqual(receipt.record.unverifiedAcceptanceIds,['n:desktop:1']);assert.equal(receipt.record.acknowledged,true);
+ assert.match(original['acceptance.md']!,/- \[ \] n:desktop:1/);assert.match(original['START_HERE.md']!,/approval.json/);
+ p=editRequirements(p,1,{kind:'rename',id:'n',title:'later draft'});
+ assert.equal(handoffContents(p,'reviewed').files['approval.json'],original['approval.json']);
+ assert.equal(JSON.parse(handoffContents(p,'legacy').files['approval.json']!).record,null);
+});

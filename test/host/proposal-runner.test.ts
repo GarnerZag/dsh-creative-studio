@@ -14,6 +14,6 @@ test('admission failure keeps known identity and prevents duplicate sessions',as
 });
 test('prompt ACK is submitted, not finished or approved',async()=>{
  const s=store(),p=await s.create('测试');
- await startProposal(s,{create:async({sessionId})=>({sessionId}),prompt:async()=>({accepted:true})},{projectId:p.id,expectedProjectRevision:0,request:'优化'},new AbortController().signal);
+ await startProposal(s,{create:async({sessionId})=>({sessionId}),prompt:async(request)=>{const text=request.content[0]!.text;assert.match(text,/recommendations/);assert.match(text,/未核验线索/);assert.match(text,/含goal/);return {accepted:true};}},{projectId:p.id,expectedProjectRevision:0,request:'优化'},new AbortController().signal);
  assert.equal(s.get(p.id).proposalJob?.status,'submitted');assert.equal(s.get(p.id).versions.length,0);
 });

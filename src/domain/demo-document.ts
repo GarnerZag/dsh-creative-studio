@@ -6,15 +6,16 @@ function runtime(){
  const root=document.getElementById('root')!;
  const execute=(id:string)=>{const action=scene.actions.find(a=>a.id===id);if(action)for(const c of action.changes)state[c.key]=c.value;render();};
  function render(){
-  root.replaceChildren();
   for(const c of scene.components){
-   const box=document.createElement('section');box.dataset.component=c.id;
-   if(c.kind==='notice'&&!state[c.binding])continue;
+   let box=root.querySelector<HTMLElement>(`[data-component="${CSS.escape(c.id)}"]`);
+   if(!box){box=document.createElement('section');box.dataset.component=c.id;root.append(box);}
+   if(c.kind==='input'&&box.querySelector('input')){const input=box.querySelector('input')!;const value=String(state[c.binding]);if(input.value!==value)input.value=value;continue;}
+   box.replaceChildren();box.hidden=c.kind==='notice'&&!state[c.binding];
+   if(box.hidden)continue;
    const label=document.createElement('label');label.textContent=c.label;box.append(label);
-   if(c.kind==='input'){const input=document.createElement('input');input.value=String(state[c.binding]);input.setAttribute('aria-label',c.label);input.oninput=()=>{state[c.binding]=input.value;const start=input.selectionStart;render();const restored=document.querySelector<HTMLInputElement>(`[data-component="${CSS.escape(c.id)}"] input`);restored?.focus();if(start!==null)restored?.setSelectionRange(start,start);};box.append(input);}
+   if(c.kind==='input'){const input=document.createElement('input');input.value=String(state[c.binding]);input.setAttribute('aria-label',c.label);input.oninput=()=>{state[c.binding]=input.value;render();};box.append(input);}
    if(c.kind==='button'){const button=document.createElement('button');button.textContent=c.label;label.remove();button.onclick=()=>execute(c.actionId);box.append(button);}
    if(c.kind==='list'){const list=document.createElement('ul');const query=String(state[c.binding]).toLocaleLowerCase();for(const row of c.rows.filter(row=>row.toLocaleLowerCase().includes(query))){const li=document.createElement('li');li.textContent=row;list.append(li);}box.append(list);}
-   root.append(box);
   }
  }
  const pause=()=>{if(timer!==undefined)clearInterval(timer);timer=undefined;};

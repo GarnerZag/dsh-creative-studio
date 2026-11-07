@@ -1,21 +1,22 @@
 import * as React from 'react';
 import {newId} from './id.js';
+import {openEditor,refreshEditor,editorDirty} from './editor-state.js';
 import { MindMap } from './mind-map.js';
 import type { ProjectSnapshot, RequirementChange } from '../types.js';
 
-export function RequirementsEditor({ project, save, busy, t }: { project: ProjectSnapshot; save: (change: RequirementChange) => void; busy: boolean; t: (key: string) => string }): React.ReactElement {
+type stringFields={title:string;description:string;desktop:string;mobile:string};
+export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSelect?:(id:string|null)=>void; project: ProjectSnapshot; save: (change: RequirementChange) => void; busy: boolean; t: (key: string) => string }): React.ReactElement {
   const [selected, setSelected] = React.useState<string | null>(null);
-  const [title, setTitle] = React.useState('');
-  const [description, setDescription] = React.useState('');
-  const [desktop, setDesktop] = React.useState('');
-  const [mobile, setMobile] = React.useState('');
   const node = project.nodes.find(n => n.id === selected);
-  React.useEffect(() => {
-    setTitle(node?.title ?? ''); setDescription(node?.description ?? '');
-    setDesktop(node?.desktopAcceptance.join('\n') ?? ''); setMobile(node?.mobileAcceptance.join('\n') ?? '');
-  }, [node?.id]);
+  React.useEffect(()=>{onSelect?.(node?.id??null);},[node?.id,onSelect]);
+  const snapshot=()=>({title:node?.title??'',description:node?.description??'',desktop:node?.desktopAcceptance.join('\n')??'',mobile:node?.mobileAcceptance.join('\n')??''});
+  const [editor,setEditor]=React.useState(()=>openEditor<stringFields>(null,{title:'',description:'',desktop:'',mobile:''}));
+  const {title,description,desktop,mobile}=editor.values;
+  const field=(key:keyof stringFields,value:string)=>setEditor(current=>({...current,values:{...current.values,[key]:value}}));
+  const setTitle=(v:string)=>field('title',v),setDescription=(v:string)=>field('description',v),setDesktop=(v:string)=>field('desktop',v),setMobile=(v:string)=>field('mobile',v);
+  React.useEffect(()=>{setEditor(current=>refreshEditor(current,node?.id??null,snapshot()));},[node]);
   const choose = (id: string | null) => {
-    const dirty = node && (title !== node.title || description !== node.description || desktop !== node.desktopAcceptance.join('\n') || mobile !== node.mobileAcceptance.join('\n'));
+    const dirty = editorDirty(editor);
     if (id === selected || !dirty || window.confirm(t('discardEdits'))) setSelected(id);
   };
   const rows: Array<{ id: string; depth: number }> = [];
@@ -32,13 +33,14 @@ export function RequirementsEditor({ project, save, busy, t }: { project: Projec
       <MindMap nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>
       <div className="cs-tree" aria-label={t('requirements')}>{rows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 22 }}><button disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>
     </div>
-    {node ? <fieldset disabled={busy} style={{ border: 0, padding: 0, minWidth: 0 }}>
+    {editor.conflicts.length>0&&<p role="alert">{t('editorConflict')} <button disabled={busy} onClick={()=>{if(window.confirm(t('discardEdits')))setEditor(openEditor(node?.id??null,snapshot()));}}>{t('editorReload')}</button></p>}
+    {node ? <fieldset disabled={busy||editor.conflicts.length>0} style={{ border: 0, padding: 0, minWidth: 0 }}>
       <form onSubmit={e => { e.preventDefault(); if (title.trim()) save({ kind: 'rename', id: node.id, title }); }}><label>{t('nodeTitle')}<input value={title} onChange={e => setTitle(e.target.value)} /></label><button disabled={!title.trim()}>{t('rename')}</button></form>
       <label>{t('parentNode')}<select value={node.parentId ?? ''} onChange={e => save({ kind: 'move', id: node.id, parentId: e.target.value || null })}><option value="">{t('selectRoot')}</option>{project.nodes.filter(n => n.id !== node.id).map(n => <option key={n.id} value={n.id}>{n.title}</option>)}</select></label>
       <form onSubmit={e => { e.preventDefault(); save({ kind: 'details', id: node.id, description, priority: node.priority, desktopAcceptance: lines(desktop), mobileAcceptance: lines(mobile) }); }}>
-        <label>{t('nodeDescription')}<textarea rows={4} value={description} onChange={e => setDescription(e.target.value)}/></label>
-        <label>{t('desktopAcceptance')}<textarea rows={3} value={desktop} onChange={e => setDesktop(e.target.value)}/></label>
-        <label>{t('mobileAcceptance')}<textarea rows={3} value={mobile} onChange={e => setMobile(e.target.value)}/></label>
+        <label>{t('nodeDescription')}<textarea aria-label={t('nodeDescription')} rows={4} value={description} onChange={e => setDescription(e.target.value)}/></label>
+        <label>{t('desktopAcceptance')}<textarea aria-label={t('desktopAcceptance')} rows={3} value={desktop} onChange={e => setDesktop(e.target.value)}/></label>
+        <label>{t('mobileAcceptance')}<textarea aria-label={t('mobileAcceptance')} rows={3} value={mobile} onChange={e => setMobile(e.target.value)}/></label>
         <button>{t('saveDetails')}</button>
       </form>
       <button onClick={() => { if (window.confirm(t('confirmRemove'))) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button>

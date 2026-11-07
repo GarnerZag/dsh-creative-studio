@@ -24,4 +24,13 @@ test('store protects read snapshots and checks revision inside storage update', 
   assert.equal(store.get(p.id).projectRevision, 1);
   assert.equal(store.get(p.id).contentRevision, 0);
   assert.throws(() => store.get('missing'), /PROJECT_NOT_FOUND/);
+  const fixture=store.get(p.id);
+  fixture.nodes.push({id:'req',parentId:null,title:'Requirement',description:'',kind:'feature',priority:'normal',desktopAcceptance:['Works'],mobileAcceptance:[]});
+  records.set(p.id,fixture);
+  await assert.rejects(store.approve(p.id,1,0,'No acknowledgement'),/APPROVAL_UNVERIFIED_ACK_REQUIRED/);
+  assert.equal(store.get(p.id).versions.length,0);
+  const approved=await store.approve(p.id,1,0,'Explicit acknowledgement',{baselineVersionId:null,acknowledgeUnverified:true});
+  assert.equal(approved.versions[0]!.approval!.acknowledged,true);
+  assert.equal(approved.projectRevision,2);
+  await assert.rejects(store.approve(p.id,1,0,'Stale',{baselineVersionId:null,acknowledgeUnverified:true}),/CONFLICT/);
 });

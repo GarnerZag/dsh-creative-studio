@@ -1,0 +1,4 @@
+import {z} from 'zod';
+/** Discovery hints only: no observed authority and no guessed Host file access. */
+export const RecommendationSchema=z.object({id:z.string().min(1),name:z.string().trim().min(1),sourceKind:z.enum(['url','repository']),location:z.string().url(),rationale:z.string().trim().min(1),featureIdeas:z.array(z.string().trim().min(1)).max(12)}).strict().superRefine((r,ctx)=>{const url=new URL(r.location);if(!['http:','https:'].includes(url.protocol)||url.username||url.password)ctx.addIssue({code:'custom',message:'PUBLIC_HTTP_SOURCE_REQUIRED'});});
+export const RecommendationsSchema=z.array(RecommendationSchema).max(5).superRefine((rows,ctx)=>{if(new Set(rows.map(r=>r.id)).size!==rows.length||new Set(rows.map(r=>r.location)).size!==rows.length)ctx.addIssue({code:'custom',message:'DUPLICATE_RECOMMENDATION'});});

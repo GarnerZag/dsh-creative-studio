@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {SceneSchema,validateScene} from './demo.js';
+import {RecommendationsSchema} from './recommendations.js';
 
 const id = z.string().min(1);
 export const RequirementSchema = z.object({
@@ -15,6 +16,7 @@ export const ArchitectureItemSchema = z.object({
 }).strict();
 export type ArchitectureItem = z.infer<typeof ArchitectureItemSchema>;
 export const ProposalInputSchema = z.object({
+  recommendations:RecommendationsSchema.optional(),
   demo:SceneSchema.optional(),
   id, title: z.string().trim().min(1), rationale: z.string(), alternatives: z.array(z.string()), assumptions: z.array(z.string()),
   baseContentRevision: z.number().int().nonnegative(), nodes: z.array(RequirementSchema), architecture: z.array(ArchitectureItemSchema),
@@ -33,7 +35,9 @@ export type ProductReference=z.infer<typeof ReferenceSchema>;
 // Analyst notes cannot claim runtime observation; verified tool evidence is separate.
 export const FeatureNoteSchema=z.object({id,referenceId:id,name:z.string().trim().min(1),description:z.string(),requirementIds:z.array(id),assessment:z.enum(['unknown','inferred']),implementation:z.string(),adaptation:z.string(),sourceLocator:z.string()}).strict();
 export type FeatureNote=z.infer<typeof FeatureNoteSchema>;
+export const ApprovalRecordSchema=z.object({baselineVersionId:id.nullable(),operator:z.literal('owner'),changes:z.array(z.object({collection:z.enum(['nodes','architecture']),id})),sceneId:id.nullable(),mappedRequirementIds:z.array(id),uncoveredRequirementIds:z.array(id),unverifiedAcceptanceIds:z.array(z.string().min(1)),acknowledged:z.boolean()}).strict();
 export const VersionSchema = z.object({
+  approval:ApprovalRecordSchema.nullable().default(null),
   references:z.array(ReferenceSchema).default([]),features:z.array(FeatureNoteSchema).default([]),
   taskPlanConfirmed:z.boolean().default(false),demo:SceneSchema.nullable().default(null),
   id,label:z.string().trim().min(1),createdAt:z.iso.datetime(),contentRevision:z.number().int().nonnegative(),

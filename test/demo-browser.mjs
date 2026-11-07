@@ -10,6 +10,7 @@ try{
  await page.locator('iframe').evaluate((iframe,html)=>{iframe.srcdoc=html;},demoDocument(scene,'test-renderer-nonce'));
  const frame=page.frameLocator('iframe');await frame.getByRole('textbox',{name:'Search'}).waitFor();
  assert.equal(await frame.locator('li').count(),2);
+ const composing=await frame.getByRole('textbox',{name:'Search'}).evaluate(input=>{input.focus();input.dispatchEvent(new CompositionEvent('compositionstart',{data:''}));for(const value of ['z','zhong','中文']){input.value=value;input.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true,data:value}));if(!input.isConnected||document.activeElement!==input)return false;}input.dispatchEvent(new CompositionEvent('compositionend',{data:'中文'}));input.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:false,data:'中文'}));return input.isConnected&&input.value==='中文'&&document.activeElement===input;});assert.equal(composing,true);
  await frame.getByRole('textbox',{name:'Search'}).fill('Banana');assert.equal(await frame.locator('li').innerText(),'Banana');
  await frame.getByRole('button',{name:'Open',exact:true}).click();await frame.getByText('Mock success',{exact:true}).waitFor();
  await frame.locator('#reset').click();assert.equal(await frame.locator('li').count(),2);

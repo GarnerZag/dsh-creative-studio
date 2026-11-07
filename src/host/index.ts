@@ -1,6 +1,6 @@
 import {disposeAll,type Cleanup} from './dispose.js';
 import {evidencePage} from './evidence-page.js';
-import type {ResearchEvidencePage} from '../types.js';
+import type {ApprovalReviewInput,ResearchEvidencePage} from '../types.js';
 import {startResearch} from './research-runner.js';
 import {researchReadTools} from './research-policy.js';
 import {researchTools,researchGuard} from './research-tools.js';
@@ -134,8 +134,8 @@ export default class CreativeStudio extends TypertRemoteService {
   }
 
   @Remote
-  approveVersion(id: string, expectedProjectRevision: number, expectedContentRevision: number, label: string): Promise<ProjectSnapshot> {
-    return this.userStore().approve(id, expectedProjectRevision, expectedContentRevision, label);
+  approveVersion(id: string, expectedProjectRevision: number, expectedContentRevision: number, label: string, review?:ApprovalReviewInput): Promise<ProjectSnapshot> {
+    return this.userStore().approve(id, expectedProjectRevision, expectedContentRevision, label, review);
   }
 
   @Remote

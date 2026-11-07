@@ -34,14 +34,19 @@ export interface ProjectHead {
   projectRevision: number;
   contentRevision: number;
 }
+export interface ApprovalReviewInput {baselineVersionId:string|null;selection?:Array<{collection:'nodes'|'architecture';id:string}>;acknowledgeUnverified:boolean}
+export interface ApprovalRecord {baselineVersionId:string|null;operator:'owner';changes:Array<{collection:'nodes'|'architecture';id:string}>;sceneId:string|null;mappedRequirementIds:string[];uncoveredRequirementIds:string[];unverifiedAcceptanceIds:string[];acknowledged:boolean}
 export interface ApprovedVersion {
+  approval:ApprovalRecord|null;
   references:ProductReference[];features:FeatureNote[];
   taskPlanConfirmed:boolean;
    demo:DemoSceneData|null;
   id: string; label: string; createdAt: string; contentRevision: number;
   nodes: RequirementNode[]; architecture: ArchitectureNode[];
 }
+export interface ProductRecommendation {id:string;name:string;sourceKind:'url'|'repository';location:string;rationale:string;featureIdeas:string[]}
 export interface ProposalInput {
+  recommendations?:ProductRecommendation[];
   demo?:DemoSceneData;
   id: string; title: string; rationale: string; alternatives: string[]; assumptions: string[];
   baseContentRevision: number; nodes: RequirementNode[]; architecture: ArchitectureNode[];
