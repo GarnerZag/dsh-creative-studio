@@ -50,14 +50,26 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
   const [history,setHistory]=React.useState<RequirementHistory>();
   const historyCurrent=history&&project&&history.projectId===project.id&&history.revision===project.contentRevision;
   const [selectedRequirement,setSelectedRequirement]=React.useState<string|null>(null);
+  const errorText=(message:string):string=>{
+    const rule=(pattern:RegExp,key:string)=>{
+      const m=message.match(pattern);
+      return m?`${t(key as Parameters<typeof t>[0])} ${m[1]}`:undefined;
+    };
+    return rule(/^REQUIREMENT_DEPENDENCY_CYCLE: (.*)$/,'errorDependencyCycle')
+      ?? rule(/^REQUIREMENT_DEPENDENCY_NOT_FOUND: (.*)$/,'errorDependencyMissing')
+      ?? rule(/^DUPLICATE_REQUIREMENT_DEPENDENCY: (.*)$/,'errorDependencyDuplicate')
+      ?? (message==='DUPLICATE_ID'?t('errorDuplicateId'):message);
+  };
   const generation = React.useRef(0);
   React.useEffect(() => {
     const token = ++generation.current;
     void api.list().then(items => { if (generation.current === token) setProjects(items); }).catch(e => { if (generation.current === token) setError(String(e)); });
     return () => { generation.current++; };
   }, [api]);
+  const busyRef = React.useRef(false);
   const run = async (operation: () => Promise<ProjectSnapshot>, resetEditors=false) => {
-    if (busy) return;
+    if (busyRef.current) return;
+    busyRef.current = true;
     const token = ++generation.current;
     setBusy(true); setError('');
     try {
@@ -69,11 +81,18 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
       const items = await api.list();
       if (generation.current === token) setProjects(items);
     } catch (e) { if (generation.current === token) setError(e instanceof Error ? e.message : String(e)); }
-    finally { if (generation.current === token) setBusy(false); }
+    finally { if (generation.current === token) setBusy(false); busyRef.current = false; }
   };
   const restore=(direction:'undo'|'redo')=>{
     if(!project||!history||!historyCurrent||busy||!window.confirm(t('historyConfirm')))return;
-    void run(async()=>{const change=historyChange(history,project,direction);const next=await api.edit(project,change);setHistory(commitHistory(history,project,next,direction));setEditorEpoch(epoch=>epoch+1);return next;});
+    void run(async()=>{
+      const change=historyChange(history,project,direction);
+      const next=await api.edit(project,change);
+      try{setHistory(commitHistory(history,project,next,direction));}
+      catch{setHistory(undefined);setError(t('historyDesync'));}
+      setEditorEpoch(epoch=>epoch+1);
+      return next;
+    });
   };
   return <section className="cs-projects" aria-label={t('projects')}>
     <h2>{t('projects')}</h2>
@@ -82,7 +101,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
       <button disabled={busy || !name.trim()} type="submit">{t('newProject')}</button>
     </form>
     <nav aria-label={t('projects')} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{projects.map(p => <button type="button" key={p.id} aria-pressed={project?.id === p.id} disabled={busy} onClick={() => {if(!project||project.id===p.id||window.confirm(t('confirmProjectChange')))void run(() => api.get(p.id));}}>{p.name}</button>)}</nav>
-    {error && <p role="alert" className="cs-error">{error}</p>}
+    {error && <p role="alert" className="cs-error">{errorText(error)}</p>}
     {project && <article><h3>{project.name}</h3><button disabled={busy} onClick={()=>{const next=window.prompt(t('renameProject'),project.name);if(next?.trim()&&next.trim()!==project.name)void run(()=>api.rename(project,next.trim()));}}>{t('renameProject')}</button><small>{t('draftRevision')} {project.contentRevision}</small>
       <div aria-label={t('requirementHistory')}><button disabled={busy||!historyCurrent||!history?.past.length} onClick={()=>restore('undo')}>{t('undoRequirements')}</button><button disabled={busy||!historyCurrent||!history?.future.length} onClick={()=>restore('redo')}>{t('redoRequirements')}</button><small>{t('historyScope')}</small></div>
       <Workbench key={project.id} projectId={project.id} t={t}
@@ -91,7 +110,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
           {id:'research',label:t('researchTitle'),content:<ResearchPanel evidence={api.evidence} project={project} busy={busy} t={t} listWorkspaces={api.listWorkspaces} start={(referenceId,request,workspaceId)=>void run(()=>api.research(project,referenceId,request,workspaceId))} refresh={()=>void run(()=>api.get(project.id))}/>},
           {id:'reports',label:t('reportsTitle'),content:<ReportsPanel project={project} busy={busy} t={t} refresh={()=>void run(()=>api.get(project.id))} accept={(id,value)=>void run(()=>api.acceptReport(project,id,value))}/>},
           {id:'handoff',label:t('handoffTitle'),content:<HandoffPanel key={`handoff-${project.id}`} project={project} api={api.handoff} dispatch={api.dispatch} onProject={next=>setProject(current=>current?.id===next.id&&next.projectRevision>=current.projectRevision?next:current)} t={t}/>},
-          {id:'requirements',label:t('layoutRequirements'),content:<RequirementsEditor onSelect={setSelectedRequirement} key={`${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change => { void run(async() => {const next=await api.edit(project,change);setHistory(h=>recordEdit(h,project,next));return next;}); }}/>},
+          {id:'requirements',label:t('layoutRequirements'),content:<RequirementsEditor onSelect={setSelectedRequirement} key={`${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change => { void run(async() => {const next=await api.edit(project,change);setHistory(h=>{try{return recordEdit(h,project,next);}catch{return undefined;}});return next;}); }}/>},
           {id:'architecture',label:t('layoutArchitecture'),content:<ArchitectureEditor key={`architecture-${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change=>{void run(()=>api.architecture(project,change));}}/>},
           {id:'references',label:t('layoutReferences'),content:<>{<ReferencesPanel key={`references-${project.id}`} project={project} busy={busy} t={t} save={change=>{void run(()=>api.reference(project,change));}}/>}{<FeaturePanel key={`features-${project.id}`} project={project} busy={busy} t={t} save={change=>{void run(()=>api.feature(project,change));}}/>}</>},
           {id:'versions',label:t('layoutVersions'),content:<VersionPanel key={`versions-${project.id}`} project={project} busy={busy} t={t} confirmTasks={id=>{void run(()=>api.confirmTasks(project,id));}} approve={(label,review)=>{void run(()=>api.approve(project,label,review));}}/>},

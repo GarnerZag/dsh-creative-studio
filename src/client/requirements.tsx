@@ -23,8 +23,9 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   const setDependencyDraft=(ids:string[])=>setDependencyState({id:node?.id??null,ids});
   const dependenciesChanged=(()=>{const a=[...dependencyDraft].sort(),b=[...(node?.dependsOn??[])].sort();return JSON.stringify(a)!==JSON.stringify(b);})();
   const choose = (id: string | null) => {
+    if (id === selected) { setSelected(id); return; }
     const dirty = editorDirty(editor) || dependenciesChanged;
-    if (id === selected || !dirty || window.confirm(t('discardEdits'))) setSelected(id);
+    if (!dirty || window.confirm(t('discardEdits'))) { setDependencyState({ id: null, ids: [] }); setSelected(id); }
   };
   const rows: Array<{ id: string; depth: number }> = [];
   const visit = (parent: string | null, depth: number) => {
