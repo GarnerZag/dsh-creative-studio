@@ -15,6 +15,29 @@ try{
  await frame.getByRole('button',{name:'Open',exact:true}).click();await frame.getByText('Mock success',{exact:true}).waitFor();
  await frame.locator('#reset').click();assert.equal(await frame.locator('li').count(),2);
  await frame.locator('#play').click();await frame.getByText('Mock success',{exact:true}).waitFor();assert.equal(await frame.locator('li').innerText(),'Apple');
+ await frame.locator('#reset').click();
+ const anim=await page.frames().find(f=>f!==page.mainFrame()).evaluate(async()=>{
+  const roots=document.getElementById('root');const rows=()=>[...roots.querySelectorAll('li')];
+  const settle=()=>new Promise(r=>setTimeout(r,450));
+  await settle();
+  const idle=rows().map(r=>getComputedStyle(r).animationName);
+  document.getElementById('play').click();
+  const started=Date.now();
+  while(!roots.classList.contains('anim')&&Date.now()-started<2000)await new Promise(r=>setTimeout(r,20));
+  const during=rows().map(r=>getComputedStyle(r).animationName);
+  const classDuring=roots.className;
+  const clearedAt=Date.now();
+  while(roots.classList.contains('anim')&&Date.now()-clearedAt<2000)await new Promise(r=>setTimeout(r,20));
+  await settle();
+  const after={cls:roots.className,names:rows().map(r=>getComputedStyle(r).animationName)};
+  document.getElementById('pause').click();
+  return {idle,during,classDuring,after};
+ });
+ assert.ok(anim.idle.length>0&&anim.idle.every(n=>n==='none'),`idle rows should not animate: ${anim.idle}`);
+ assert.equal(anim.classDuring,'anim');
+ assert.ok(anim.during.length>0&&anim.during.every(n=>n==='enter'),`rows should animate during a step: ${anim.during}`);
+ assert.equal(anim.after.cls,'');
+ assert.ok(anim.after.names.length>0&&anim.after.names.every(n=>n==='none'),`animation should clear: ${anim.after.names}`);
  const inner=page.frames().find(f=>f!==page.mainFrame());
  const safety=await inner.evaluate(async()=>{let parentBlocked=false,storageBlocked=false,networkBlocked=false;try{void parent.document.body;}catch{parentBlocked=true;}try{localStorage.setItem('x','x');}catch{storageBlocked=true;}try{await fetch('https://example.com/');}catch{networkBlocked=true;}return{parentBlocked,storageBlocked,networkBlocked,width:innerWidth,columns:getComputedStyle(document.getElementById('root')).gridTemplateColumns.split(' ').length};});
  assert.deepEqual(safety,{parentBlocked:true,storageBlocked:true,networkBlocked:true,width:1440,columns:2});
@@ -23,5 +46,5 @@ try{
  await page.waitForFunction(()=>document.querySelector('iframe').getBoundingClientRect().width<400);
  const mobile=await inner.evaluate(()=>({width:innerWidth,columns:getComputedStyle(document.getElementById('root')).gridTemplateColumns.split(' ').length}));
  assert.deepEqual(mobile,{width:390,columns:1});
- console.log('PASS: input/filter, action, reset/playback, desktop/mobile layout, text escaping, parent/storage/network isolation');
+ console.log('PASS: input/filter, action, reset/playback, step animation, desktop/mobile layout, text escaping, parent/storage/network isolation');
 }finally{await browser.close();}
