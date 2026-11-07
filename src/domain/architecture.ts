@@ -2,6 +2,20 @@ import { ArchitectureItemSchema, validateProject, type ArchitectureItem, type Pr
 
 export type ArchitectureEdit = { kind: 'save'; item: ArchitectureItem } | { kind: 'remove'; id: string };
 
+/** Acceptance points may only be claimed by tasks that link the requirement owning them. */
+function requireAcceptanceOwnership(nodes: readonly { id: string; desktopAcceptance: readonly string[]; mobileAcceptance: readonly string[] }[], item: ArchitectureItem): void {
+  if (item.kind !== 'task' || !item.task) return;
+  const owners = new Map<string, string>();
+  for (const node of nodes) {
+    node.desktopAcceptance.forEach((_, index) => owners.set(`${node.id}:desktop:${index + 1}`, node.id));
+    node.mobileAcceptance.forEach((_, index) => owners.set(`${node.id}:mobile:${index + 1}`, node.id));
+  }
+  for (const acceptanceId of item.task.acceptanceIds) {
+    const owner = owners.get(acceptanceId);
+    if (owner && !item.requirementIds.includes(owner)) throw new Error(`ACCEPTANCE_NOT_LINKED: ${item.id} ${acceptanceId}`);
+  }
+}
+
 /** New saves must be structured; historical items stay loadable through validateContent. */
 function requireStructure(item: ArchitectureItem): void {
   if (item.kind === 'contract') {
@@ -20,6 +34,7 @@ export function editArchitecture(current: Project, expectedContentRevision: numb
   if (edit.kind === 'save') {
     const item = ArchitectureItemSchema.parse(edit.item);
     requireStructure(item);
+    requireAcceptanceOwnership(project.nodes, item);
     const index = project.architecture.findIndex(existing => existing.id === item.id);
     if (index < 0) project.architecture.push(item); else project.architecture[index] = item;
   } else {

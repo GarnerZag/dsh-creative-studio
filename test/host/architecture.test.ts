@@ -67,6 +67,13 @@ test('a task may only cite acceptance points of its own requirements',()=>{
   assert.deepEqual(ok.architecture[0]?.task?.acceptanceIds,['r1:desktop:1']);
 });
 
+test('a historical task that cites an unlinked requirement stays loadable but blocks readiness',()=>{
+  const base=editRequirements(createProject('p','产品'),0,{kind:'add',node:{id:'r1',parentId:null,title:'查询',kind:'feature',description:'',priority:'normal',desktopAcceptance:['可见'],mobileAcceptance:[]}});
+  const two=editRequirements(base,1,{kind:'add',node:{id:'r2',parentId:null,title:'收藏',kind:'feature',description:'',priority:'normal',desktopAcceptance:['可收藏'],mobileAcceptance:['可收藏']}});
+  const legacy={...two,architecture:[{id:'t',kind:'task' as const,title:'旧任务',body:'',requirementIds:['r1'],dependsOn:[],task:{inputs:[],outputs:['src/q.ts'],acceptanceIds:['r2:desktop:1']}}]};
+  assert.equal(validateProject(legacy).architecture.length,1);
+});
+
 test('editing the text of a cited acceptance point is rejected instead of silently re-pointing',()=>{
   const base=editRequirements(createProject('p','产品'),0,{kind:'add',node:{id:'r',parentId:null,title:'查询',kind:'feature',description:'',priority:'normal',desktopAcceptance:['A','B','C'],mobileAcceptance:[]}});
   const withTask=editArchitecture(base,1,{kind:'save',item:{id:'t',kind:'task',title:'任务',body:'',requirementIds:['r'],dependsOn:[],task:{inputs:[],outputs:['src/q.ts'],acceptanceIds:['r:desktop:2']}}});

@@ -189,8 +189,8 @@ export function validateContent(project: Pick<Project, 'nodes' | 'architecture'>
     if (item.kind === 'task' && item.task) {
       for (const acceptanceId of item.task.acceptanceIds) {
         if (!acceptance.has(acceptanceId)) throw new Error(`ACCEPTANCE_NOT_FOUND: ${item.id} ${acceptanceId}`);
-        const owner = acceptance.get(acceptanceId)!;
-        if (!item.requirementIds.includes(owner)) throw new Error(`ACCEPTANCE_NOT_LINKED: ${item.id} ${acceptanceId}`);
+        // Ownership is enforced on save and at handoff readiness, not here: frozen versions are
+        // immutable, so a historical mismatch must stay loadable instead of locking the project.
       }
     }
   }
