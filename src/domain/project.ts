@@ -1,12 +1,14 @@
 import { z } from 'zod';
 import {SceneSchema,validateScene} from './demo.js';
 import {RecommendationsSchema} from './recommendations.js';
+import {reorderRequirements} from './requirement-order.js';
 
 const id = z.string().min(1);
 export const RequirementSchema = z.object({
   id, parentId: id.nullable(), title: z.string().trim().min(1),
   kind: z.enum(['goal', 'scenario', 'feature']), description: z.string(),
   priority: z.enum(['low', 'normal', 'high']),
+  order: z.number().int().nonnegative().optional(),
   desktopAcceptance: z.array(z.string()), mobileAcceptance: z.array(z.string()),
 }).strict();
 export type Requirement = z.infer<typeof RequirementSchema>;
@@ -73,6 +75,8 @@ export type RequirementEdit =
   | { kind: 'rename'; id: string; title: string }
   | { kind: 'details'; id: string; description: string; priority: Requirement['priority']; desktopAcceptance: string[]; mobileAcceptance: string[] }
   | { kind: 'move'; id: string; parentId: string | null }
+  | { kind: 'reorder'; id: string; beforeId: string | null }
+  | { kind: 'restore'; nodes: Requirement[] }
   | { kind: 'remove'; id: string };
 
 /** Parses every write; callers must compare revisions within their storage queue. */
@@ -151,8 +155,14 @@ export function createProject(projectId: string, name: string): Project {
 
 /** Pure editing: failures never mutate the prior project or caller input. */
 export function editRequirements(current: Project, expectedContentRevision: number, edit: RequirementEdit): Project {
+  if(edit.kind==='reorder')return reorderRequirements(current,expectedContentRevision,edit.id,edit.beforeId);
   if (current.contentRevision !== expectedContentRevision) throw new Error('CONFLICT');
   const project = validateProject(current);
+  if(edit.kind==='restore'){
+    project.nodes=edit.nodes.map(n=>RequirementSchema.parse(n));
+    project.projectRevision++;project.contentRevision++;
+    return validateProject(project);
+  }
   const node = edit.kind === 'add' ? undefined : project.nodes.find(item => item.id === edit.id);
   if (edit.kind !== 'add' && !node) throw new Error('NODE_NOT_FOUND');
   switch (edit.kind) {

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {orderedChildren} from '../domain/requirement-order.js';
 import {newId} from './id.js';
 import {openEditor,refreshEditor,editorDirty} from './editor-state.js';
 import { MindMap } from './mind-map.js';
@@ -8,6 +9,8 @@ type stringFields={title:string;description:string;desktop:string;mobile:string}
 export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSelect?:(id:string|null)=>void; project: ProjectSnapshot; save: (change: RequirementChange) => void; busy: boolean; t: (key: string) => string }): React.ReactElement {
   const [selected, setSelected] = React.useState<string | null>(null);
   const node = project.nodes.find(n => n.id === selected);
+  const siblings=node?orderedChildren(project.nodes,node.parentId):[];
+  const position=siblings.findIndex(n=>n.id===selected);
   React.useEffect(()=>{onSelect?.(node?.id??null);},[node?.id,onSelect]);
   const snapshot=()=>({title:node?.title??'',description:node?.description??'',desktop:node?.desktopAcceptance.join('\n')??'',mobile:node?.mobileAcceptance.join('\n')??''});
   const [editor,setEditor]=React.useState(()=>openEditor<stringFields>(null,{title:'',description:'',desktop:'',mobile:''}));
@@ -21,7 +24,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   };
   const rows: Array<{ id: string; depth: number }> = [];
   const visit = (parent: string | null, depth: number) => {
-    for (const n of project.nodes.filter(n => n.parentId === parent)) { rows.push({ id: n.id, depth }); visit(n.id, depth + 1); }
+    for (const n of orderedChildren(project.nodes,parent)) { rows.push({ id: n.id, depth }); visit(n.id, depth + 1); }
   };
   visit(null, 0);
   const lines = (text: string) => text.split('\n').map(s => s.trim()).filter(Boolean);
@@ -30,13 +33,14 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
     <div>
       <button disabled={busy} onClick={() => save({ kind: 'add', node: { id: newId(), parentId: selected, title: t('newRequirement'), kind: 'feature', description: '', priority: 'normal', desktopAcceptance: [], mobileAcceptance: [] } })}>{selected ? t('addChild') : t('addRoot')}</button>
       <button disabled={busy} onClick={() => choose(null)}>{t('selectRoot')}</button>
-      <MindMap nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>
+      <MindMap t={t} move={(id,parentId)=>save({kind:'move',id,parentId})} nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>
       <div className="cs-tree" aria-label={t('requirements')}>{rows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 22 }}><button disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>
     </div>
     {editor.conflicts.length>0&&<p role="alert">{t('editorConflict')} <button disabled={busy} onClick={()=>{if(window.confirm(t('discardEdits')))setEditor(openEditor(node?.id??null,snapshot()));}}>{t('editorReload')}</button></p>}
     {node ? <fieldset disabled={busy||editor.conflicts.length>0} style={{ border: 0, padding: 0, minWidth: 0 }}>
+      <div><button type="button" disabled={position<=0} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position-1]!.id})}>{t('moveEarlier')}</button><button type="button" disabled={position<0||position>=siblings.length-1} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position+2]?.id??null})}>{t('moveLater')}</button></div>
       <form onSubmit={e => { e.preventDefault(); if (title.trim()) save({ kind: 'rename', id: node.id, title }); }}><label>{t('nodeTitle')}<input value={title} onChange={e => setTitle(e.target.value)} /></label><button disabled={!title.trim()}>{t('rename')}</button></form>
-      <label>{t('parentNode')}<select value={node.parentId ?? ''} onChange={e => save({ kind: 'move', id: node.id, parentId: e.target.value || null })}><option value="">{t('selectRoot')}</option>{project.nodes.filter(n => n.id !== node.id).map(n => <option key={n.id} value={n.id}>{n.title}</option>)}</select></label>
+      <label>{t('parentNode')}<select aria-label={t('parentNode')} value={node.parentId ?? ''} onChange={e => save({ kind: 'move', id: node.id, parentId: e.target.value || null })}><option value="">{t('selectRoot')}</option>{project.nodes.filter(n => n.id !== node.id).map(n => <option key={n.id} value={n.id}>{n.title}</option>)}</select></label>
       <form onSubmit={e => { e.preventDefault(); save({ kind: 'details', id: node.id, description, priority: node.priority, desktopAcceptance: lines(desktop), mobileAcceptance: lines(mobile) }); }}>
         <label>{t('nodeDescription')}<textarea aria-label={t('nodeDescription')} rows={4} value={description} onChange={e => setDescription(e.target.value)}/></label>
         <label>{t('desktopAcceptance')}<textarea aria-label={t('desktopAcceptance')} rows={3} value={desktop} onChange={e => setDesktop(e.target.value)}/></label>

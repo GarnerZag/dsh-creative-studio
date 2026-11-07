@@ -16,6 +16,7 @@ export interface RequirementNode {
   kind: 'goal' | 'scenario' | 'feature';
   description: string;
   priority: 'low' | 'normal' | 'high';
+  order?: number;
   desktopAcceptance: string[];
   mobileAcceptance: string[];
 }
@@ -85,5 +86,7 @@ export type RequirementChange =
   | { kind: 'rename'; id: string; title: string }
   | { kind: 'details'; id: string; description: string; priority: 'low' | 'normal' | 'high'; desktopAcceptance: string[]; mobileAcceptance: string[] }
   | { kind: 'move'; id: string; parentId: string | null }
+  | { kind: 'reorder'; id: string; beforeId: string | null }
+  | { kind: 'restore'; nodes: RequirementNode[] }
   | { kind: 'remove'; id: string };
 
