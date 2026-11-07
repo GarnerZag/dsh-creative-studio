@@ -1,15 +1,17 @@
 import { build } from 'esbuild';
 import { WorkspaceTypertGenerator, writePackageArtifacts } from '@deepseek-ai/dsh-typert-generator';
-import { cp, mkdir, mkdtemp, readFile, symlink, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 // The official compiler discovers packages under a workspace. Stage this one
 // package for compilation only; no hand-written Remote descriptors or Host edits.
-const workspace = await mkdtemp(join(tmpdir(), 'creative-studio-typert-'));
+const temporaryRoot = await realpath(tmpdir());
+const workspace = await mkdtemp(join(temporaryRoot, 'creative-studio-typert-'));
+try {
 const packageRoot = join(workspace, 'packages/studio');
 await mkdir(packageRoot, { recursive: true });
 await symlink(join(root, 'node_modules'), join(workspace, 'node_modules'), 'dir');
@@ -33,7 +35,7 @@ if (!artifacts.length) throw new Error('Official compiler produced no Host contr
 writePackageArtifacts(root, artifacts);
 await build({ entryPoints: [join(root, 'src/index.ts')], outfile: join(root, 'lib/index.js'), bundle: true, platform: 'node', format: 'esm', target: 'node24', packages: 'external' });
 const declarations = spawnSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '-p', join(root, 'tsconfig.host.json')], { stdio: 'inherit', cwd: root });
-if (declarations.status !== 0) process.exit(declarations.status ?? 1);
+if (declarations.status !== 0) throw new Error(`Type declaration build failed (${declarations.status ?? 1})`);
 await build({
   entryPoints: [join(root, 'src/client.ts')], outfile: join(root, 'lib/client.js'),
   bundle: true, platform: 'browser', format: 'cjs', target: 'es2022', jsx: 'automatic',
@@ -43,3 +45,10 @@ await build({
   footer: { js: 'return module.exports;}});' },
 });
 console.log('Built Host, official Typert artifacts, and lazy Client factory.');
+} finally {
+  // Delete only the exact temporary directory created by this build. Never sweep
+  // other builds or follow a replaced root into the package or its dependencies.
+  const target = await realpath(workspace);
+  if (target !== workspace || dirname(target) !== temporaryRoot || !basename(target).startsWith('creative-studio-typert-')) throw new Error('Refusing unexpected build cleanup target');
+  await rm(target, { recursive: true, force: false });
+}

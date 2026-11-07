@@ -17,6 +17,9 @@ import type { ArchitectureChange } from '../types.js';
 import { RequirementsEditor } from './requirements.js';
 
 export interface ProjectActions {
+  reject(project:ProjectSnapshot,proposalId:string):Promise<ProjectSnapshot>;
+  rename(project:ProjectSnapshot,name:string):Promise<ProjectSnapshot>;
+  evidence(id:string,jobId:string,callId:string,offset:number):Promise<import('../types.js').ResearchEvidencePage>;
   research(project:ProjectSnapshot,referenceId:string,request:string,workspaceId:string):Promise<ProjectSnapshot>;
   acceptReport(project:ProjectSnapshot,reportId:string,accepted:boolean):Promise<ProjectSnapshot>;
   listWorkspaces():Promise<import('../types.js').WorkspaceOption[]>;
@@ -71,11 +74,11 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
     </form>
     <nav aria-label={t('projects')} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{projects.map(p => <button type="button" key={p.id} aria-pressed={project?.id === p.id} disabled={busy} onClick={() => void run(() => api.get(p.id))}>{p.name}</button>)}</nav>
     {error && <p role="alert" className="cs-error">{error}</p>}
-    {project && <article><h3>{project.name}</h3><small>{t('draftRevision')} {project.contentRevision}</small>
+    {project && <article><h3>{project.name}</h3><button disabled={busy} onClick={()=>{const next=window.prompt(t('renameProject'),project.name);if(next?.trim()&&next.trim()!==project.name)void run(()=>api.rename(project,next.trim()));}}>{t('renameProject')}</button><small>{t('draftRevision')} {project.contentRevision}</small>
       <Workbench key={project.id} projectId={project.id} t={t}
-        idea={<><GeneratePanel listWorkspaces={api.listWorkspaces} key={`generate-${project.id}`} project={project} busy={busy} t={t} generate={(request,workspaceId)=>{void run(()=>api.generate(project,request,workspaceId));}} refresh={()=>{void run(()=>api.get(project.id));}}/><ProposalPanel key={`proposals-${project.id}`} project={project} busy={busy} t={t} adopt={id=>{void run(()=>api.adopt(project,id),true);}}/></>}
+        idea={<><GeneratePanel listWorkspaces={api.listWorkspaces} key={`generate-${project.id}`} project={project} busy={busy} t={t} generate={(request,workspaceId)=>{void run(()=>api.generate(project,request,workspaceId));}} refresh={()=>{void run(()=>api.get(project.id));}}/><ProposalPanel reject={id=>{void run(()=>api.reject(project,id));}} key={`proposals-${project.id}`} project={project} busy={busy} t={t} adopt={id=>{void run(()=>api.adopt(project,id),true);}}/></>}
         panels={[
-          {id:'research',label:t('researchTitle'),content:<ResearchPanel project={project} busy={busy} t={t} listWorkspaces={api.listWorkspaces} start={(referenceId,request,workspaceId)=>void run(()=>api.research(project,referenceId,request,workspaceId))} refresh={()=>void run(()=>api.get(project.id))}/>},
+          {id:'research',label:t('researchTitle'),content:<ResearchPanel evidence={api.evidence} project={project} busy={busy} t={t} listWorkspaces={api.listWorkspaces} start={(referenceId,request,workspaceId)=>void run(()=>api.research(project,referenceId,request,workspaceId))} refresh={()=>void run(()=>api.get(project.id))}/>},
           {id:'reports',label:t('reportsTitle'),content:<ReportsPanel project={project} busy={busy} t={t} refresh={()=>void run(()=>api.get(project.id))} accept={(id,value)=>void run(()=>api.acceptReport(project,id,value))}/>},
           {id:'handoff',label:t('handoffTitle'),content:<HandoffPanel key={`handoff-${project.id}`} project={project} api={api.handoff} dispatch={api.dispatch} onProject={next=>setProject(current=>current?.id===next.id&&next.projectRevision>=current.projectRevision?next:current)} t={t}/>},
           {id:'requirements',label:t('layoutRequirements'),content:<RequirementsEditor key={`${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change => { void run(() => api.edit(project, change)); }}/>},

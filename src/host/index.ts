@@ -1,3 +1,6 @@
+import {disposeAll,type Cleanup} from './dispose.js';
+import {evidencePage} from './evidence-page.js';
+import type {ResearchEvidencePage} from '../types.js';
 import {startResearch} from './research-runner.js';
 import {researchReadTools} from './research-policy.js';
 import {researchTools,researchGuard} from './research-tools.js';
@@ -31,21 +34,26 @@ export default class CreativeStudio extends TypertRemoteService {
   constructor(ctx: Context) {
     super(ctx, 'creativeStudio');
     ctx.effect(async () => {
+      const disposers:Cleanup[]=[];
+      const cleanup=async()=>{this.projects=undefined;this.handoffs=undefined;await disposeAll(disposers);};
       try {
       const domain = await ctx.storageDomain.open(defineDomain({
         name: 'garnerzag_creative_studio', version: 1, layout: 'per-record',
         tables: { projects: domainTable<string, Project>(ProjectSchema), handoffs:domainTable<string,StoredHandoff>(StoredHandoffSchema) },
       }));
+      disposers.push(()=>domain.close());
       const store = new ProjectStore(domain.table('projects'));
       this.projects = store;
       this.handoffs=new HandoffStore(domain.table('handoffs'));
       const tools = ctx.get('tools') as ProposalToolRegistry | undefined;
-      if (!tools) { await domain.close(); this.projects = undefined; this.handoffs=undefined; throw new Error('TOOLS_UNAVAILABLE'); }
-      const disposers = proposalTools(store).map(definition => tools.register(definition, {
+      if (!tools) throw new Error('TOOLS_UNAVAILABLE');
+      for(const definition of proposalTools(store))disposers.push(tools.register(definition, {
         when: ({agent}) => store.list().some(p => store.get(p.id).proposalJob?.sessionId === agent.id),
       }));
-      disposers.push(tools.guard(proposalGuard(store)),registerReportTool(tools,store));
-      disposers.push(...researchTools(store).map(definition=>tools.register(definition,{when:({agent})=>store.list().some(p=>store.get(p.id).researchJob?.sessionId===agent.id)})),tools.guard(researchGuard(store)));
+      disposers.push(tools.guard(proposalGuard(store)));
+      disposers.push(registerReportTool(tools,store));
+      for(const definition of researchTools(store))disposers.push(tools.register(definition,{when:({agent})=>store.list().some(p=>store.get(p.id).researchJob?.sessionId===agent.id)}));
+      disposers.push(tools.guard(researchGuard(store)));
       // Actual Host event, not a claim submitted by the model. Structural type avoids unrelated SDK ambient resources.
       const events=ctx as unknown as {on(name:'tools/result',listener:(exec:{agent?:{id:string};callId:string;name:string},result:{isError:boolean;value?:unknown})=>void):()=>void};
       disposers.push(events.on('tools/result',(exec,result)=>{
@@ -57,8 +65,9 @@ export default class CreativeStudio extends TypertRemoteService {
         void store.researchEvidence(head.id,job.sessionId,job.id,evidence).catch(async()=>{await store.markResearch(head.id,job.id,'unknown');}).catch(()=>console.warn('Creative Studio: research evidence persistence failed; no completion claimed.'));
        }
       }));
-      return async () => { disposers.forEach(dispose => dispose()); this.projects = undefined; this.handoffs=undefined; await domain.close(); };
+      return cleanup;
       } catch (error) {
+        await cleanup().catch(()=>console.warn('Creative Studio: initialization cleanup failed'));
         this.initializationError = error instanceof Error ? error.message : String(error);
         return () => {};
       }
@@ -102,6 +111,12 @@ export default class CreativeStudio extends TypertRemoteService {
 
   @Remote
   getProject(id: string): ProjectSnapshot { return this.userStore().get(id); }
+
+  @Remote
+  rejectProposal(id:string,expectedProjectRevision:number,proposalId:string):Promise<ProjectSnapshot>{return this.userStore().rejectProposal(id,expectedProjectRevision,proposalId);}
+
+  @Remote
+  readResearchEvidence(id:string,jobId:string,callId:string,offset:number):ResearchEvidencePage{return evidencePage(this.userStore().get(id),jobId,callId,offset);}
 
   @Remote
   renameProject(id: string, expectedProjectRevision: number, name: string): Promise<ProjectSnapshot> {

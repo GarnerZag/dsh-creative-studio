@@ -2,7 +2,7 @@ import * as React from 'react';
 import {CandidateDemo} from './demo.js';
 import type { ProjectSnapshot } from '../types.js';
 import { diffContent } from '../domain/versions.js';
-export function ProposalPanel({project,busy,adopt,t}:{project:ProjectSnapshot;busy:boolean;adopt:(id:string)=>void;t:(key:string)=>string}):React.ReactElement {
+export function ProposalPanel({project,busy,adopt,reject,t}:{reject:(id:string)=>void;project:ProjectSnapshot;busy:boolean;adopt:(id:string)=>void;t:(key:string)=>string}):React.ReactElement {
  return <section aria-label={t('proposals')}><h3>{t('proposals')}</h3><p>{t('proposalRule')}</p>
  {project.proposals.length===0&&<p>{t('noProposals')}</p>}
  {project.proposals.map(proposal=>{
@@ -21,6 +21,7 @@ export function ProposalPanel({project,busy,adopt,t}:{project:ProjectSnapshot;bu
     <h5>{t('proposalDiff')}</h5><ul>{differences.map(change=><li key={`${change.collection}-${change.id}`}>{t(change.kind)} · {change.title} {change.fields.join(', ')}</li>)}</ul>
    {differences.length===0&&<p>{t('noDifferences')}</p>}
    <button disabled={busy||stale||proposal.status!=='pending'} onClick={()=>{if(window.confirm(t('confirmAdopt'))) adopt(proposal.id);}}>{t('adoptProposal')}</button>
-  </article>;
+  <button disabled={busy||proposal.status!=='pending'} onClick={()=>{if(window.confirm(t('confirmReject')))reject(proposal.id);}}>{t('rejectProposal')}</button>
+   </article>;
  })}</section>;
 }

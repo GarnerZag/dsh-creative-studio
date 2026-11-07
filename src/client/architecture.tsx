@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {newId} from './id.js';
+import {ArchitectureMap} from './architecture-map.js';
 import type { ArchitectureNode, ArchitectureChange, ProjectSnapshot } from '../types.js';
 
 export function ArchitectureEditor({project,busy,save,t}:{project:ProjectSnapshot;busy:boolean;save:(change:ArchitectureChange)=>void;t:(key:string)=>string}):React.ReactElement {
@@ -9,6 +10,7 @@ export function ArchitectureEditor({project,busy,save,t}:{project:ProjectSnapsho
   const current=project.architecture.find(item=>item.id===selected);
   return <section aria-label={t('architecture')}>
     <h3>{t('architecture')}</h3>
+    <ArchitectureMap items={project.architecture} selected={selected} busy={busy} select={choose} t={t}/>
     <nav style={{display:'flex',gap:8,flexWrap:'wrap'}}>{project.architecture.map(item=><button key={item.id} disabled={busy} aria-pressed={selected===item.id} onClick={()=>choose(item.id)}>{t(`architecture_${item.kind}`)} · {item.title}</button>)}<button disabled={busy} onClick={()=>choose(newId())}>{t('addArchitecture')}</button></nav>
     <ArchitectureForm key={selected} id={selected} current={current} project={project} busy={busy} save={save} t={t} dirty={setDirty}/>
     <ul aria-label={t('dependencies')}>{project.architecture.filter(item=>item.dependsOn.length>0).map(item=><li key={item.id}>{item.title} → {item.dependsOn.map(id=>project.architecture.find(other=>other.id===id)?.title ?? id).join(' · ')}</li>)}</ul>

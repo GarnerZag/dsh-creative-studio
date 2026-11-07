@@ -1,4 +1,12 @@
 import {ProposalInputSchema,validateProject,type Project,type ProposalInput} from './project.js';
+export function rejectProposal(current:Project,id:string):Project {
+  const project=validateProject(current),proposal=project.proposals.find(p=>p.id===id);
+  if(!proposal)throw new Error('PROPOSAL_NOT_FOUND');
+  if(proposal.status==='rejected')return project;
+  if(proposal.status!=='pending')throw new Error('PROPOSAL_NOT_PENDING');
+  proposal.status='rejected';project.projectRevision++;
+  return validateProject(project);
+}
 /** Candidate storage is not adoption or approval. Late results remain reviewable. */
 export function saveProposal(current:Project,input:ProposalInput):Project {
   const project=validateProject(current);

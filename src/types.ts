@@ -1,4 +1,5 @@
 /** Public, serializable contracts shared by the Host and Client. */
+export interface ResearchEvidencePage {text:string;nextOffset:number|null;total:number}
 export interface HandoffInfo { handoffId:string; projectId:string; versionId:string; ready:boolean; manifestDigest:string; archiveSha256:string; size:number }
 export interface HandoffChunk {base64:string;nextOffset:number|null;total:number;packageId:string}
 export interface HandoffIssue {code:string;id:string;message:string}
