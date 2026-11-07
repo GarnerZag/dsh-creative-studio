@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {SceneSchema,validateScene} from './demo.js';
 import {RecommendationsSchema} from './recommendations.js';
 import {reorderRequirements} from './requirement-order.js';
+import {validateRequirementDependencies} from './requirement-dependencies.js';
 
 const id = z.string().min(1);
 export const RequirementSchema = z.object({
@@ -9,6 +10,8 @@ export const RequirementSchema = z.object({
   kind: z.enum(['goal', 'scenario', 'feature']), description: z.string(),
   priority: z.enum(['low', 'normal', 'high']),
   order: z.number().int().nonnegative().optional(),
+  // Independent of parentId: declared prerequisites are a separate directed relation.
+  dependsOn: z.array(id).optional(),
   desktopAcceptance: z.array(z.string()), mobileAcceptance: z.array(z.string()),
 }).strict();
 export type Requirement = z.infer<typeof RequirementSchema>;
@@ -75,6 +78,7 @@ export type RequirementEdit =
   | { kind: 'rename'; id: string; title: string }
   | { kind: 'details'; id: string; description: string; priority: Requirement['priority']; desktopAcceptance: string[]; mobileAcceptance: string[] }
   | { kind: 'move'; id: string; parentId: string | null }
+  | { kind: 'dependencies'; id: string; dependsOn: string[] }
   | { kind: 'reorder'; id: string; beforeId: string | null }
   | { kind: 'restore'; nodes: Requirement[] }
   | { kind: 'remove'; id: string };
@@ -120,6 +124,7 @@ export function validateProject(value: unknown): Project {
   return project;
 }
 export function validateContent(project: Pick<Project, 'nodes' | 'architecture'>): void {
+  validateRequirementDependencies(project.nodes);
   const nodes = new Map(project.nodes.map(node => [node.id, node]));
   if (nodes.size !== project.nodes.length) throw new Error('DUPLICATE_ID');
   for (const node of project.nodes) {
@@ -172,6 +177,7 @@ export function editRequirements(current: Project, expectedContentRevision: numb
       Object.assign(node!, { description: edit.description, priority: edit.priority, desktopAcceptance: [...edit.desktopAcceptance], mobileAcceptance: [...edit.mobileAcceptance] });
       break;
     case 'move': node!.parentId = edit.parentId; break;
+    case 'dependencies': node!.dependsOn = [...edit.dependsOn]; break;
     case 'remove': {
       const removed = new Set([edit.id]);
       let changed = true;

@@ -17,6 +17,7 @@ export interface RequirementNode {
   description: string;
   priority: 'low' | 'normal' | 'high';
   order?: number;
+  dependsOn?: string[];
   desktopAcceptance: string[];
   mobileAcceptance: string[];
 }
@@ -86,6 +87,7 @@ export type RequirementChange =
   | { kind: 'rename'; id: string; title: string }
   | { kind: 'details'; id: string; description: string; priority: 'low' | 'normal' | 'high'; desktopAcceptance: string[]; mobileAcceptance: string[] }
   | { kind: 'move'; id: string; parentId: string | null }
+  | { kind: 'dependencies'; id: string; dependsOn: string[] }
   | { kind: 'reorder'; id: string; beforeId: string | null }
   | { kind: 'restore'; nodes: RequirementNode[] }
   | { kind: 'remove'; id: string };
