@@ -26,18 +26,22 @@ try{
   while(!roots.classList.contains('anim')&&Date.now()-started<2000)await new Promise(r=>setTimeout(r,20));
   const during=rows().map(r=>getComputedStyle(r).animationName);
   const classDuring=roots.className;
+  const highlightSeen=(()=>{const boxes=[...roots.querySelectorAll('section.hl')];return boxes.map(b=>b.dataset.component);})();
   const clearedAt=Date.now();
   while(roots.classList.contains('anim')&&Date.now()-clearedAt<2000)await new Promise(r=>setTimeout(r,20));
   await settle();
   const after={cls:roots.className,names:rows().map(r=>getComputedStyle(r).animationName)};
+  const highlightCleared=[...roots.querySelectorAll('section.hl')].length;
   document.getElementById('pause').click();
-  return {idle,during,classDuring,after};
+  return {idle,during,classDuring,after,highlightSeen,highlightCleared};
  });
  assert.ok(anim.idle.length>0&&anim.idle.every(n=>n==='none'),`idle rows should not animate: ${anim.idle}`);
  assert.equal(anim.classDuring,'anim');
  assert.ok(anim.during.length>0&&anim.during.every(n=>n==='enter'),`rows should animate during a step: ${anim.during}`);
  assert.equal(anim.after.cls,'');
  assert.ok(anim.after.names.length>0&&anim.after.names.every(n=>n==='none'),`animation should clear: ${anim.after.names}`);
+ assert.ok(anim.highlightSeen.length>0,`the step should highlight its component: ${anim.highlightSeen}`);
+ assert.equal(anim.highlightCleared,0,'highlight should clear after its timeout');
  const inner=page.frames().find(f=>f!==page.mainFrame());
  const safety=await inner.evaluate(async()=>{let parentBlocked=false,storageBlocked=false,networkBlocked=false;try{void parent.document.body;}catch{parentBlocked=true;}try{localStorage.setItem('x','x');}catch{storageBlocked=true;}try{await fetch('https://example.com/');}catch{networkBlocked=true;}return{parentBlocked,storageBlocked,networkBlocked,width:innerWidth,columns:getComputedStyle(document.getElementById('root')).gridTemplateColumns.split(' ').length};});
  assert.deepEqual(safety,{parentBlocked:true,storageBlocked:true,networkBlocked:true,width:1440,columns:2});
@@ -46,5 +50,5 @@ try{
  await page.waitForFunction(()=>document.querySelector('iframe').getBoundingClientRect().width<400);
  const mobile=await inner.evaluate(()=>({width:innerWidth,columns:getComputedStyle(document.getElementById('root')).gridTemplateColumns.split(' ').length}));
  assert.deepEqual(mobile,{width:390,columns:1});
- console.log('PASS: input/filter, action, reset/playback, step animation, desktop/mobile layout, text escaping, parent/storage/network isolation');
+ console.log('PASS: input/filter, action, reset/playback, step animation and highlight, desktop/mobile layout, text escaping, parent/storage/network isolation');
 }finally{await browser.close();}
