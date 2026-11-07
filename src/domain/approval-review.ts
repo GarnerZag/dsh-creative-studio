@@ -15,7 +15,7 @@ export function reviewApproval(current:ApprovalSource,review:ApprovalReview){
  const mappedRequirementIds=content.nodes.filter(n=>demo?.requirementIds.includes(n.id)).map(n=>n.id);
  const uncoveredRequirementIds=content.nodes.filter(n=>!mappedRequirementIds.includes(n.id)).map(n=>n.id);
  const unverifiedAcceptanceIds=content.nodes.flatMap(n=>[...n.desktopAcceptance.map((_,i)=>`${n.id}:desktop:${i+1}`),...n.mobileAcceptance.map((_,i)=>`${n.id}:mobile:${i+1}`)]);
- const approval={baselineVersionId:review.baselineVersionId,operator:'owner' as const,changes:diffContent(baseline,content).map(({collection,id})=>({collection,id})),sceneId:demo?.id??null,mappedRequirementIds,uncoveredRequirementIds,unverifiedAcceptanceIds,acknowledged:review.acknowledgeUnverified};
+ const approval={baselineVersionId:review.baselineVersionId,operator:'owner' as const,changes:diffContent(baseline,content).map(({collection,id,fields})=>({collection,id,fields})),sceneId:demo?.id??null,mappedRequirementIds,uncoveredRequirementIds,unverifiedAcceptanceIds,acknowledged:review.acknowledgeUnverified};
  return {content,demo,approval,needsAcknowledgement:uncoveredRequirementIds.length>0||unverifiedAcceptanceIds.length>0};
 }
 /** Only an owner-authorized Host caller can supply the acknowledgement. */

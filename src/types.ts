@@ -48,8 +48,8 @@ export interface ProjectHead {
   projectRevision: number;
   contentRevision: number;
 }
-export interface ApprovalReviewInput {baselineVersionId:string|null;selection?:Array<{collection:'nodes'|'architecture';id:string}>;acknowledgeUnverified:boolean}
-export interface ApprovalRecord {baselineVersionId:string|null;operator:'owner';changes:Array<{collection:'nodes'|'architecture';id:string}>;sceneId:string|null;mappedRequirementIds:string[];uncoveredRequirementIds:string[];unverifiedAcceptanceIds:string[];acknowledged:boolean}
+export interface ApprovalReviewInput {baselineVersionId:string|null;selection?:Array<{collection:'nodes'|'architecture';id:string;fields?:string[]}>;acknowledgeUnverified:boolean}
+export interface ApprovalRecord {baselineVersionId:string|null;operator:'owner';changes:Array<{collection:'nodes'|'architecture';id:string;fields?:string[]}>;sceneId:string|null;mappedRequirementIds:string[];uncoveredRequirementIds:string[];unverifiedAcceptanceIds:string[];acknowledged:boolean}
 export interface ApprovedVersion {
   approval:ApprovalRecord|null;
   references:ProductReference[];features:FeatureNote[];
