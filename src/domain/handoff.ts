@@ -22,6 +22,8 @@ export function checkHandoff(current:Project,versionId:string):HandoffReadiness{
  }
  for(const n of version.nodes.filter(n=>n.kind!=='feature'))if([...n.desktopAcceptance,...n.mobileAcceptance].some(s=>s.trim())&&!version.architecture.some(a=>a.kind==='task'&&a.requirementIds.includes(n.id)))block('TASK_COVERAGE',n.id,'Every declared acceptance criterion, including goal-level criteria, needs an owning task.');
  if(!version.architecture.some(a=>a.kind==='module'))block('ARCHITECTURE_MISSING',versionId,'Approve product module boundaries.');
+ for(const a of version.architecture.filter(item=>item.kind==='contract'))if(!a.contract||(!a.contract.notApplicable&&!a.contract.surface.trim()))block('CONTRACT_STRUCTURE',a.id,'Record the interface/entity surface, or mark the contract not applicable.');
+ for(const a of version.architecture.filter(item=>item.kind==='task')){if(!a.task||!a.task.outputs.length||!a.task.acceptanceIds.length)block('TASK_STRUCTURE',a.id,'Record expected outputs and at least one mapped acceptance point.');}
  for(const a of version.architecture)if(!a.body.trim())block('ARCHITECTURE_DETAILS',a.id,'Fill in implementation contract, decision rationale or task outputs and verification.');
  if(!version.taskPlanConfirmed)block('TASK_PLAN_UNCONFIRMED',versionId,'Explicit user confirmation of this task plan is required.');
  if(!version.demo)warnings.push({code:'NO_DEMO',id:versionId,message:'No matching frozen Demo; interaction coverage is unverified.'});
