@@ -20,7 +20,8 @@ function runtime(){
   }
  }
  const pause=()=>{if(timer!==undefined)clearInterval(timer);timer=undefined;};
- const highlight=(selector:string)=>{const box=root.querySelector<HTMLElement>(selector);if(!box)return;box.classList.add('hl');setTimeout(()=>box.classList.remove('hl'),700);};
+ const reduce=()=>typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const highlight=(selector:string)=>{const box=root.querySelector<HTMLElement>(selector);if(!box)return;box.classList.add('hl');box.scrollIntoView({block:'center',behavior:reduce()?'auto':'smooth'});setTimeout(()=>box.classList.remove('hl'),700);};
  document.getElementById('play')!.onclick=()=>{pause();timer=setInterval(()=>{const step=scene.steps[cursor++];if(!step){pause();return;}const target='actionId'in step?scene.components.find(c=>c.kind==='button'&&c.actionId===step.actionId):scene.components.find(c=>c.id===step.componentId);if('actionId'in step)execute(step.actionId);else{const c=scene.components.find(c=>c.id===step.componentId);if(c?.kind==='input')state[c.binding]=step.value;render(true);}if(target)highlight(`[data-component="${CSS.escape(target.id)}"]`);document.getElementById('progress')!.textContent=`${cursor} / ${scene.steps.length}`;},900);};
  document.getElementById('pause')!.onclick=pause;
  document.getElementById('reset')!.onclick=()=>{pause();cursor=0;state={...scene.state};render(true);document.getElementById('progress')!.textContent='0';};
