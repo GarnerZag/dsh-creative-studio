@@ -24,7 +24,7 @@ export function checkHandoff(current:Project,versionId:string):HandoffReadiness{
  if(!version.architecture.some(a=>a.kind==='module'))block('ARCHITECTURE_MISSING',versionId,'Approve product module boundaries.');
  for(const a of version.architecture.filter(item=>item.kind==='contract'))if(!a.contract||(!a.contract.notApplicable&&!a.contract.surface.trim()))block('CONTRACT_STRUCTURE',a.id,'Record the interface/entity surface, or mark the contract not applicable.');
  for(const a of version.architecture.filter(item=>item.kind==='task')){if(!a.task||!a.task.outputs.length||!a.task.acceptanceIds.length)block('TASK_STRUCTURE',a.id,'Record expected outputs and at least one mapped acceptance point.');}
- for(const a of version.architecture)if(!a.body.trim())block('ARCHITECTURE_DETAILS',a.id,'Fill in implementation contract, decision rationale or task outputs and verification.');
+ for(const a of version.architecture){const structured=a.kind==='task'?Boolean(a.task):a.kind==='contract'?Boolean(a.contract&&(a.contract.notApplicable||a.contract.surface.trim())):false;if(!a.body.trim()&&!structured)block('ARCHITECTURE_DETAILS',a.id,'Fill in implementation contract, decision rationale or task outputs and verification.');}
  if(!version.taskPlanConfirmed)block('TASK_PLAN_UNCONFIRMED',versionId,'Explicit user confirmation of this task plan is required.');
  if(!version.demo)warnings.push({code:'NO_DEMO',id:versionId,message:'No matching frozen Demo; interaction coverage is unverified.'});
  else for(const n of features)if(!version.demo.requirementIds.includes(n.id))warnings.push({code:'DEMO_UNCOVERED',id:n.id,message:'This requirement is not covered by the frozen Demo.'});
