@@ -59,7 +59,7 @@ export type ProductReference=z.infer<typeof ReferenceSchema>;
 // Analyst notes cannot claim runtime observation; verified tool evidence is separate.
 export const FeatureNoteSchema=z.object({id,referenceId:id,name:z.string().trim().min(1),description:z.string(),requirementIds:z.array(id),assessment:z.enum(['unknown','inferred']),implementation:z.string(),adaptation:z.string(),sourceLocator:z.string()}).strict();
 export type FeatureNote=z.infer<typeof FeatureNoteSchema>;
-export const ApprovalRecordSchema=z.object({baselineVersionId:id.nullable(),operator:z.literal('owner'),changes:z.array(z.object({collection:z.enum(['nodes','architecture']),id})),sceneId:id.nullable(),mappedRequirementIds:z.array(id),uncoveredRequirementIds:z.array(id),unverifiedAcceptanceIds:z.array(z.string().min(1)),acknowledged:z.boolean()}).strict();
+export const ApprovalRecordSchema=z.object({baselineVersionId:id.nullable(),operator:z.literal('owner'),changes:z.array(z.object({collection:z.enum(['nodes','architecture']),id,fields:z.array(z.string().min(1)).optional()})),sceneId:id.nullable(),mappedRequirementIds:z.array(id),uncoveredRequirementIds:z.array(id),unverifiedAcceptanceIds:z.array(z.string().min(1)),acknowledged:z.boolean()}).strict();
 export const VersionSchema = z.object({
   approval:ApprovalRecordSchema.nullable().default(null),
   references:z.array(ReferenceSchema).default([]),features:z.array(FeatureNoteSchema).default([]),
