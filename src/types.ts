@@ -21,6 +21,16 @@ export interface RequirementNode {
   desktopAcceptance: string[];
   mobileAcceptance: string[];
 }
+export interface ContractField { name: string; type: string; required: boolean; notes: string }
+export interface ContractPayload {
+  surface: string;
+  inputs: ContractField[];
+  outputs: ContractField[];
+  errors: string[];
+  permissions: string;
+  notApplicable: boolean;
+}
+export interface TaskPayload { inputs: string[]; outputs: string[]; acceptanceIds: string[] }
 export interface ArchitectureNode {
   id: string;
   kind: 'module' | 'contract' | 'decision' | 'task';
@@ -28,6 +38,8 @@ export interface ArchitectureNode {
   body: string;
   requirementIds: string[];
   dependsOn: string[];
+  contract?: ContractPayload;
+  task?: TaskPayload;
 }
 export type ArchitectureChange = { kind: 'save'; item: ArchitectureNode } | { kind: 'remove'; id: string };
 export interface ProjectHead {

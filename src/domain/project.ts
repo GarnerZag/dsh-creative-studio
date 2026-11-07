@@ -15,9 +15,28 @@ export const RequirementSchema = z.object({
   desktopAcceptance: z.array(z.string()), mobileAcceptance: z.array(z.string()),
 }).strict();
 export type Requirement = z.infer<typeof RequirementSchema>;
+// Structured contract payload: what the boundary accepts, returns, rejects and who may call it.
+export const ContractFieldSchema = z.object({
+  name: z.string().trim().min(1), type: z.string().trim().min(1),
+  required: z.boolean().default(true), notes: z.string().default(''),
+}).strict();
+export type ContractField = z.infer<typeof ContractFieldSchema>;
+export const ContractPayloadSchema = z.object({
+  surface: z.string().default(''), inputs: z.array(ContractFieldSchema).default([]),
+  outputs: z.array(ContractFieldSchema).default([]), errors: z.array(z.string()).default([]),
+  permissions: z.string().default(''), notApplicable: z.boolean().default(false),
+}).strict();
+export type ContractPayload = z.infer<typeof ContractPayloadSchema>;
+// Structured task payload: inputs, expected artifacts and acceptance IDs from the frozen baseline.
+export const TaskPayloadSchema = z.object({
+  inputs: z.array(z.string()).default([]), outputs: z.array(z.string()).default([]),
+  acceptanceIds: z.array(z.string().trim().min(1)).default([]),
+}).strict();
+export type TaskPayload = z.infer<typeof TaskPayloadSchema>;
 export const ArchitectureItemSchema = z.object({
   id, kind: z.enum(['module', 'contract', 'decision', 'task']), title: z.string().trim().min(1),
   body: z.string(), requirementIds: z.array(id), dependsOn: z.array(id),
+  contract: ContractPayloadSchema.optional(), task: TaskPayloadSchema.optional(),
 }).strict();
 export type ArchitectureItem = z.infer<typeof ArchitectureItemSchema>;
 export const ProposalInputSchema = z.object({
@@ -140,6 +159,16 @@ export function validateContent(project: Pick<Project, 'nodes' | 'architecture'>
   }
   const items = new Map(project.architecture.map(item => [item.id, item]));
   if (items.size !== project.architecture.length) throw new Error('DUPLICATE_ARCHITECTURE_ID');
+  const acceptance = new Set<string>();
+  for (const node of project.nodes) {
+    for (const [platform, list] of [['desktop', node.desktopAcceptance], ['mobile', node.mobileAcceptance]] as const) {
+      list.forEach((_, index) => acceptance.add(`${node.id}:${platform}:${index + 1}`));
+    }
+  }
+  for (const item of project.architecture) {
+    if (item.contract && item.kind !== 'contract') throw new Error('ARCHITECTURE_PAYLOAD_KIND');
+    if (item.task && item.kind !== 'task') throw new Error('ARCHITECTURE_PAYLOAD_KIND');
+  }
   const done = new Set<string>();
   const visit = (itemId: string, path: Set<string>) => {
     if (path.has(itemId)) throw new Error('ARCHITECTURE_CYCLE');
@@ -152,6 +181,12 @@ export function validateContent(project: Pick<Project, 'nodes' | 'architecture'>
     done.add(itemId);
   };
   for (const item of project.architecture) visit(item.id, new Set());
+  // Checked after referential integrity so a deleted requirement is reported as such.
+  for (const item of project.architecture) {
+    if (item.kind === 'task' && item.task) {
+      for (const acceptanceId of item.task.acceptanceIds) if (!acceptance.has(acceptanceId)) throw new Error('ACCEPTANCE_NOT_FOUND');
+    }
+  }
 }
 
 export function createProject(projectId: string, name: string): Project {

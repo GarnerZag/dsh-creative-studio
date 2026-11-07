@@ -58,7 +58,12 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
     return rule(/^REQUIREMENT_DEPENDENCY_CYCLE: (.*)$/,'errorDependencyCycle')
       ?? rule(/^REQUIREMENT_DEPENDENCY_NOT_FOUND: (.*)$/,'errorDependencyMissing')
       ?? rule(/^DUPLICATE_REQUIREMENT_DEPENDENCY: (.*)$/,'errorDependencyDuplicate')
-      ?? (message==='DUPLICATE_ID'?t('errorDuplicateId'):message);
+      ?? (message==='DUPLICATE_ID'?t('errorDuplicateId'):undefined)
+      ?? (message==='CONTRACT_STRUCTURE_REQUIRED'?t('errorContractStructure'):undefined)
+      ?? (message==='TASK_STRUCTURE_REQUIRED'?t('errorTaskStructure'):undefined)
+      ?? (message==='ARCHITECTURE_PAYLOAD_KIND'?t('errorArchitecturePayloadKind'):undefined)
+      ?? (message==='ACCEPTANCE_NOT_FOUND'?t('errorAcceptanceMissing'):undefined)
+      ?? message;
   };
   const generation = React.useRef(0);
   React.useEffect(() => {
