@@ -28,6 +28,6 @@ export function VersionPanel({project,busy,approve,t,confirmTasks}:{confirmTasks
 }
 
 function fieldLabel(field:string,t:(key:string)=>string):string{
-  const labels:Record<string,string>={title:'architectureTitle',body:'architectureBody',kind:'architectureType',requirementIds:'linkedRequirements',dependsOn:'dependencies',contract:'contractStructure',task:'taskStructure'};
+  const labels:Record<string,string>={title:'architectureTitle',body:'architectureBody',kind:'architectureType',requirementIds:'linkedRequirements',dependsOn:'dependencies',contract:'diffContract',task:'diffTask'};
   return labels[field]?t(labels[field]!):field;
 }

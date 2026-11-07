@@ -53,7 +53,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
   const errorText=(message:string):string=>{
     const rule=(pattern:RegExp,key:string)=>{
       const m=message.match(pattern);
-      return m?`${t(key as Parameters<typeof t>[0])} ${m[1]}`:undefined;
+      return m?`${t(key as Parameters<typeof t>[0])} ${m.slice(1).filter(Boolean).join(' ')}`.trim():undefined;
     };
     return rule(/^REQUIREMENT_DEPENDENCY_CYCLE: (.*)$/,'errorDependencyCycle')
       ?? rule(/^REQUIREMENT_DEPENDENCY_NOT_FOUND: (.*)$/,'errorDependencyMissing')
@@ -62,7 +62,11 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
       ?? (message==='CONTRACT_STRUCTURE_REQUIRED'?t('errorContractStructure'):undefined)
       ?? (message==='TASK_STRUCTURE_REQUIRED'?t('errorTaskStructure'):undefined)
       ?? (message==='ARCHITECTURE_PAYLOAD_KIND'?t('errorArchitecturePayloadKind'):undefined)
-      ?? (message==='ACCEPTANCE_NOT_FOUND'?t('errorAcceptanceMissing'):undefined)
+      ?? rule(/^ACCEPTANCE_NOT_FOUND(?:: (.*))?$/,'errorAcceptanceMissing')
+      ?? rule(/^ACCEPTANCE_TEXT_CHANGED(?:: (.*))?$/,'errorAcceptanceTextChanged')
+      ?? rule(/^ACCEPTANCE_NOT_LINKED(?:: (.*))?$/,'errorAcceptanceNotLinked')
+      ?? rule(/^REQUIREMENT_NOT_FOUND(?:: (.*))?$/,'errorRequirementMissing')
+      ?? rule(/^ARCHITECTURE_DEPENDENCY_NOT_FOUND(?:: (.*))?$/,'errorArchitectureDependencyMissing')
       ?? message;
   };
   const generation = React.useRef(0);
@@ -115,8 +119,8 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
           {id:'research',label:t('researchTitle'),content:<ResearchPanel evidence={api.evidence} project={project} busy={busy} t={t} listWorkspaces={api.listWorkspaces} start={(referenceId,request,workspaceId)=>void run(()=>api.research(project,referenceId,request,workspaceId))} refresh={()=>void run(()=>api.get(project.id))}/>},
           {id:'reports',label:t('reportsTitle'),content:<ReportsPanel project={project} busy={busy} t={t} refresh={()=>void run(()=>api.get(project.id))} accept={(id,value)=>void run(()=>api.acceptReport(project,id,value))}/>},
           {id:'handoff',label:t('handoffTitle'),content:<HandoffPanel key={`handoff-${project.id}`} project={project} api={api.handoff} dispatch={api.dispatch} onProject={next=>setProject(current=>current?.id===next.id&&next.projectRevision>=current.projectRevision?next:current)} t={t}/>},
-          {id:'requirements',label:t('layoutRequirements'),content:<RequirementsEditor onSelect={setSelectedRequirement} key={`${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change => { void run(async() => {const next=await api.edit(project,change);setHistory(h=>{try{return recordEdit(h,project,next);}catch{return undefined;}});return next;}); }}/>},
-          {id:'architecture',label:t('layoutArchitecture'),content:<ArchitectureEditor key={`architecture-${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change=>{void run(()=>api.architecture(project,change));}}/>},
+          {id:'requirements',label:t('layoutRequirements'),content:<RequirementsEditor onSelect={setSelectedRequirement} key={`${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change => { void run(async() => {const next=await api.edit(project,change);setHistory(h=>{try{return recordEdit(h,project,next);}catch{setError(t('historyDesync'));return undefined;}});return next;}); }}/>},
+          {id:'architecture',label:t('layoutArchitecture'),content:<ArchitectureEditor key={`architecture-${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change=>{void run(async()=>{const next=await api.architecture(project,change);if(history){setHistory(undefined);setError(t('historyDesync'));}return next;});}}/>},
           {id:'references',label:t('layoutReferences'),content:<>{<ReferencesPanel key={`references-${project.id}`} project={project} busy={busy} t={t} save={change=>{void run(()=>api.reference(project,change));}}/>}{<FeaturePanel key={`features-${project.id}`} project={project} busy={busy} t={t} save={change=>{void run(()=>api.feature(project,change));}}/>}</>},
           {id:'versions',label:t('layoutVersions'),content:<VersionPanel key={`versions-${project.id}`} project={project} busy={busy} t={t} confirmTasks={id=>{void run(()=>api.confirmTasks(project,id));}} approve={(label,review)=>{void run(()=>api.approve(project,label,review));}}/>},
         ]}

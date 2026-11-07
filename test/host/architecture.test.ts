@@ -57,3 +57,20 @@ test('structured payloads are rejected on the wrong kind and legacy items still 
   assert.equal(validateProject(legacy).architecture.length,1);
   assert.throws(()=>editArchitecture(base,1,{kind:'save',item:{id:'m',kind:'module',title:'模块',body:'',requirementIds:['r'],dependsOn:[],contract:{surface:'x',inputs:[],outputs:[],errors:[],permissions:'',notApplicable:false}}}),/ARCHITECTURE_PAYLOAD_KIND/);
 });
+
+test('a task may only cite acceptance points of its own requirements',()=>{
+  const base=editRequirements(createProject('p','产品'),0,{kind:'add',node:{id:'r1',parentId:null,title:'查询',kind:'feature',description:'',priority:'normal',desktopAcceptance:['可见'],mobileAcceptance:['可见']}});
+  const two=editRequirements(base,1,{kind:'add',node:{id:'r2',parentId:null,title:'收藏',kind:'feature',description:'',priority:'normal',desktopAcceptance:['可收藏'],mobileAcceptance:[]}});
+  const task={id:'t',kind:'task' as const,title:'查询任务',body:'',requirementIds:['r1'],dependsOn:[],task:{inputs:[],outputs:['src/q.ts'],acceptanceIds:['r2:desktop:1']}};
+  assert.throws(()=>editArchitecture(two,2,{kind:'save',item:task}),/ACCEPTANCE_NOT_LINKED: t r2:desktop:1/);
+  const ok=editArchitecture(two,2,{kind:'save',item:{...task,task:{...task.task,acceptanceIds:['r1:desktop:1']}}});
+  assert.deepEqual(ok.architecture[0]?.task?.acceptanceIds,['r1:desktop:1']);
+});
+
+test('editing the text of a cited acceptance point is rejected instead of silently re-pointing',()=>{
+  const base=editRequirements(createProject('p','产品'),0,{kind:'add',node:{id:'r',parentId:null,title:'查询',kind:'feature',description:'',priority:'normal',desktopAcceptance:['A','B','C'],mobileAcceptance:[]}});
+  const withTask=editArchitecture(base,1,{kind:'save',item:{id:'t',kind:'task',title:'任务',body:'',requirementIds:['r'],dependsOn:[],task:{inputs:[],outputs:['src/q.ts'],acceptanceIds:['r:desktop:2']}}});
+  assert.throws(()=>editRequirements(withTask,2,{kind:'details',id:'r',description:'',priority:'normal',desktopAcceptance:['A','C'],mobileAcceptance:[]}),/ACCEPTANCE_TEXT_CHANGED: t r:desktop:2/);
+  const edit=editRequirements(withTask,2,{kind:'details',id:'r',description:'',priority:'normal',desktopAcceptance:['A','B','C','D'],mobileAcceptance:[]});
+  assert.equal(edit.nodes[0]?.desktopAcceptance.length,4);
+});

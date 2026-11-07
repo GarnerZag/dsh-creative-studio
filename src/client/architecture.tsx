@@ -18,16 +18,33 @@ export function ArchitectureEditor({project,busy,save,t}:{project:ProjectSnapsho
 }
 function ArchitectureForm({id,current,project,busy,save,t,dirty}:{id:string;current:ArchitectureNode|undefined;project:ProjectSnapshot;busy:boolean;save:(change:ArchitectureChange)=>void;t:(key:string)=>string;dirty:(value:boolean)=>void}):React.ReactElement {
   const [item,setItem]=React.useState<ArchitectureNode>(()=>current ?? {id,kind:'module',title:'',body:'',requirementIds:[],dependsOn:[]});
-  const patch=(changes:Partial<ArchitectureNode>)=>{setItem(old=>({...old,...changes}));dirty(true);};
+  const patch=(changes:Partial<ArchitectureNode>)=>{
+    setItem(old=>{
+      const next={...old,...changes};
+      // A payload only belongs to its own kind; keeping it would make the item unsavable
+      // because the fieldset for the old kind is no longer rendered.
+      if(changes.kind && changes.kind!==old.kind){if(changes.kind!=='contract')next.contract=undefined;if(changes.kind!=='task')next.task=undefined;}
+      return next;
+    });
+    dirty(true);
+  };
   React.useEffect(()=>{if(current && JSON.stringify(current)===JSON.stringify(item)) dirty(false);},[current,item,dirty]);
   const toggle=(field:'requirementIds'|'dependsOn',value:string)=>patch({[field]:item[field].includes(value)?item[field].filter(v=>v!==value):[...item[field],value]});
   const contract=item.contract ?? {surface:'',inputs:[],outputs:[],errors:[],permissions:'',notApplicable:false};
   const task=item.task ?? {inputs:[],outputs:[],acceptanceIds:[]};
+  // Textareas keep the raw text while typing; parsing on every keystroke would swallow newlines.
+  const [rawText,setRawText]=React.useState<Record<string,string>>({});
+  const lines=(value:string)=>value.split('\n').map(line=>line.trim()).filter(line=>line!=='');
+  const listField=(key:'errors'|'inputs'|'outputs',value:string[],apply:(items:string[])=>void)=>({
+    value:rawText[key] ?? value.join('\n'),
+    onChange:(event:React.ChangeEvent<HTMLTextAreaElement>)=>{setRawText(old=>({...old,[key]:event.target.value}));apply(lines(event.target.value));},
+    onBlur:()=>setRawText(old=>{if(!(key in old))return old;const next={...old};delete next[key];return next;}),
+  });
   const patchContract=(changes:Partial<typeof contract>)=>patch({contract:{...contract,...changes}});
   const patchTask=(changes:Partial<typeof task>)=>patch({task:{...task,...changes}});
   const acceptance=project.nodes.flatMap(node=>[
-    ...node.desktopAcceptance.map((text,index)=>({id:`${node.id}:desktop:${index+1}`,text:`${node.title} · 桌面 · ${text}`})),
-    ...node.mobileAcceptance.map((text,index)=>({id:`${node.id}:mobile:${index+1}`,text:`${node.title} · 手机 · ${text}`})),
+    ...node.desktopAcceptance.map((text,index)=>({id:`${node.id}:desktop:${index+1}`,text:`${node.title} · ${t('desktop')} · ${text}`})),
+    ...node.mobileAcceptance.map((text,index)=>({id:`${node.id}:mobile:${index+1}`,text:`${node.title} · ${t('mobile')} · ${text}`})),
   ]);
   const fieldList=(key:'inputs'|'outputs',label:string)=><fieldset className={`cs-${key}`} disabled={busy}><legend>{label}</legend>
     {contract[key].map((field,index)=><div key={index} style={{display:'flex',gap:6,alignItems:'center',marginBottom:4}}>
@@ -49,13 +66,13 @@ function ArchitectureForm({id,current,project,busy,save,t,dirty}:{id:string;curr
         <label>{t('contractSurface')}<input value={contract.surface} onChange={e=>patchContract({surface:e.target.value})} placeholder={t('hint_contractSurface')}/></label>
         {fieldList('inputs',t('contractInputs'))}
         {fieldList('outputs',t('contractOutputs'))}
-        <label>{t('contractErrors')}<textarea rows={3} value={contract.errors.join('\n')} onChange={e=>patchContract({errors:e.target.value.split('\n').filter(line=>line.trim()!=='').map(line=>line.trim())})} placeholder={t('hint_contractErrors')}/></label>
+        <label>{t('contractErrors')}<textarea rows={3} {...listField('errors',contract.errors,errors=>patchContract({errors}))} placeholder={t('hint_contractErrors')}/></label>
         <label>{t('contractPermissions')}<textarea rows={2} value={contract.permissions} onChange={e=>patchContract({permissions:e.target.value})} placeholder={t('hint_contractPermissions')}/></label>
       </>}
     </fieldset>}
     {item.kind==='task' && <fieldset className="cs-task" disabled={busy}><legend>{t('taskStructure')}</legend>
-      <label>{t('taskInputs')}<textarea rows={3} value={task.inputs.join('\n')} onChange={e=>patchTask({inputs:e.target.value.split('\n').filter(line=>line.trim()!=='').map(line=>line.trim())})} placeholder={t('hint_taskInputs')}/></label>
-      <label>{t('taskOutputs')}<textarea rows={3} value={task.outputs.join('\n')} onChange={e=>patchTask({outputs:e.target.value.split('\n').filter(line=>line.trim()!=='').map(line=>line.trim())})} placeholder={t('hint_taskOutputs')}/></label>
+      <label>{t('taskInputs')}<textarea rows={3} {...listField('inputs',task.inputs,inputs=>patchTask({inputs}))} placeholder={t('hint_taskInputs')}/></label>
+      <label>{t('taskOutputs')}<textarea rows={3} {...listField('outputs',task.outputs,outputs=>patchTask({outputs}))} placeholder={t('hint_taskOutputs')}/></label>
       <fieldset className="cs-task-acceptance"><legend>{t('taskAcceptance')}</legend>
         {acceptance.length===0 && <p>{t('taskAcceptanceEmpty')}</p>}
         {acceptance.map(entry=><label key={entry.id} style={{display:'block'}}><input type="checkbox" checked={task.acceptanceIds.includes(entry.id)} onChange={()=>patchTask({acceptanceIds:task.acceptanceIds.includes(entry.id)?task.acceptanceIds.filter(v=>v!==entry.id):[...task.acceptanceIds,entry.id]})}/>{entry.text}</label>)}

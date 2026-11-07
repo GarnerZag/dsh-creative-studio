@@ -159,10 +159,10 @@ export function validateContent(project: Pick<Project, 'nodes' | 'architecture'>
   }
   const items = new Map(project.architecture.map(item => [item.id, item]));
   if (items.size !== project.architecture.length) throw new Error('DUPLICATE_ARCHITECTURE_ID');
-  const acceptance = new Set<string>();
+  const acceptance = new Map<string, string>();
   for (const node of project.nodes) {
     for (const [platform, list] of [['desktop', node.desktopAcceptance], ['mobile', node.mobileAcceptance]] as const) {
-      list.forEach((_, index) => acceptance.add(`${node.id}:${platform}:${index + 1}`));
+      list.forEach((_, index) => acceptance.set(`${node.id}:${platform}:${index + 1}`, node.id));
     }
   }
   for (const item of project.architecture) {
@@ -175,16 +175,23 @@ export function validateContent(project: Pick<Project, 'nodes' | 'architecture'>
     if (done.has(itemId)) return;
     const item = items.get(itemId);
     if (!item) throw new Error('ARCHITECTURE_DEPENDENCY_NOT_FOUND');
-    for (const requirement of item.requirementIds) if (!nodes.has(requirement)) throw new Error('REQUIREMENT_NOT_FOUND');
+    for (const requirement of item.requirementIds) if (!nodes.has(requirement)) throw new Error(`REQUIREMENT_NOT_FOUND: ${item.id} ${requirement}`);
     const nextPath = new Set(path); nextPath.add(itemId);
-    for (const dependency of item.dependsOn) visit(dependency, nextPath);
+    for (const dependency of item.dependsOn) {
+      if (!items.has(dependency)) throw new Error(`ARCHITECTURE_DEPENDENCY_NOT_FOUND: ${itemId} -> ${dependency}`);
+      visit(dependency, nextPath);
+    }
     done.add(itemId);
   };
   for (const item of project.architecture) visit(item.id, new Set());
   // Checked after referential integrity so a deleted requirement is reported as such.
   for (const item of project.architecture) {
     if (item.kind === 'task' && item.task) {
-      for (const acceptanceId of item.task.acceptanceIds) if (!acceptance.has(acceptanceId)) throw new Error('ACCEPTANCE_NOT_FOUND');
+      for (const acceptanceId of item.task.acceptanceIds) {
+        if (!acceptance.has(acceptanceId)) throw new Error(`ACCEPTANCE_NOT_FOUND: ${item.id} ${acceptanceId}`);
+        const owner = acceptance.get(acceptanceId)!;
+        if (!item.requirementIds.includes(owner)) throw new Error(`ACCEPTANCE_NOT_LINKED: ${item.id} ${acceptanceId}`);
+      }
     }
   }
 }
@@ -208,9 +215,21 @@ export function editRequirements(current: Project, expectedContentRevision: numb
   switch (edit.kind) {
     case 'add': project.nodes.push(RequirementSchema.parse(edit.node)); break;
     case 'rename': node!.title = edit.title; break;
-    case 'details':
+    case 'details': {
+      // Acceptance ids are positional (`<node>:<platform>:<index+1>`), so rewriting the text at a
+      // cited index would silently re-point an approved task at a criterion nobody chose.
+      const cited = new Map<string, string>();
+      for (const item of project.architecture) if (item.task) for (const id of item.task.acceptanceIds) cited.set(id, item.id);
+      const pairs = [['desktop', node!.desktopAcceptance, edit.desktopAcceptance], ['mobile', node!.mobileAcceptance, edit.mobileAcceptance]] as const;
+      for (const [platform, before, after] of pairs) {
+        after.forEach((text, index) => {
+          const citation = cited.get(`${node!.id}:${platform}:${index + 1}`);
+          if (citation !== undefined && before[index] !== text) throw new Error(`ACCEPTANCE_TEXT_CHANGED: ${citation} ${node!.id}:${platform}:${index + 1}`);
+        });
+      }
       Object.assign(node!, { description: edit.description, priority: edit.priority, desktopAcceptance: [...edit.desktopAcceptance], mobileAcceptance: [...edit.mobileAcceptance] });
       break;
+    }
     case 'move': node!.parentId = edit.parentId; break;
     case 'dependencies': node!.dependsOn = [...edit.dependsOn]; break;
     case 'remove': {
