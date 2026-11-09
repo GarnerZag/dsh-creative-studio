@@ -18,7 +18,7 @@ DeepSeek Harness 原生产品需求与开发交接插件，MIT License。
 ## 当前验证边界与缺口
 
 - 最近完整回归：76 项单元测试通过，构建和类型检查通过；独立浏览器 Demo 测试（输入/过滤/动作/重置/步进动画/场景高亮/双端自动滚动/双端布局/转义/父窗口与存储网络隔离）通过。以上不等于完整 Harness 验收。
-- 字段级部分批准：实现与单元测试已完成（只覆盖选中字段、未选字段保持基线，`approval.changes[].fields` 记录实际冻结字段），**真实界面尚未验证通过**。原因已定位：运行中的 Host 进程启动早于该修复，`set_bundle` 只重载 Client、不重载 Host 模块，因此实测仍走旧的整实体替换逻辑（抓包确认客户端已发送 `selection:[{…,fields:['title']}]`，构建产物 `lib/index.js` 的合并逻辑也正确）。重启 Host 后需复验：只勾 `Title` 时冻结版本的说明应保持基线值，且 `changes[0].fields` 应为 `['title']`。
+- 字段级部分批准：实现与单元测试已完成（只覆盖选中字段、未选字段保持基线，`approval.changes[].fields` 记录实际冻结字段），并已在重启后的真实 Host 上通过界面端到端验证：以 `FIELD BASELINE TEST ONLY — not product approval` 为基线，草稿把标题改为 `FIELD TITLE V5`、说明改为 `FIELD DESC V5`，审批时只勾选 `Title` 字段（实体复选框与 `Description` 均为未勾选状态），冻结版本得到标题 `FIELD TITLE V5`、说明仍为基线值 `field level approval probe`，审批记录为 `changes:[{collection:'nodes',id:'fa51a344-…',fields:['title']}]`，界面无报错提示。此前一次误判（提交 `635eecc` 记录）源于 Host 进程缓存旧模块：`set_bundle` 只重载 Client，Host 模块更新必须重启进程。
 - 运行中 Harness 曾实测：侧栏、连接、项目创建/打开；需求新增、重命名、说明及双端验收保存后重新打开仍存在；参考来源新增/编辑/移除；双端 Demo 鼠标交互及场景保存后重新打开；空需求审批、无版本导出均被阻止。只使用专用测试项目，没有审批真实产品需求。
 - 先前 `args fields do not match the descriptor: unexpected "id"` 已在重启原 Harness 后消失。接口更新仍应注意进程级契约缓存，安装回执不能代替实际操作验证。
 - 初始化缺陷已修复：报告工具输出 schema 缺少布尔类型声明，注册失败时旧实现又遗漏了已打开存储的释放，表现为 `domain already open`。已补齐 schema、加固异常清理；恢复后通过官方禁用/启用进行了真实生命周期复测，既有项目及 Demo 仍能读取。无需更换存储域或删除数据。
