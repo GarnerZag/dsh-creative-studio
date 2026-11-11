@@ -9,7 +9,7 @@ export function ProposalPanel({project,busy,adopt,reject,registerReference,t}:{r
  {project.proposals.map(proposal=>{
   const stale=proposal.baseContentRevision!==project.contentRevision;
   const differences=diffContent(project,proposal);
-  return <article key={proposal.id} style={{border:'1px solid currentColor',borderRadius:12,padding:16,marginBlock:12}}>
+  return <article key={proposal.id} style={{border:'1px solid var(--cs-border)',borderRadius:12,padding:16,marginBlock:16}}>
    <h4>{proposal.title}</h4><p>{proposal.rationale}</p><small>{t('proposalBase')} r{proposal.baseContentRevision} · {t(`proposal_${proposal.status}`)}</small>
    {proposal.status==='pending'&&stale&&<p role="status">{t('staleProposal')}</p>}
    <h5>{t('assumptions')}</h5><ul>{proposal.assumptions.map((text,i)=><li key={i}>{text}</li>)}</ul>

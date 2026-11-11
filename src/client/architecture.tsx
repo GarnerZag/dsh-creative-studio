@@ -47,7 +47,7 @@ function ArchitectureForm({id,current,project,busy,save,t,dirty}:{id:string;curr
     ...node.mobileAcceptance.map((text,index)=>({id:`${node.id}:mobile:${index+1}`,text:`${node.title} · ${t('mobile')} · ${text}`})),
   ]);
   const fieldList=(key:'inputs'|'outputs',label:string)=><fieldset className={`cs-${key}`} disabled={busy}><legend>{label}</legend>
-    {contract[key].map((field,index)=><div key={index} style={{display:'flex',gap:6,alignItems:'center',marginBottom:4}}>
+    {contract[key].map((field,index)=><div key={index} style={{display:'flex',gap:8,alignItems:'center',marginBottom:8}}>
       <input aria-label={t('contractFieldName')} value={field.name} onChange={e=>patchContract({[key]:contract[key].map((f,i)=>i===index?{...f,name:e.target.value}:f)})}/>
       <input aria-label={t('contractFieldType')} value={field.type} onChange={e=>patchContract({[key]:contract[key].map((f,i)=>i===index?{...f,type:e.target.value}:f)})}/>
       <input aria-label={t('contractFieldNotes')} value={field.notes} onChange={e=>patchContract({[key]:contract[key].map((f,i)=>i===index?{...f,notes:e.target.value}:f)})}/>
