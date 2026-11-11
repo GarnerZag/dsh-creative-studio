@@ -20,7 +20,7 @@ export function ApprovalForm({project,busy,approve,t}:{project:ProjectSnapshot;b
  {selectionEmpty&&<p role="status">{t('approvalSelectSomething')}</p>}
  {error&&<p role="alert">{selectionError(error,t)}</p>}
  {preview&&<><p>{t('approvalCoverageNotice')}</p><p>{t('demoMapped')}: {preview.approval.mappedRequirementIds.join(', ')||'—'}</p><p>{t('demoUncovered')}: {preview.approval.uncoveredRequirementIds.join(', ')||'—'}</p><details><summary>{t('unverifiedAcceptance')} ({preview.approval.unverifiedAcceptanceIds.length})</summary><ul>{preview.approval.unverifiedAcceptanceIds.map(id=><li key={id}>{id}</li>)}</ul></details>{preview.needsAcknowledgement&&<label><input type="checkbox" checked={review.acknowledgeUnverified} onChange={e=>{setAck(e.target.checked);setAckRevision(project.projectRevision);}}/>{t('ackUnverified')}</label>}</>}
- <input aria-label={t('versionLabel')} value={label} onChange={e=>setLabel(e.target.value)} placeholder={t('versionLabel')}/><button disabled={!ready||!label.trim()}>{t('approveVersion')}</button>
+ <label>{t('versionLabel')}<input aria-label={t('versionLabel')} value={label} onChange={e=>setLabel(e.target.value)} placeholder={t('versionLabel')}/></label><button disabled={!ready||!label.trim()}>{t('approveVersion')}</button>
  </fieldset></form>;
 }
 function fieldLabel(field:string,t:(key:string)=>string):string{

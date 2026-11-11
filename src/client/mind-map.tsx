@@ -3,6 +3,17 @@ import {orderedChildren} from '../domain/requirement-order.js';
 import {canReparent} from './requirement-drag.js';
 import type { RequirementNode } from '../types.js';
 
+const CARD_WIDTH = 220;
+const CARD_HEIGHT = 48;
+const ROW_GAP = 72;
+const COLUMN_GAP = 248;
+const OFFSET = 20;
+
+/** Six-dot grip: an icon set glyph, not a font character. */
+function GripIcon(): React.ReactElement {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="6" cy="4" r="1.3"/><circle cx="10" cy="4" r="1.3"/><circle cx="6" cy="8" r="1.3"/><circle cx="10" cy="8" r="1.3"/><circle cx="6" cy="12" r="1.3"/><circle cx="10" cy="12" r="1.3"/></svg>;
+}
+
 export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes: RequirementNode[]; selected: string | null; select: (id: string) => void; disabled: boolean; move:(id:string,parentId:string|null)=>void; t:(key:string)=>string }): React.ReactElement {
   const root=React.useRef<HTMLDivElement>(null);
   const dragging=React.useRef<{id:string;pointerId:number;x:number;y:number}|null>(null);
@@ -20,25 +31,31 @@ export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes:
   let row = 0;
   const visit = (parent: string | null, depth: number) => {
     for (const node of orderedChildren(nodes,parent)) {
-      positions.set(node.id, { x: depth * 240 + 20, y: row++ * 66 + 20 });
+      positions.set(node.id, { x: depth * COLUMN_GAP + OFFSET, y: row++ * ROW_GAP + OFFSET });
       visit(node.id, depth + 1);
     }
   };
   visit(null, 0);
-  const width = Math.max(480, ...Array.from(positions.values(), p => p.x + 225));
+  const width = Math.max(480, ...Array.from(positions.values(), p => p.x + CARD_WIDTH + OFFSET));
+  const height = Math.max(180, row * ROW_GAP + OFFSET * 2);
   return <div ref={root} style={{minWidth:0}}>
-    <p>{t('nodeDragHint')}</p><div role="note" data-cs-parent="" style={{position:'sticky',top:0,zIndex:1,background:'var(--cs-bg, #fff)',padding:10,border:'1px dashed var(--cs-border)'}}>{t('nodeDropRoot')}</div>
-    <div style={{overflow:'auto',maxHeight:520,border:'1px solid var(--cs-border)',borderRadius:12}}><svg width={width} height={Math.max(180, row * 66 + 35)} style={{ display: 'block' }}>
+    <p className="cs-hint">{t('nodeDragHint')}</p>
+    <div role="note" data-cs-parent="" style={{padding:12,marginBottom:12,border:'1px dashed var(--cs-border)',borderRadius:12,background:'var(--cs-surface)',fontSize:'var(--cs-text-sm)',lineHeight:'20px',color:'var(--cs-muted)'}}>{t('nodeDropRoot')}</div>
+    <div style={{overflow:'auto',maxHeight:560,border:'1px solid var(--cs-border)',borderRadius:12}}><svg width={width} height={height} style={{ display: 'block' }}>
       {nodes.map(node => {
         const p = positions.get(node.id); const parent = node.parentId ? positions.get(node.parentId) : undefined;
         if (!p || !parent) return null;
-        return <path key={node.id} d={`M ${parent.x + 200} ${parent.y + 22} C ${parent.x + 222} ${parent.y + 22}, ${p.x - 22} ${p.y + 22}, ${p.x} ${p.y + 22}`} fill="none" stroke="var(--cs-accent)" opacity={0.45}/>;
+        return <path key={node.id} d={`M ${parent.x + CARD_WIDTH} ${parent.y + CARD_HEIGHT / 2} C ${parent.x + CARD_WIDTH + 24} ${parent.y + CARD_HEIGHT / 2}, ${p.x - 24} ${p.y + CARD_HEIGHT / 2}, ${p.x} ${p.y + CARD_HEIGHT / 2}`} fill="none" stroke="var(--cs-accent)" strokeWidth={1.5} opacity={0.45}/>;
       })}
       {nodes.map(node => {
         const p = positions.get(node.id); if (!p) return null;
+        const active = selected === node.id;
         return <g key={node.id} transform={`translate(${p.x},${p.y})`}>
-          <rect width={200} height={44} rx={9} fill="var(--cs-soft)" stroke={selected === node.id ? 'var(--cs-accent)' : 'var(--cs-border)'}/>
-          <foreignObject width={200} height={44}><div data-cs-parent={node.id} style={{display:'flex',height:'100%'}}><button type="button" disabled={disabled} aria-label={`${t('dragRequirement')} ${node.title}`} title={t('dragRequirement')} onPointerDown={e=>start(e,node.id)} onPointerUp={finish} onPointerCancel={()=>{dragging.current=null;}} onLostPointerCapture={()=>{dragging.current=null;}} style={{flex:'0 0 28px',margin:0,padding:0,border:0,cursor:'grab',touchAction:'none',userSelect:'none'}}>⠿</button><button type="button" disabled={disabled} aria-pressed={selected === node.id} onClick={() => select(node.id)} title={node.title} style={{ width: '100%', height: '100%', margin: 0, border: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>{node.title}</button></div></foreignObject>
+          <rect width={CARD_WIDTH} height={CARD_HEIGHT} rx={8} fill={active ? 'var(--cs-soft)' : 'var(--cs-surface)'} stroke={active ? 'var(--cs-accent)' : 'var(--cs-border)'} strokeWidth={active ? 2 : 1}/>
+          <foreignObject width={CARD_WIDTH} height={CARD_HEIGHT}><div data-cs-parent={node.id} style={{display:'flex',height:'100%',alignItems:'stretch'}}>
+            <button type="button" className="cs-quiet" disabled={disabled} aria-label={`${t('dragRequirement')} ${node.title}`} title={t('dragRequirement')} onPointerDown={e=>start(e,node.id)} onPointerUp={finish} onPointerCancel={()=>{dragging.current=null;}} onLostPointerCapture={()=>{dragging.current=null;}} style={{flex:'0 0 24px',margin:0,padding:0,border:0,minHeight:0,background:'transparent',cursor:'grab',touchAction:'none',userSelect:'none',display:'grid',placeItems:'center',color:'var(--cs-muted)'}}><GripIcon/></button>
+            <button type="button" className="cs-quiet" disabled={disabled} aria-pressed={active} onClick={() => select(node.id)} title={node.title} style={{flex:'1 1 auto',minWidth:0,height:'100%',margin:0,padding:'0 8px',border:0,minHeight:0,background:'transparent',color:'inherit',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',textAlign:'left',fontSize:'var(--cs-text-sm)',lineHeight:'20px'}}>{node.title}</button>
+          </div></foreignObject>
         </g>;
       })}
     </svg></div>

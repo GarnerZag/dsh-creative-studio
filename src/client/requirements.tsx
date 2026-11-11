@@ -34,31 +34,35 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   visit(null, 0);
   const lines = (text: string) => text.split('\n').map(s => s.trim()).filter(Boolean);
   return <section className="cs-editor">
-    <style>{`.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(240px,1fr) minmax(260px,1fr);gap:24px;margin-top:20px}.creative-studio-root input,.creative-studio-root textarea,.creative-studio-root select{font:inherit;background:transparent;color:inherit;border:1px solid var(--cs-border);border-radius:7px;padding:9px;max-width:100%}.creative-studio-root .cs-editor label{display:block;font-size:12px;margin-top:12px}.creative-studio-root .cs-editor textarea,.creative-studio-root .cs-editor label input{display:block;width:100%;margin-top:5px}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}@media(max-width:850px){.creative-studio-root .cs-editor{grid-template-columns:1fr}}`}</style>
+    <style>{`.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(240px,1fr) minmax(260px,1fr);gap:24px;margin-top:24px}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}@media(max-width:850px){.creative-studio-root .cs-editor{grid-template-columns:1fr}}`}</style>
     <div>
-      <button disabled={busy} onClick={() => save({ kind: 'add', node: { id: newId(), parentId: selected, title: t('newRequirement'), kind: 'feature', description: '', priority: 'normal', dependsOn: [], desktopAcceptance: [], mobileAcceptance: [] } })}>{selected ? t('addChild') : t('addRoot')}</button>
-      <button disabled={busy} onClick={() => choose(null)}>{t('selectRoot')}</button>
+      <div className="cs-toolbar">
+        <button type="button" className="cs-primary" disabled={busy} onClick={() => save({ kind: 'add', node: { id: newId(), parentId: selected, title: t('newRequirement'), kind: 'feature', description: '', priority: 'normal', dependsOn: [], desktopAcceptance: [], mobileAcceptance: [] } })}>{selected ? t('addChild') : t('addRoot')}</button>
+        <button type="button" disabled={busy} onClick={() => choose(null)}>{t('selectRoot')}</button>
+      </div>
       <MindMap t={t} move={(id,parentId)=>save({kind:'move',id,parentId})} nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>
-      <div className="cs-tree" aria-label={t('requirements')}>{rows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 22 }}><button disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>
+      <div className="cs-tree" aria-label={t('requirements')}>{rows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 24 }}><button type="button" disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>
     </div>
-    {editor.conflicts.length>0&&<p role="alert">{t('editorConflict')} <button disabled={busy} onClick={()=>{if(window.confirm(t('discardEdits')))setEditor(openEditor(node?.id??null,snapshot()));}}>{t('editorReload')}</button></p>}
+    {editor.conflicts.length>0&&<p role="alert">{t('editorConflict')} <button type="button" disabled={busy} onClick={()=>{if(window.confirm(t('discardEdits')))setEditor(openEditor(node?.id??null,snapshot()));}}>{t('editorReload')}</button></p>}
     {node ? <fieldset disabled={busy||editor.conflicts.length>0} style={{ border: 0, padding: 0, minWidth: 0 }}>
-      <div><button type="button" disabled={position<=0} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position-1]!.id})}>{t('moveEarlier')}</button><button type="button" disabled={position<0||position>=siblings.length-1} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position+2]?.id??null})}>{t('moveLater')}</button></div>
+      <legend className="cs-visually-hidden">{t('nodeDetails')}</legend>
+      <div className="cs-toolbar"><button type="button" disabled={position<=0} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position-1]!.id})}>{t('moveEarlier')}</button><button type="button" disabled={position<0||position>=siblings.length-1} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position+2]?.id??null})}>{t('moveLater')}</button><button type="button" disabled={busy} onClick={()=>choose(node.parentId)}>{t('selectParent')}</button></div>
+      <p className="cs-hint">{t('dragAlternativeHint')}</p>
       <form onSubmit={e => { e.preventDefault(); if (title.trim()) save({ kind: 'rename', id: node.id, title }); }}><label>{t('nodeTitle')}<input value={title} onChange={e => setTitle(e.target.value)} /></label><button disabled={!title.trim()}>{t('rename')}</button></form>
       <label>{t('parentNode')}<select aria-label={t('parentNode')} value={node.parentId ?? ''} onChange={e => save({ kind: 'move', id: node.id, parentId: e.target.value || null })}><option value="">{t('selectRoot')}</option>{project.nodes.filter(n => n.id !== node.id).map(n => <option key={n.id} value={n.id}>{n.title}</option>)}</select></label>
       <fieldset className="cs-deps" style={{ border: 0, padding: 0, minWidth: 0 }}>
-        <legend style={{ fontSize: 12 }}>{t('requirementDependencies')}</legend>
-        <p style={{ fontSize: 11, margin: '2px 0 6px' }}>{t('requirementDependencyHint')}</p>
-        {project.nodes.filter(n => n.id !== node.id).map(n => <label key={n.id} style={{ display: 'inline-flex', gap: 6, margin: '4px 14px 0 0', alignItems: 'center' }}><input type="checkbox" checked={dependencyDraft.includes(n.id)} onChange={e => setDependencyDraft(e.target.checked ? [...dependencyDraft, n.id] : dependencyDraft.filter(id => id !== n.id))} />{n.title}</label>)}
-        <div><button type="button" disabled={busy || !dependenciesChanged} onClick={() => save({ kind: 'dependencies', id: node.id, dependsOn: dependencyDraft })}>{t('saveRequirementDependencies')}</button></div>
+        <legend>{t('requirementDependencies')}</legend>
+        <p className="cs-hint">{t('requirementDependencyHint')}</p>
+        <div className="cs-checks">{project.nodes.filter(n => n.id !== node.id).map(n => <label key={n.id}><input type="checkbox" checked={dependencyDraft.includes(n.id)} onChange={e => setDependencyDraft(e.target.checked ? [...dependencyDraft, n.id] : dependencyDraft.filter(id => id !== n.id))} />{n.title}</label>)}</div>
+        <div className="cs-toolbar"><button type="button" disabled={busy || !dependenciesChanged} onClick={() => save({ kind: 'dependencies', id: node.id, dependsOn: dependencyDraft })}>{t('saveRequirementDependencies')}</button></div>
       </fieldset>
       <form onSubmit={e => { e.preventDefault(); save({ kind: 'details', id: node.id, description, priority: node.priority, desktopAcceptance: lines(desktop), mobileAcceptance: lines(mobile) }); }}>
         <label>{t('nodeDescription')}<textarea aria-label={t('nodeDescription')} rows={4} value={description} onChange={e => setDescription(e.target.value)}/></label>
         <label>{t('desktopAcceptance')}<textarea aria-label={t('desktopAcceptance')} rows={3} value={desktop} onChange={e => setDesktop(e.target.value)}/></label>
         <label>{t('mobileAcceptance')}<textarea aria-label={t('mobileAcceptance')} rows={3} value={mobile} onChange={e => setMobile(e.target.value)}/></label>
-        <button>{t('saveDetails')}</button>
+        <button disabled={busy}>{busy ? t('working') : t('saveDetails')}</button>
       </form>
-      <button onClick={() => { if (window.confirm(t('confirmRemove'))) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button>
-    </fieldset> : <p>{t('selectNode')}</p>}
+      <button type="button" onClick={() => { if (window.confirm(t('confirmRemove'))) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button>
+    </fieldset> : <p className="cs-hint">{t('selectNode')}</p>}
   </section>;
 }

@@ -105,14 +105,14 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
   };
   return <section className="cs-projects" aria-label={t('projects')}>
     <h2>{t('projects')}</h2>
-    <form onSubmit={e => { e.preventDefault(); if (name.trim()&&(!project||window.confirm(t('confirmProjectChange')))) void run(() => api.create(name.trim())); }}>
-      <input aria-label={t('projectName')} placeholder={t('projectName')} value={name} onChange={e => setName(e.target.value)} disabled={busy} />
-      <button disabled={busy || !name.trim()} type="submit">{t('newProject')}</button>
+    <form className="cs-form" onSubmit={e => { e.preventDefault(); if (name.trim()&&(!project||window.confirm(t('confirmProjectChange')))) void run(() => api.create(name.trim())); }}>
+      <div className="cs-field"><label htmlFor="cs-project-name">{t('projectName')}</label><input id="cs-project-name" aria-label={t('projectName')} placeholder={t('projectName')} value={name} onChange={e => setName(e.target.value)} disabled={busy} /></div>
+      <button disabled={busy || !name.trim()} type="submit">{busy ? t('working') : t('newProject')}</button>
     </form>
     <nav aria-label={t('projects')} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{projects.map(p => <button type="button" key={p.id} aria-pressed={project?.id === p.id} disabled={busy} onClick={() => {if(!project||project.id===p.id||window.confirm(t('confirmProjectChange')))void run(() => api.get(p.id));}}>{p.name}</button>)}</nav>
     {error && <p role="alert" className="cs-error">{errorText(error)}</p>}
-    {project && <article><h3>{project.name}</h3><button disabled={busy} onClick={()=>{const next=window.prompt(t('renameProject'),project.name);if(next?.trim()&&next.trim()!==project.name)void run(()=>api.rename(project,next.trim()));}}>{t('renameProject')}</button><small>{t('draftRevision')} {project.contentRevision}</small>
-      <div aria-label={t('requirementHistory')}><button disabled={busy||!historyCurrent||!history?.past.length} onClick={()=>restore('undo')}>{t('undoRequirements')}</button><button disabled={busy||!historyCurrent||!history?.future.length} onClick={()=>restore('redo')}>{t('redoRequirements')}</button><small>{t('historyScope')}</small></div>
+    {project && <article><div className="cs-article-head"><h3>{project.name}</h3><button type="button" disabled={busy} onClick={()=>{const next=window.prompt(t('renameProject'),project.name);if(next?.trim()&&next.trim()!==project.name)void run(()=>api.rename(project,next.trim()));}}>{t('renameProject')}</button><small>{t('draftRevision')} {project.contentRevision}</small></div>
+      <div className="cs-toolbar" aria-label={t('requirementHistory')}><button type="button" disabled={busy||!historyCurrent||!history?.past.length} onClick={()=>restore('undo')}>{t('undoRequirements')}</button><button type="button" disabled={busy||!historyCurrent||!history?.future.length} onClick={()=>restore('redo')}>{t('redoRequirements')}</button><small className="cs-hint">{t('historyScope')}</small></div>
       <Workbench key={project.id} projectId={project.id} t={t}
         idea={<><GeneratePanel listWorkspaces={api.listWorkspaces} key={`generate-${project.id}`} project={project} busy={busy} t={t} generate={(request,workspaceId)=>{void run(()=>api.generate(project,request,workspaceId));}} refresh={()=>{void run(()=>api.get(project.id));}}/><ProposalPanel registerReference={reference=>{void run(()=>api.reference(project,{kind:'save',reference}));}} reject={id=>{void run(()=>api.reject(project,id));}} key={`proposals-${project.id}`} project={project} busy={busy} t={t} adopt={id=>{void run(()=>api.adopt(project,id),true);}}/></>}
         panels={[
