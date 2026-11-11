@@ -123,7 +123,8 @@ const styles = `
 .creative-studio-root .cs-inline-field{display:inline-flex;align-items:center;gap:8px;margin:0;min-height:32px;color:var(--cs-muted)}
 .creative-studio-root .cs-tabs{display:flex;flex-wrap:wrap;gap:8px}
 .creative-studio-root .cs-pane{min-width:0;padding:12px;border:1px solid var(--cs-border);border-radius:12px;background:var(--cs-surface)}
-.creative-studio-root .cs-split{align-self:stretch;min-height:240px;cursor:col-resize;touch-action:none;background:var(--cs-border);border-radius:8px}
+.creative-studio-root .cs-split{position:relative;align-self:stretch;min-height:240px;cursor:col-resize;touch-action:none;background:transparent}
+.creative-studio-root .cs-split::before{content:'';position:absolute;inset:0 6px;background:var(--cs-border);border-radius:8px}
 .creative-studio-root .cs-split:focus-visible{outline:2px solid var(--cs-accent);outline-offset:2px}
 .creative-studio-root .cs-demo-pane{min-width:0}
 .creative-studio-root .cs-checks{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 12px}

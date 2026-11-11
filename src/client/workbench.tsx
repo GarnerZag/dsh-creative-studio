@@ -15,7 +15,7 @@ export function Workbench({projectId,idea,panels,demo,t}:{projectId:string;idea:
  <button type="button" aria-pressed={!layout.compare} onClick={()=>change({...layout,compare:false})}>{t('layoutExplore')}</button><button type="button" aria-pressed={layout.compare} onClick={()=>change({...layout,compare:true})}>{t('layoutCompare')}</button>
  <label className="cs-inline-field"><span>{t('layoutWidth')}</span><input type="range" min="30" max="70" value={split} onChange={e=>change({...layout,split:Number(e.target.value)})}/></label>
  <button type="button" aria-pressed={focus} onClick={()=>setFocus(!focus)}>{t('layoutFocus')}</button></div>
- <div ref={grid} className="cs-grid" style={{gridTemplateColumns:focus?'minmax(0,1fr)':`minmax(0,${split}fr) 12px minmax(0,${100-split}fr)`,gap:12,marginTop:12,alignItems:'start'}}>
+ <div ref={grid} className="cs-grid" style={{gridTemplateColumns:focus?'minmax(0,1fr)':`minmax(0,${split}fr) 24px minmax(0,${100-split}fr)`,gap:12,marginTop:12,alignItems:'start'}}>
  <div hidden={focus} className="cs-left" style={{minWidth:0,display:focus?'none':'grid',gridTemplateRows:layout.compare?'minmax(220px,40vh) auto minmax(220px,40vh)':'auto auto auto',gap:12}}>
  <section hidden={layout.compare} className="cs-pane" style={{gridRow:1,maxHeight:'40vh',overflow:'auto'}}>{idea}</section>
  <nav className="cs-tabs" style={{gridRow:2}}>{panels.filter(p=>!layout.compare||p.id!=='requirements').map(p=><button type="button" key={p.id} aria-pressed={visibleTab===p.id} onClick={()=>setTab(p.id)}>{p.label}</button>)}</nav>
