@@ -89,7 +89,9 @@ const styles = `
 .creative-studio-root button.cs-primary{background:var(--cs-accent-strong);border-color:var(--cs-accent-strong);color:#fff;font-weight:600}
 .creative-studio-root button.cs-primary:hover:not(:disabled){background:color-mix(in srgb,var(--cs-accent-strong) 86%,#000)}
 .creative-studio-root button.cs-quiet{border-color:transparent;padding:4px 8px}
-.creative-studio-root :is(input,select,textarea){font:inherit;font-size:var(--cs-text-sm);line-height:20px;padding:4px 12px;min-height:32px;border:1px solid var(--cs-border);border-radius:8px;background:var(--cs-surface);color:inherit;max-width:100%}
+.creative-studio-root :is(input,select,textarea){font:inherit;font-size:var(--cs-text-sm);line-height:20px;padding:4px 12px;min-height:32px;border:1px solid var(--cs-border);border-radius:8px;background-color:light-dark(#fbfbfc,#1b1b1e);color:inherit;max-width:100%}
+.creative-studio-root select option,.creative-studio-root select optgroup{background-color:light-dark(#ffffff,#202024);color:light-dark(#111114,#f4f4f6)}
+.creative-studio-root :is(input,select,textarea)::placeholder{color:var(--cs-muted);opacity:1}
 .creative-studio-root textarea{line-height:24px;min-height:80px;padding:8px 12px;resize:vertical}
 .creative-studio-root select{cursor:pointer}
 .creative-studio-root input[type=checkbox]{width:16px;height:16px;min-height:0;padding:0;accent-color:var(--cs-accent-strong);vertical-align:middle}
