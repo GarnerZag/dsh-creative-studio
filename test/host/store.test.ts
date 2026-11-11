@@ -9,6 +9,7 @@ test('store protects read snapshots and checks revision inside storage update', 
   const table = {
     get: (id: string) => records.get(id), entries: () => records.entries(),
     put: async (id: string, p: Project) => { records.set(id, p); },
+    delete: async (id: string) => records.delete(id),
     update: (id: string, transform: (p: Project) => Project) => {
       const result = queue.then(() => { const next = transform(records.get(id)!); records.set(id, next); return next; });
       queue = result.then(() => {}, () => {});
@@ -33,4 +34,25 @@ test('store protects read snapshots and checks revision inside storage update', 
   assert.equal(approved.versions[0]!.approval!.acknowledged,true);
   assert.equal(approved.projectRevision,2);
   await assert.rejects(store.approve(p.id,1,0,'Stale',{baselineVersionId:null,acknowledgeUnverified:true}),/CONFLICT/);
+});
+
+test('removing a project deletes the record and rejects a stale revision', async () => {
+  const records = new Map<string, Project>();
+  const table = {
+    get: (id: string) => records.get(id), entries: () => records.entries(),
+    put: async (id: string, p: Project) => { records.set(id, p); },
+    delete: async (id: string) => records.delete(id),
+    update: (id: string, transform: (p: Project) => Project) => {
+      const next = transform(records.get(id)!); records.set(id, next); return Promise.resolve(next);
+    },
+  };
+  const store = new ProjectStore(table);
+  const keep = await store.create('保留');
+  const doomed = await store.create('待删除');
+  await assert.rejects(store.remove(doomed.id, doomed.projectRevision + 1), /CONFLICT/);
+  assert.equal(store.list().length, 2);
+  await store.remove(doomed.id, doomed.projectRevision);
+  assert.deepEqual(store.list().map(p => p.id), [keep.id]);
+  assert.throws(() => store.get(doomed.id), /PROJECT_NOT_FOUND/);
+  await assert.rejects(store.remove(doomed.id, 0), /PROJECT_NOT_FOUND/);
 });

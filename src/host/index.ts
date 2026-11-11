@@ -119,6 +119,14 @@ export default class CreativeStudio extends TypertRemoteService {
   readResearchEvidence(id:string,jobId:string,callId:string,offset:number):ResearchEvidencePage{return evidencePage(this.userStore().get(id),jobId,callId,offset);}
 
   @Remote
+  async deleteProject(id:string,expectedProjectRevision:number):Promise<ProjectHead[]>{
+    const store=this.userStore();
+    await store.remove(id,expectedProjectRevision);
+    if(this.handoffs)await this.handoffs.purge(id);
+    return store.list();
+  }
+
+  @Remote
   renameProject(id: string, expectedProjectRevision: number, name: string): Promise<ProjectSnapshot> {
     return this.userStore().rename(id, expectedProjectRevision, name);
   }

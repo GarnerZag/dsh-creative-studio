@@ -1,2 +1,21 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {createProject} from '../../src/domain/project.js';import {approveVersion} from '../../src/domain/versions.js';import {HandoffStore,type StoredHandoff} from '../../src/host/handoff-store.js';
-test('stored archive reads are stable bounded chunks and remain after reopening the store',async()=>{const rows=new Map<string,StoredHandoff>();const table={get:(id:string)=>rows.get(id),put:async(id:string,r:StoredHandoff)=>{rows.set(id,structuredClone(r));}};const p=approveVersion(createProject('p','P'),0,'v','V','2026-11-07T00:00:00Z');const store=new HandoffStore(table),info=await store.create(p,'v');const reopened=new HandoffStore(table);assert.deepEqual(reopened.info('p',info.handoffId),info);const a=reopened.chunk('p',info.handoffId,0,100),b=reopened.chunk('p',info.handoffId,0,100);assert.deepEqual(a,b);assert.equal(Buffer.from(a.base64,'base64').length,100);assert.equal(a.nextOffset,100);assert.throws(()=>reopened.info('other',info.handoffId),/HANDOFF_NOT_FOUND/);assert.throws(()=>reopened.chunk('p',info.handoffId,-1,100),/INVALID_CHUNK/);assert.throws(()=>reopened.chunk('p',info.handoffId,0,65537),/INVALID_CHUNK/);assert.throws(()=>reopened.chunk('p',info.handoffId,info.size+1,10),/INVALID_CHUNK/);assert.equal(reopened.chunk('p',info.handoffId,info.size,10).nextOffset,null);});
+test('stored archive reads are stable bounded chunks and remain after reopening the store',async()=>{const rows=new Map<string,StoredHandoff>();const table={get:(id:string)=>rows.get(id),put:async(id:string,r:StoredHandoff)=>{rows.set(id,structuredClone(r));},entries:()=>rows.entries(),delete:async(id:string)=>rows.delete(id)};const p=approveVersion(createProject('p','P'),0,'v','V','2026-11-07T00:00:00Z');const store=new HandoffStore(table),info=await store.create(p,'v');const reopened=new HandoffStore(table);assert.deepEqual(reopened.info('p',info.handoffId),info);const a=reopened.chunk('p',info.handoffId,0,100),b=reopened.chunk('p',info.handoffId,0,100);assert.deepEqual(a,b);assert.equal(Buffer.from(a.base64,'base64').length,100);assert.equal(a.nextOffset,100);assert.throws(()=>reopened.info('other',info.handoffId),/HANDOFF_NOT_FOUND/);assert.throws(()=>reopened.chunk('p',info.handoffId,-1,100),/INVALID_CHUNK/);assert.throws(()=>reopened.chunk('p',info.handoffId,0,65537),/INVALID_CHUNK/);assert.throws(()=>reopened.chunk('p',info.handoffId,info.size+1,10),/INVALID_CHUNK/);assert.equal(reopened.chunk('p',info.handoffId,info.size,10).nextOffset,null);});
+
+test('purging a project removes only that project archives', async () => {
+  const rows = new Map<string, StoredHandoff>();
+  const table = {
+    get: (id: string) => rows.get(id),
+    put: async (id: string, r: StoredHandoff) => { rows.set(id, structuredClone(r)); },
+    entries: () => rows.entries(),
+    delete: async (id: string) => rows.delete(id),
+  };
+  const store = new HandoffStore(table);
+  const approved = approveVersion(createProject('p1', 'P1'), 0, 'v', 'V', '2026-11-07T00:00:00Z');
+  const other = approveVersion(createProject('p2', 'P2'), 0, 'v', 'V', '2026-11-07T00:00:00Z');
+  await store.create(approved, 'v');
+  await store.create(other, 'v');
+  assert.equal(rows.size, 2);
+  assert.equal(await store.purge('p1'), 1);
+  assert.equal(rows.size, 1);
+  assert.equal(await store.purge('p1'), 0);
+});

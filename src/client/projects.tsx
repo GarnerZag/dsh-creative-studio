@@ -32,6 +32,7 @@ export interface ProjectActions {
   reference(project:ProjectSnapshot,change:ReferenceChange):Promise<ProjectSnapshot>;
   generate(project:ProjectSnapshot,request:string,workspaceId:string):Promise<ProjectSnapshot>;
   list(): Promise<ProjectHead[]>;
+  remove(project:ProjectSnapshot):Promise<ProjectHead[]>;
   adopt(project: ProjectSnapshot, proposalId: string): Promise<ProjectSnapshot>;
   approve(project: ProjectSnapshot, label: string,review:import('../types.js').ApprovalReviewInput): Promise<ProjectSnapshot>;
   create(name: string): Promise<ProjectSnapshot>;
@@ -92,6 +93,20 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
     } catch (e) { if (generation.current === token) setError(e instanceof Error ? e.message : String(e)); }
     finally { if (generation.current === token) setBusy(false); busyRef.current = false; }
   };
+  const removeProject=async()=>{
+    if(!project||busyRef.current||!window.confirm(t('confirmDeleteProject')))return;
+    busyRef.current=true;
+    generation.current++;
+    setBusy(true);setError('');
+    try{
+      const items=await api.remove(project);
+      setProjects(items);
+      setProject(undefined);
+      setHistory(undefined);
+      setSelectedRequirement(null);
+    }catch(e){setError(e instanceof Error?e.message:String(e));}
+    finally{setBusy(false);busyRef.current=false;}
+  };
   const restore=(direction:'undo'|'redo')=>{
     if(!project||!history||!historyCurrent||busy||!window.confirm(t('historyConfirm')))return;
     void run(async()=>{
@@ -111,7 +126,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
     </form>
     <nav aria-label={t('projects')} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{projects.map(p => <button type="button" key={p.id} aria-pressed={project?.id === p.id} disabled={busy} onClick={() => {if(!project||project.id===p.id||window.confirm(t('confirmProjectChange')))void run(() => api.get(p.id));}}>{p.name}</button>)}</nav>
     {error && <p role="alert" className="cs-error">{errorText(error)}</p>}
-    {project && <article><div className="cs-article-head"><h3>{project.name}</h3><button type="button" disabled={busy} onClick={()=>{const next=window.prompt(t('renameProject'),project.name);if(next?.trim()&&next.trim()!==project.name)void run(()=>api.rename(project,next.trim()));}}>{t('renameProject')}</button><small>{t('draftRevision')} {project.contentRevision}</small></div>
+    {project && <article><div className="cs-article-head"><h3>{project.name}</h3><button type="button" disabled={busy} onClick={()=>{const next=window.prompt(t('renameProject'),project.name);if(next?.trim()&&next.trim()!==project.name)void run(()=>api.rename(project,next.trim()));}}>{t('renameProject')}</button><button type="button" className="cs-danger" disabled={busy} onClick={()=>{void removeProject();}}>{t('deleteProject')}</button><small>{t('draftRevision')} {project.contentRevision}</small></div>
       <div className="cs-toolbar" aria-label={t('requirementHistory')}><button type="button" disabled={busy||!historyCurrent||!history?.past.length} onClick={()=>restore('undo')}>{t('undoRequirements')}</button><button type="button" disabled={busy||!historyCurrent||!history?.future.length} onClick={()=>restore('redo')}>{t('redoRequirements')}</button><small className="cs-hint">{t('historyScope')}</small></div>
       <Workbench key={project.id} projectId={project.id} t={t}
         idea={<><GeneratePanel listWorkspaces={api.listWorkspaces} key={`generate-${project.id}`} project={project} busy={busy} t={t} generate={(request,workspaceId)=>{void run(()=>api.generate(project,request,workspaceId));}} refresh={()=>{void run(()=>api.get(project.id));}}/><ProposalPanel registerReference={reference=>{void run(()=>api.reference(project,{kind:'save',reference}));}} reject={id=>{void run(()=>api.reject(project,id));}} key={`proposals-${project.id}`} project={project} busy={busy} t={t} adopt={id=>{void run(()=>api.adopt(project,id),true);}}/></>}

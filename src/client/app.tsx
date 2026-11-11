@@ -89,6 +89,8 @@ const styles = `
 .creative-studio-root button.cs-primary{background:var(--cs-accent-strong);border-color:var(--cs-accent-strong);color:#fff;font-weight:600}
 .creative-studio-root button.cs-primary:hover:not(:disabled){background:color-mix(in srgb,var(--cs-accent-strong) 86%,#000)}
 .creative-studio-root button.cs-quiet{border-color:transparent;padding:4px 8px}
+.creative-studio-root button.cs-danger{color:light-dark(#a3201b,#f2a7a1);border-color:light-dark(#e3b3ae,#5d2f2c)}
+.creative-studio-root button.cs-danger:hover:not(:disabled){background:light-dark(#fdf3f2,#2a1a19);border-color:light-dark(#c98a84,#8a4741)}
 .creative-studio-root :is(input,select,textarea){font:inherit;font-size:var(--cs-text-sm);line-height:20px;padding:4px 12px;min-height:32px;border:1px solid var(--cs-border);border-radius:8px;background-color:light-dark(#fbfbfc,#1b1b1e);color:inherit;max-width:100%}
 .creative-studio-root select option,.creative-studio-root select optgroup{background-color:light-dark(#ffffff,#202024);color:light-dark(#111114,#f4f4f6)}
 .creative-studio-root :is(input,select,textarea)::placeholder{color:var(--cs-muted);opacity:1}

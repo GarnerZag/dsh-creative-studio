@@ -4,9 +4,18 @@ import {buildHandoffArchive,type HandoffArchive} from './handoff-export.js';
 export const StoredHandoffSchema=z.object({handoffId:z.string().min(1),projectId:z.string().min(1),versionId:z.string().min(1),ready:z.boolean(),manifestDigest:z.string(),archiveSha256:z.string(),size:z.number().int().nonnegative(),base64:z.string()}).strict();
 export type StoredHandoff=z.infer<typeof StoredHandoffSchema>;
 export type HandoffInfo=Omit<StoredHandoff,'base64'>;
-interface ArchiveTable{get(id:string):StoredHandoff|undefined;put(id:string,value:StoredHandoff):Promise<void>}
+interface ArchiveTable{get(id:string):StoredHandoff|undefined;put(id:string,value:StoredHandoff):Promise<void>;entries?():IterableIterator<[string,StoredHandoff]>;delete?(id:string):Promise<boolean>}
 export class HandoffStore{
  constructor(private readonly table:ArchiveTable){}
+ /** Removes every archive of a deleted project so no orphaned bytes stay behind. */
+ async purge(projectId:string):Promise<number>{
+  const entries=this.table.entries,remove=this.table.delete;
+  if(!entries||!remove)return 0;
+  const keys:string[]=[];
+  for(const [key,row] of entries.call(this.table))if(row.projectId===projectId)keys.push(key);
+  for(const key of keys)await remove.call(this.table,key);
+  return keys.length;
+ }
  async create(project:Project,versionId:string):Promise<HandoffInfo>{const archive=buildHandoffArchive(project,versionId);const {bytes,...meta}=archive;const record=StoredHandoffSchema.parse({...meta,size:bytes.length,base64:Buffer.from(bytes).toString('base64')});if(this.table.get(record.handoffId))throw new Error('HANDOFF_EXISTS');await this.table.put(record.handoffId,record);return this.info(project.id,record.handoffId);}
  private record(projectId:string,id:string):StoredHandoff{const row=this.table.get(id);if(!row||row.projectId!==projectId)throw new Error('HANDOFF_NOT_FOUND');return row;}
  info(projectId:string,id:string):HandoffInfo{const {base64,...info}=this.record(projectId,id);return {...info};}

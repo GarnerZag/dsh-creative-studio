@@ -17,7 +17,7 @@ import { editArchitecture, type ArchitectureEdit } from '../domain/architecture.
 import type { KvTable } from '@deepseek-ai/dsh-storage-domain';
 import { createProject, editRequirements, validateProject, type Project, type RequirementEdit } from '../domain/project.js';
 
-type ProjectTable = Pick<KvTable<string, Project>, 'get' | 'entries' | 'put' | 'update'>;
+type ProjectTable = Pick<KvTable<string, Project>, 'get' | 'entries' | 'put' | 'update'> & { delete?: (key: string) => Promise<boolean> };
 
 /** Thin adapter: serialization/persistence belongs to the Host's KvTable. */
 export class ProjectStore {
@@ -69,6 +69,18 @@ export class ProjectStore {
       if(current.projectRevision!==expectedProjectRevision)throw new Error('CONFLICT');
       return editReference(current,edit);
     }));
+  }
+
+  /**
+   * Deletes one project record. The revision check runs before the delete so a stale
+   * editor cannot silently discard newer work; storage has no conditional delete, so a
+   * concurrent write that lands between the check and the delete is still discarded.
+   */
+  async remove(id: string, expectedProjectRevision: number): Promise<void> {
+    const current = this.get(id);
+    if (current.projectRevision !== expectedProjectRevision) throw new Error('CONFLICT');
+    if (!this.table.delete) throw new Error('DELETE_UNAVAILABLE');
+    await this.table.delete(id);
   }
 
   async rename(id: string, expectedProjectRevision: number, name: string): Promise<Project> {
