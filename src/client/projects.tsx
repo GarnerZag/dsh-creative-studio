@@ -104,7 +104,10 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
       setProject(undefined);
       setHistory(undefined);
       setSelectedRequirement(null);
-    }catch(e){setError(e instanceof Error?e.message:String(e));}
+    }catch(e){
+      const message=e instanceof Error?e.message:String(e);
+      setError(message.includes('PROJECT_NOT_FOUND')?t('errorProjectMissing'):message);
+    }
     finally{setBusy(false);busyRef.current=false;}
   };
   const restore=(direction:'undo'|'redo')=>{
