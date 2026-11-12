@@ -18,6 +18,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   const field=(key:keyof stringFields,value:string)=>setEditor(current=>({...current,values:{...current.values,[key]:value}}));
   const setTitle=(v:string)=>field('title',v),setDescription=(v:string)=>field('description',v),setDesktop=(v:string)=>field('desktop',v),setMobile=(v:string)=>field('mobile',v);
   React.useEffect(()=>{setEditor(current=>refreshEditor(current,node?.id??null,snapshot()));},[node]);
+  const [view,setView]=React.useState<'canvas'|'outline'>('canvas');
   const [dependencyState,setDependencyState]=React.useState<{id:string|null;ids:string[]}>({id:null,ids:[]});
   const dependencyDraft=dependencyState.id===(node?.id??null)?dependencyState.ids:(node?.dependsOn??[]);
   const setDependencyDraft=(ids:string[])=>setDependencyState({id:node?.id??null,ids});
@@ -33,17 +34,25 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   };
   visit(null, 0);
   const lines = (text: string) => text.split('\n').map(s => s.trim()).filter(Boolean);
-  return <section className="cs-editor">
-    <style>{`.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(240px,1fr) minmax(260px,1fr);gap:24px;margin-top:24px}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}@media(max-width:850px){.creative-studio-root .cs-editor{grid-template-columns:1fr}}`}</style>
-    <div>
+  return <section className={`cs-editor ${view === 'canvas' ? 'cs-editor-canvas' : 'cs-editor-outline'}`}>
+    <style>{`.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start;margin-top:16px}@container (min-width:820px){.creative-studio-root .cs-editor-canvas{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.creative-studio-root .cs-editor-outline{grid-template-columns:minmax(240px,1fr) minmax(260px,1fr)}}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}.creative-studio-root .cs-segmented{display:flex;gap:4px;margin-left:auto}.creative-studio-root .cs-inspector-title{margin:0 0 8px}@media(max-width:1024px){.creative-studio-root .cs-editor{grid-template-columns:minmax(0,1fr)}}`}</style>
+    <div className="cs-canvas-column">
       <div className="cs-toolbar">
         <button type="button" className="cs-primary" disabled={busy} onClick={() => save({ kind: 'add', node: { id: newId(), parentId: selected, title: t('newRequirement'), kind: 'feature', description: '', priority: 'normal', dependsOn: [], desktopAcceptance: [], mobileAcceptance: [] } })}>{selected ? t('addChild') : t('addRoot')}</button>
         <button type="button" disabled={busy} onClick={() => choose(null)}>{t('selectRoot')}</button>
+        <div className="cs-segmented" role="group" aria-label={t('requirementView')}>
+          <button type="button" aria-pressed={view === 'canvas'} onClick={() => setView('canvas')}>{t('canvasView')}</button>
+          <button type="button" aria-pressed={view === 'outline'} onClick={() => setView('outline')}>{t('outlineView')}</button>
+        </div>
       </div>
-      <MindMap t={t} move={(id,parentId)=>save({kind:'move',id,parentId})} nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>
-      <div className="cs-tree" aria-label={t('requirements')}>{rows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 24 }}><button type="button" disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>
+      {view === 'canvas'
+        ? <MindMap t={t} move={(id,parentId)=>save({kind:'move',id,parentId})} nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>
+        : <div className="cs-tree" aria-label={t('requirements')}>{rows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 24 }}><button type="button" disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>}
+      <p className="cs-hint">{t(view === 'canvas' ? 'canvasHint' : 'outlineHint')}</p>
     </div>
     {editor.conflicts.length>0&&<p role="alert">{t('editorConflict')} <button type="button" disabled={busy} onClick={()=>{if(window.confirm(t('discardEdits')))setEditor(openEditor(node?.id??null,snapshot()));}}>{t('editorReload')}</button></p>}
+    <div className="cs-inspector">
+      <h4 className="cs-inspector-title">{t('inspectorTitle')}</h4>
     {node ? <fieldset disabled={busy||editor.conflicts.length>0} style={{ border: 0, padding: 0, minWidth: 0 }}>
       <legend className="cs-visually-hidden">{t('nodeDetails')}</legend>
       <div className="cs-toolbar"><button type="button" disabled={position<=0} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position-1]!.id})}>{t('moveEarlier')}</button><button type="button" disabled={position<0||position>=siblings.length-1} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position+2]?.id??null})}>{t('moveLater')}</button><button type="button" disabled={busy} onClick={()=>choose(node.parentId)}>{t('selectParent')}</button></div>
@@ -64,5 +73,6 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
       </form>
       <button type="button" onClick={() => { if (window.confirm(t('confirmRemove'))) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button>
     </fieldset> : <p className="cs-hint">{t('selectNode')}</p>}
+    </div>
   </section>;
 }
