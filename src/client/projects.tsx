@@ -21,16 +21,17 @@ export interface ProjectActions {
   reject(project:ProjectSnapshot,proposalId:string):Promise<ProjectSnapshot>;
   rename(project:ProjectSnapshot,name:string):Promise<ProjectSnapshot>;
   evidence(id:string,jobId:string,callId:string,offset:number):Promise<import('../types.js').ResearchEvidencePage>;
-  research(project:ProjectSnapshot,referenceId:string,request:string,workspaceId:string):Promise<ProjectSnapshot>;
+  research(project:ProjectSnapshot,referenceId:string,request:string,workspaceId:string,model?:import('../types.js').ModelChoice):Promise<ProjectSnapshot>;
   acceptReport(project:ProjectSnapshot,reportId:string,accepted:boolean):Promise<ProjectSnapshot>;
   listWorkspaces():Promise<import('../types.js').WorkspaceOption[]>;
+  listModels():Promise<import('../types.js').ModelCatalogView>;
   handoff:HandoffActions;
   dispatch:import('./dispatch.js').DispatchActions;
   confirmTasks(project:ProjectSnapshot,versionId:string):Promise<ProjectSnapshot>;
   demo(project:ProjectSnapshot,scene:NonNullable<ProjectSnapshot['demo']>):Promise<ProjectSnapshot>;
   feature(project:ProjectSnapshot,change:FeatureChange):Promise<ProjectSnapshot>;
   reference(project:ProjectSnapshot,change:ReferenceChange):Promise<ProjectSnapshot>;
-  generate(project:ProjectSnapshot,request:string,workspaceId:string):Promise<ProjectSnapshot>;
+  generate(project:ProjectSnapshot,request:string,workspaceId:string,model?:import('../types.js').ModelChoice):Promise<ProjectSnapshot>;
   list(): Promise<ProjectHead[]>;
   remove(project:ProjectSnapshot):Promise<ProjectHead[]>;
   adopt(project: ProjectSnapshot, proposalId: string): Promise<ProjectSnapshot>;
@@ -123,7 +124,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
   };
   const stages:Stage[]=project?[
     {id:'idea',label:t('stageIdea'),hint:t('stageHintIdea'),blocks:[
-      {id:'generate',label:t('generateTitle'),content:<GeneratePanel listWorkspaces={api.listWorkspaces} key={`generate-${project.id}`} project={project} busy={busy} t={t} generate={(request,workspaceId)=>{void run(()=>api.generate(project,request,workspaceId));}} refresh={()=>{void run(()=>api.get(project.id));}}/>},
+      {id:'generate',label:t('generateTitle'),content:<GeneratePanel listWorkspaces={api.listWorkspaces} listModels={api.listModels} key={`generate-${project.id}`} project={project} busy={busy} t={t} generate={(request,workspaceId,model)=>{void run(()=>api.generate(project,request,workspaceId,model));}} refresh={()=>{void run(()=>api.get(project.id));}}/>},
       {id:'proposals',label:t('proposals'),content:<ProposalPanel registerReference={reference=>{void run(()=>api.reference(project,{kind:'save',reference}));}} reject={id=>{void run(()=>api.reject(project,id));}} key={`proposals-${project.id}`} project={project} busy={busy} t={t} adopt={id=>{void run(()=>api.adopt(project,id),true);}}/>},
     ]},
     {id:'requirements',label:t('stageRequirements'),hint:t('stageHintRequirements'),blocks:[
@@ -135,7 +136,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
     ]},
     {id:'approval',label:t('stageApproval'),hint:t('stageHintApproval'),blocks:[
       {id:'versions',label:t('versions'),content:<VersionPanel key={`versions-${project.id}`} project={project} busy={busy} t={t} confirmTasks={id=>{void run(()=>api.confirmTasks(project,id));}} approve={(label,review)=>{void run(()=>api.approve(project,label,review));}}/>},
-      {id:'research',label:t('researchTitle'),content:<ResearchPanel evidence={api.evidence} project={project} busy={busy} t={t} listWorkspaces={api.listWorkspaces} start={(referenceId,request,workspaceId)=>void run(()=>api.research(project,referenceId,request,workspaceId))} refresh={()=>void run(()=>api.get(project.id))}/>},
+      {id:'research',label:t('researchTitle'),content:<ResearchPanel evidence={api.evidence} project={project} busy={busy} t={t} listWorkspaces={api.listWorkspaces} listModels={api.listModels} start={(referenceId,request,workspaceId,model)=>void run(()=>api.research(project,referenceId,request,workspaceId,model))} refresh={()=>void run(()=>api.get(project.id))}/>},
     ]},
     {id:'handoff',label:t('stageHandoff'),hint:t('stageHintHandoff'),blocks:[
       {id:'handoff',label:t('handoffTitle'),content:<HandoffPanel key={`handoff-${project.id}`} project={project} api={api.handoff} dispatch={api.dispatch} onProject={next=>setProject(current=>current?.id===next.id&&next.projectRevision>=current.projectRevision?next:current)} t={t}/>},

@@ -13,7 +13,7 @@ import { requireUserAuthority } from './authority.js';
 
 import {HandoffStore,StoredHandoffSchema,type StoredHandoff} from './handoff-store.js';
 import {checkHandoff} from '../domain/handoff.js';
-import type { WorkspaceOption,HandoffInfo,HandoffChunk,HandoffReadinessResult,DemoSceneData, StudioHealth, ProjectHead, ProjectSnapshot, RequirementChange, ArchitectureChange, ProposalInput, ReferenceChange, FeatureChange } from '../types.js';
+import type { ModelCatalogView, ModelChoice, WorkspaceOption,HandoffInfo,HandoffChunk,HandoffReadinessResult,DemoSceneData, StudioHealth, ProjectHead, ProjectSnapshot, RequirementChange, ArchitectureChange, ProposalInput, ReferenceChange, FeatureChange } from '../types.js';
 import { defineDomain, domainTable } from '@deepseek-ai/dsh-storage-domain';
 import { ProjectSchema, type Project } from '../domain/project.js';
 import { ProjectStore } from './store.js';
@@ -179,17 +179,34 @@ export default class CreativeStudio extends TypertRemoteService {
   }
 
   @Remote
-  async generateProposal(id:string, expectedProjectRevision:number, request:string, workspaceId:string, signal:AbortSignal):Promise<ProjectSnapshot> {
+  async listModels():Promise<ModelCatalogView>{
+    type Catalog={default:{provider:string;model:string;reasoningEffort?:string};groups:readonly {id:string;name:string;models:readonly {id:string;name:string;description?:string;reasoning?:{efforts:readonly {id:string;name:string}[];defaultEffort?:string}}[]}[];failures:readonly {id:string;name:string;message:string}[]};
+    const sessions=this.ctx.get('sessionController') as {modelCatalog():Promise<Catalog>}|undefined;
+    if(!sessions)throw new Error('SESSION_SERVICE_UNAVAILABLE');
+    const catalog=await sessions.modelCatalog();
+    return {
+      default:{provider:catalog.default.provider,model:catalog.default.model,...(catalog.default.reasoningEffort?{reasoningEffort:catalog.default.reasoningEffort}:{})},
+      options:catalog.groups.flatMap(group=>group.models.map(model=>({
+        provider:group.id,providerName:group.name,model:model.id,name:model.name,
+        ...(model.description?{description:model.description}:{}),
+        ...(model.reasoning?{reasoningEfforts:model.reasoning.efforts.map(effort=>({id:effort.id,name:effort.name})),...(model.reasoning.defaultEffort?{defaultEffort:model.reasoning.defaultEffort}:{})}:{}),
+      }))),
+      failures:catalog.failures.map(failure=>({provider:failure.id,name:failure.name,message:failure.message})),
+    };
+  }
+
+  @Remote
+  async generateProposal(id:string, expectedProjectRevision:number, request:string, workspaceId:string, model:ModelChoice|undefined, signal:AbortSignal):Promise<ProjectSnapshot> {
     const store=this.userStore();
     if(!request.trim()||!workspaceId.trim()) throw new Error('REQUEST_AND_WORKSPACE_REQUIRED');
     const sessions=this.ctx.get('sessionController') as ProposalSessionGateway|undefined;
     if(!sessions) throw new Error('SESSION_SERVICE_UNAVAILABLE');
-    await startProposal(store,sessions,{projectId:id,expectedProjectRevision,request,workspaceId},signal);
+    await startProposal(store,sessions,{projectId:id,expectedProjectRevision,request,workspaceId,...(model?{model}:{})},signal);
     return store.get(id);
   }
 
   @Remote
-  async researchReference(id:string,expectedProjectRevision:number,referenceId:string,request:string,workspaceId:string,confirmed:boolean,signal:AbortSignal):Promise<ProjectSnapshot>{
+  async researchReference(id:string,expectedProjectRevision:number,referenceId:string,request:string,workspaceId:string,model:ModelChoice|undefined,confirmed:boolean,signal:AbortSignal):Promise<ProjectSnapshot>{
     const store=this.userStore();if(!confirmed)throw new Error('RESEARCH_CONFIRMATION_REQUIRED');
     if(!request.trim())throw new Error('RESEARCH_REQUEST_REQUIRED');
     const registry=this.ctx.get('workspaceRegistry') as {get(id:string):unknown}|undefined;
@@ -200,7 +217,7 @@ export default class CreativeStudio extends TypertRemoteService {
     const remote=/^https?:\/\//.test(reference.location);
     // Availability is also enforced by the child session's resolved tool set; never grant execution tools.
     const allowedTools=researchReadTools.filter(name=>remote?name==='web_fetch':name!=='web_fetch');
-    await startResearch(store,sessions,{projectId:id,expectedProjectRevision,referenceId,request,workspaceId,allowedTools},signal);
+    await startResearch(store,sessions,{projectId:id,expectedProjectRevision,referenceId,request,workspaceId,allowedTools,...(model?{model}:{})},signal);
     return store.get(id);
   }
 

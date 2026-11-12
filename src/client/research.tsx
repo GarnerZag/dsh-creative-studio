@@ -1,14 +1,16 @@
 import * as React from 'react';
 import {EvidenceView} from './evidence.js';
-import type {ProjectSnapshot,WorkspaceOption} from '../types.js';
-export function ResearchPanel({project,busy,t,listWorkspaces,start,refresh,evidence}:{evidence:(id:string,jobId:string,callId:string,offset:number)=>Promise<import('../types.js').ResearchEvidencePage>;project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;start:(referenceId:string,request:string,workspaceId:string)=>void;refresh:()=>void}):React.ReactElement{
- const [referenceId,setReference]=React.useState(''),[workspaceId,setWorkspace]=React.useState(''),[request,setRequest]=React.useState(''),[workspaces,setWorkspaces]=React.useState<WorkspaceOption[]>([]),[error,setError]=React.useState('');
+import {ModelSelect} from './model-picker.js';
+import type {ProjectSnapshot,WorkspaceOption,ModelCatalogView,ModelChoice} from '../types.js';
+export function ResearchPanel({project,busy,t,listWorkspaces,listModels,start,refresh,evidence}:{evidence:(id:string,jobId:string,callId:string,offset:number)=>Promise<import('../types.js').ResearchEvidencePage>;project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;start:(referenceId:string,request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void}):React.ReactElement{
+ const [referenceId,setReference]=React.useState(''),[workspaceId,setWorkspace]=React.useState(''),[request,setRequest]=React.useState(''),[model,setModel]=React.useState<ModelChoice|undefined>(undefined),[workspaces,setWorkspaces]=React.useState<WorkspaceOption[]>([]),[error,setError]=React.useState('');
  React.useEffect(()=>{let live=true;void listWorkspaces().then(v=>{if(live)setWorkspaces(v);}).catch(e=>{if(live)setError(String(e));});return()=>{live=false;};},[listWorkspaces]);
  const job=project.researchJob,active=!!job&&!['finished','failed'].includes(job.status);
  return <section><h3>{t('researchTitle')}</h3><p>{t('researchScopeNotice')}</p>{error&&<p role="alert">{error}</p>}
- <form onSubmit={e=>{e.preventDefault();if(window.confirm(t('researchConfirm')))start(referenceId,request,workspaceId);}}>
+ <form onSubmit={e=>{e.preventDefault();if(window.confirm(t('researchConfirm')))start(referenceId,request,workspaceId,model);}}>
  <label>{t('researchSource')}<select aria-label={t('researchSource')} value={referenceId} onChange={e=>setReference(e.target.value)} disabled={busy||active}><option value="">{t('researchSource')}</option>{project.references.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
  <label>{t('researchWorkspace')}<select aria-label={t('researchWorkspace')} value={workspaceId} onChange={e=>setWorkspace(e.target.value)} disabled={busy||active}><option value="">{t('researchWorkspace')}</option>{workspaces.map(w=><option key={w.id} value={w.id}>{w.title}</option>)}</select></label>
+ <ModelSelect value={model} onChange={setModel} disabled={busy||active} t={t} load={listModels}/>
  <label>{t('researchQuestion')}<textarea aria-label={t('researchQuestion')} placeholder={t('researchQuestion')} rows={3} value={request} onChange={e=>setRequest(e.target.value)} disabled={busy||active}/></label>
  <button disabled={busy||active||!request.trim()||!project.references.some(r=>r.id===referenceId)||!workspaces.some(w=>w.id===workspaceId)}>{t('researchStart')}</button></form>
  <button type="button" disabled={busy} onClick={refresh}>{t('researchRefresh')}</button>

@@ -94,6 +94,12 @@ export interface ProjectSnapshot extends ProjectHead {
   architecture: ArchitectureNode[];
 }
 export interface WorkspaceOption { id:string;title:string;path:string }
+/** One routable provider/model route the Host can start a session with. */
+export interface ModelOption { provider:string; providerName:string; model:string; name:string; description?:string; reasoningEfforts?:readonly {id:string;name:string}[]; defaultEffort?:string }
+/** Model selection accepted by session-starting endpoints. */
+export interface ModelChoice { provider:string; model:string; reasoningEffort?:string }
+/** Provider-grouped model catalog plus the deployment default. */
+export interface ModelCatalogView { default:ModelChoice; options:ModelOption[]; failures:readonly {provider:string;name:string;message:string}[] }
 export type RequirementChange =
   | { kind: 'add'; node: RequirementNode }
   | { kind: 'rename'; id: string; title: string }
