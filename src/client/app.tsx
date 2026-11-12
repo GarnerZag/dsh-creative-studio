@@ -19,17 +19,13 @@ export function createStudioPanel(store: ConnectionStore, fallbackT: (key: strin
       <style>{styles}</style>
       <header className="cs-header">
         <div className="cs-brand"><span className="cs-logo"><StudioIcon size={24}/></span><div><strong>{t('title')}</strong><small>CREATIVE STUDIO</small></div></div>
-        <div className={`cs-connection cs-connection-${connection.status}`} role="status"><span/>{t(connection.status)}</div>
+        <div className="cs-header-status"><div className={`cs-connection cs-connection-${connection.status}`} role="status"><span/>{t(connection.status)}</div>{connection.status !== 'connected' && <button type="button" className="cs-quiet" onClick={store.retry} disabled={connection.status === 'connecting'}>{t('retry')}</button>}</div>
       </header>
       <section className="cs-welcome">
         <span className="cs-eyebrow">{t('eyebrow')}</span>
         <h1>{t('headline')}</h1>
         <p className="cs-lead">{t('description')}</p>
-        <div className="cs-flow" aria-label={t('flow')}>
-          {['idea', 'requirements', 'research', 'architecture', 'demo', 'handoff'].map((key, index) => <div className="cs-stage" key={key}><span className="cs-stage-number">{String(index + 1).padStart(2, '0')}</span><strong>{t(key)}</strong></div>)}
-        </div>
-        {connection.status === 'connected' && <ProjectWorkspace api={projects} t={t}/>}
-        <section className="cs-empty"><span className="cs-empty-icon"><StudioIcon size={32}/></span><h2>{t('readyTitle')}</h2><p>{t('initialStage')}</p><button type="button" className="cs-primary" onClick={store.retry} disabled={connection.status === 'connecting'}>{t('retry')}</button>{connection.error && <p role="alert" className="cs-error">{connection.error}</p>}</section>
+        {connection.status === 'connected' ? <ProjectWorkspace api={projects} t={t}/> : <p role="alert" className="cs-error">{connection.error ?? t('initialStage')}</p>}
       </section>
       <footer className="cs-footer"><span>{t('draftRule')}</span><span>v0.1.0 · {t('native')}</span></footer>
     </main>;
@@ -60,6 +56,7 @@ const styles = `
 .creative-studio-root pre{padding:8px 12px;overflow:auto;max-height:280px}
 .creative-studio-root a{color:inherit}
 .creative-studio-root .cs-header{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;align-self:stretch;padding-bottom:24px;border-bottom:1px solid var(--cs-border)}
+.creative-studio-root .cs-header-status{display:flex;align-items:center;gap:12px}
 .creative-studio-root .cs-brand{display:flex;align-items:center;gap:12px}
 .creative-studio-root .cs-logo{display:grid;place-items:center;width:44px;height:44px;background:var(--cs-soft);color:var(--cs-accent-strong);border:1px solid color-mix(in srgb,var(--cs-accent) 24%,transparent);border-radius:12px}
 .creative-studio-root .cs-brand strong{display:block;font-size:var(--cs-text-lg);line-height:28px;letter-spacing:.01em}
@@ -114,8 +111,25 @@ const styles = `
 .creative-studio-root hr{border:0;border-top:1px solid var(--cs-border);margin:16px 0}
 .creative-studio-root .cs-error{color:#c2554b;overflow-wrap:anywhere}
 .creative-studio-root .cs-footer{display:flex;justify-content:space-between;gap:24px;color:var(--cs-muted);font-size:var(--cs-text-xs);line-height:16px;width:100%;max-width:none;margin:0;padding-top:16px;border-top:1px solid var(--cs-border)}
-.creative-studio-root .cs-projects{width:100%;max-width:1100px;align-self:center;margin:0}
-.creative-studio-root:has(.cs-projects > article) .cs-projects{max-width:none;align-self:stretch}
+.creative-studio-root .cs-projects{display:grid;grid-template-columns:264px minmax(0,1fr);gap:24px;align-items:start;width:100%;max-width:1100px;align-self:center;margin:32px 0 0}
+.creative-studio-root:has(.cs-projects > .cs-detail > article) .cs-projects{max-width:none;align-self:stretch}
+.creative-studio-root .cs-rail{display:flex;flex-direction:column;gap:16px;min-width:0;position:sticky;top:0}
+.creative-studio-root .cs-rail-title{margin:0}
+.creative-studio-root .cs-rail-form{gap:8px}
+.creative-studio-root .cs-rail-list{display:flex;flex-direction:column;gap:4px;max-height:60vh;overflow:auto;padding-right:4px}
+.creative-studio-root .cs-rail-list button{display:block;width:100%;min-height:32px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:4px 8px;background:transparent;border-color:transparent}
+.creative-studio-root .cs-rail-list button:hover:not(:disabled){background:var(--cs-surface);border-color:var(--cs-border)}
+.creative-studio-root .cs-rail-list button[aria-pressed='true']{background:var(--cs-soft);border-color:var(--cs-accent);font-weight:600}
+.creative-studio-root .cs-detail{min-width:0}
+.creative-studio-root .cs-detail-empty{padding:32px 24px;border:1px dashed var(--cs-border);border-radius:12px;background:var(--cs-surface)}
+.creative-studio-root .cs-detail-empty h3{margin:0 0 8px}
+.creative-studio-root .cs-detail-empty p{margin:0}
+@media(max-width:1180px){
+.creative-studio-root .cs-projects{grid-template-columns:1fr}
+.creative-studio-root .cs-rail{position:static}
+.creative-studio-root .cs-rail-list{max-height:none;flex-direction:row;flex-wrap:wrap}
+.creative-studio-root .cs-rail-list button{width:auto}
+}
 .creative-studio-root .cs-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:0 0 16px}
 .creative-studio-root .cs-field{display:grid;gap:4px;min-width:0}
 .creative-studio-root .cs-field>label{margin:0;color:var(--cs-muted);font-weight:500}
@@ -132,13 +146,24 @@ const styles = `
 .creative-studio-root .cs-split::before{content:'';position:absolute;inset:0 6px;background:var(--cs-border);border-radius:8px}
 .creative-studio-root .cs-split:focus-visible{outline:2px solid var(--cs-accent);outline-offset:2px}
 .creative-studio-root .cs-demo-pane{min-width:0}
+.creative-studio-root .cs-steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 0 12px;padding:0}
+.creative-studio-root .cs-steps button{display:inline-flex;align-items:center;gap:8px;min-height:32px}
+.creative-studio-root .cs-steps button[aria-current='step']{border-color:var(--cs-accent);background:var(--cs-soft);font-weight:600}
+.creative-studio-root .cs-step-index{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:10px;background:var(--cs-surface-2);font-size:12px;line-height:16px;color:var(--cs-muted)}
+.creative-studio-root .cs-steps button[aria-current='step'] .cs-step-index{background:var(--cs-accent-strong);color:#fff}
+.creative-studio-root .cs-stage-hint{margin:0 0 12px}
+.creative-studio-root .cs-block{padding:12px 16px;border:1px solid var(--cs-border);border-radius:12px;background:var(--cs-surface);margin:0 0 12px}
+.creative-studio-root .cs-block:last-child{margin-bottom:0}
+.creative-studio-root .cs-block>h4{margin:0 0 8px}
+.creative-studio-root .cs-pane-scroll{max-height:40vh;overflow:auto}
 .creative-studio-root .cs-checks{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 12px}
 .creative-studio-root .cs-checks>label{display:inline-flex;align-items:center;gap:8px;margin:0;min-height:24px}
 .creative-studio-root .cs-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .creative-studio-root .cs-hint{font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted);max-width:65ch}
-.creative-studio-root:has(.cs-projects > article) .cs-welcome{max-width:none;margin:16px 0}
-.creative-studio-root:has(.cs-projects > article) .cs-welcome > :is(.cs-eyebrow,h1,.cs-lead,.cs-flow,.cs-empty){display:none}
-.creative-studio-root:has(.cs-projects > article) .cs-header{padding-bottom:16px}
+.creative-studio-root:has(.cs-projects .cs-detail > article) .cs-welcome{max-width:none;margin:16px 0}
+.creative-studio-root:has(.cs-projects .cs-detail > article) .cs-welcome > :is(.cs-eyebrow,h1,.cs-lead,.cs-flow,.cs-empty){display:none}
+.creative-studio-root:has(.cs-projects .cs-detail > article) .cs-header{padding-bottom:16px}
+@media(max-width:900px){.creative-studio-root .cs-grid{grid-template-columns:minmax(0,1fr)!important}.creative-studio-root .cs-split{display:none}.creative-studio-root .cs-demo-pane{position:static!important}.creative-studio-root .cs-inline-field{display:none}}
 @media(max-width:900px){.creative-studio-root{padding:20px 16px 16px}.creative-studio-root .cs-flow{grid-template-columns:repeat(3,1fr)}.creative-studio-root .cs-welcome{margin:32px 0 24px}}
 @media(prefers-reduced-motion:reduce){.creative-studio-root *{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 `;
