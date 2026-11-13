@@ -143,23 +143,32 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
       {id:'reports',label:t('reportsTitle'),content:<ReportsPanel project={project} busy={busy} t={t} refresh={()=>void run(()=>api.get(project.id))} accept={(id,value)=>void run(()=>api.acceptReport(project,id,value))}/>},
     ]},
   ]:[];
+  if(!project) return <section className="cs-projects cs-chooser" aria-label={t('projects')}>
+    <div className="cs-chooser-head"><h2 className="cs-chooser-title">{t('projects')}</h2><small className="cs-hint">{t('chooserHint')}</small></div>
+    <form className="cs-form" onSubmit={e => { e.preventDefault(); if (name.trim()) void run(() => api.create(name.trim())); }}>
+      <div className="cs-field"><label htmlFor="cs-project-name">{t('projectName')}</label><input id="cs-project-name" aria-label={t('projectName')} placeholder={t('projectName')} value={name} onChange={e => setName(e.target.value)} disabled={busy} /></div>
+      <button disabled={busy || !name.trim()} type="submit">{busy ? t('working') : t('newProject')}</button>
+    </form>
+    {error && <p role="alert" className="cs-error">{errorText(error)}</p>}
+    <nav className="cs-project-list" aria-label={t('projects')}>{projects.map(p => <button type="button" className="cs-project-card" key={p.id} disabled={busy} onClick={() => void run(() => api.get(p.id))}><strong>{p.name}</strong><small className="cs-hint">{t('draftRevision')} {p.contentRevision}</small></button>)}</nav>
+    {!projects.length && <p className="cs-hint">{t('railEmptyHint')}</p>}
+  </section>;
   return <section className="cs-projects" aria-label={t('projects')}>
-    <aside className="cs-rail">
-      <h2 className="cs-rail-title">{t('projects')}</h2>
-      <form className="cs-form cs-rail-form" onSubmit={e => { e.preventDefault(); if (name.trim()&&(!project||window.confirm(t('confirmProjectChange')))) void run(() => api.create(name.trim())); }}>
-        <div className="cs-field"><label htmlFor="cs-project-name">{t('projectName')}</label><input id="cs-project-name" aria-label={t('projectName')} placeholder={t('projectName')} value={name} onChange={e => setName(e.target.value)} disabled={busy} /></div>
-        <button disabled={busy || !name.trim()} type="submit">{busy ? t('working') : t('newProject')}</button>
-      </form>
-      <nav className="cs-rail-list" aria-label={t('projects')}>{projects.map(p => <button type="button" key={p.id} aria-pressed={project?.id === p.id} disabled={busy} onClick={() => {if(!project||project.id===p.id||window.confirm(t('confirmProjectChange')))void run(() => api.get(p.id));}}>{p.name}</button>)}</nav>
+    <article>
+      <div className="cs-project-head">
+        <h2 className="cs-project-title">{project.name}</h2>
+        <div className="cs-toolbar">
+          <button type="button" className="cs-quiet" disabled={busy} onClick={() => { if(window.confirm(t('confirmProjectChange'))) { setProject(undefined); setHistory(undefined); setSelectedRequirement(null); } }}>{t('allProjects')}</button>
+          <button type="button" disabled={busy} onClick={()=>{const next=window.prompt(t('renameProject'),project.name);if(next?.trim()&&next.trim()!==project.name)void run(()=>api.rename(project,next.trim()));}}>{t('renameProject')}</button>
+          <button type="button" className="cs-danger" disabled={busy} onClick={()=>{void removeProject();}}>{t('deleteProject')}</button>
+        </div>
+        <small className="cs-hint">{t('draftRevision')} {project.contentRevision}</small>
+      </div>
+      <div className="cs-toolbar" aria-label={t('requirementHistory')}><button type="button" disabled={busy||!historyCurrent||!history?.past.length} onClick={()=>restore('undo')}>{t('undoRequirements')}</button><button type="button" disabled={busy||!historyCurrent||!history?.future.length} onClick={()=>restore('redo')}>{t('redoRequirements')}</button><small className="cs-hint">{t('historyScope')}</small></div>
       {error && <p role="alert" className="cs-error">{errorText(error)}</p>}
-    </aside>
-    <div className="cs-detail">
-      {project ? <article><div className="cs-article-head"><h3>{project.name}</h3><button type="button" disabled={busy} onClick={()=>{const next=window.prompt(t('renameProject'),project.name);if(next?.trim()&&next.trim()!==project.name)void run(()=>api.rename(project,next.trim()));}}>{t('renameProject')}</button><button type="button" className="cs-danger" disabled={busy} onClick={()=>{void removeProject();}}>{t('deleteProject')}</button><small>{t('draftRevision')} {project.contentRevision}</small></div>
-        <div className="cs-toolbar" aria-label={t('requirementHistory')}><button type="button" disabled={busy||!historyCurrent||!history?.past.length} onClick={()=>restore('undo')}>{t('undoRequirements')}</button><button type="button" disabled={busy||!historyCurrent||!history?.future.length} onClick={()=>restore('redo')}>{t('redoRequirements')}</button><small className="cs-hint">{t('historyScope')}</small></div>
-        <Workbench key={project.id} projectId={project.id} t={t} stages={stages}
-          demo={compare=><DemoPanel selectedRequirement={selectedRequirement} key={`demo-${project.id}-${editorEpoch}`} project={project} t={t} stacked={compare} busy={busy} save={scene=>{void run(()=>api.demo(project,scene));}}/>}
-        /></article>
-        : <div className="cs-detail-empty"><h3>{t('railEmptyTitle')}</h3><p className="cs-hint">{t('railEmptyHint')}</p></div>}
-    </div>
+      <Workbench key={project.id} projectId={project.id} t={t} stages={stages}
+        demo={compare=><DemoPanel selectedRequirement={selectedRequirement} key={`demo-${project.id}-${editorEpoch}`} project={project} t={t} stacked={compare} busy={busy} save={scene=>{void run(()=>api.demo(project,scene));}}/>}
+      />
+    </article>
   </section>;
 }
