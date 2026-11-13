@@ -121,6 +121,32 @@ const styles = `
 .creative-studio-root .cs-project-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0 0 8px}
 .creative-studio-root .cs-project-head .cs-toolbar{margin:0}
 .creative-studio-root .cs-project-title{margin:0}
+.creative-studio-root .cs-table-wrap{overflow-x:auto;border:1px solid var(--cs-border);border-radius:12px;margin:0 0 16px}
+.creative-studio-root .cs-table{border-collapse:collapse;width:100%;font-size:var(--cs-text-sm);line-height:20px}
+.creative-studio-root .cs-table th,.creative-studio-root .cs-table td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--cs-border)}
+.creative-studio-root .cs-table thead th{font-size:var(--cs-text-xs);color:var(--cs-muted);font-weight:600;white-space:nowrap}
+.creative-studio-root .cs-table tbody tr:last-child th,.creative-studio-root .cs-table tbody tr:last-child td{border-bottom:0}
+.creative-studio-root .cs-table tbody th{font-weight:600}
+.creative-studio-root .cs-table tbody th small{display:block;font-weight:400}
+.creative-studio-root .cs-table-refs td:nth-child(3){max-width:320px}
+.creative-studio-root .cs-table-matrix th{white-space:nowrap}
+.creative-studio-root .cs-table-matrix td{min-width:140px}
+.creative-studio-root .cs-code-clip{display:block;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.creative-studio-root .cs-row-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.creative-studio-root .cs-table .cs-row-actions{margin-top:0}
+.creative-studio-root .cs-chip{display:inline-flex;flex-direction:column;align-items:flex-start;gap:0;text-align:left;padding:4px 8px;min-height:32px;margin:0 4px 4px 0;background:var(--cs-surface);border-color:var(--cs-border)}
+.creative-studio-root .cs-chip small{color:var(--cs-muted);font-size:var(--cs-text-xs);line-height:16px}
+.creative-studio-root .cs-chip[aria-pressed='true']{background:var(--cs-soft);border-color:var(--cs-accent)}
+.creative-studio-root .cs-muted{color:var(--cs-muted)}
+.creative-studio-root .cs-feature-detail{padding:12px 16px;border:1px solid var(--cs-border);border-radius:12px;background:var(--cs-surface);margin:0 0 16px}
+.creative-studio-root .cs-feature-detail h4{margin:0 0 8px}
+.creative-studio-root .cs-feature-detail p{margin:0 0 12px}
+.creative-studio-root .cs-pairs{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 16px;margin:0 0 12px}
+.creative-studio-root .cs-pairs dt{color:var(--cs-muted);font-size:var(--cs-text-sm);line-height:20px}
+.creative-studio-root .cs-pairs dd{margin:0}
+.creative-studio-root .cs-disclosure{margin:0 0 12px}
+.creative-studio-root .cs-form-stack{display:grid;gap:0;margin:8px 0 0}
+.creative-studio-root .cs-form-stack .cs-checks{margin-bottom:12px}
 .creative-studio-root .cs-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:0 0 16px}
 .creative-studio-root .cs-field{display:grid;gap:4px;min-width:0}
 .creative-studio-root .cs-field>label{margin:0;color:var(--cs-muted);font-weight:500}
