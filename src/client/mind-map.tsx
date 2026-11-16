@@ -4,7 +4,7 @@ import {canReparent} from './requirement-drag.js';
 import type { RequirementNode } from '../types.js';
 
 const CARD_WIDTH = 220;
-const CARD_HEIGHT = 48;
+const CARD_HEIGHT = 56;
 const ROW_GAP = 72;
 const COLUMN_GAP = 248;
 const OFFSET = 20;
@@ -71,7 +71,7 @@ export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes:
           <rect width={CARD_WIDTH} height={CARD_HEIGHT} rx={8} fill={active ? 'var(--cs-soft)' : 'var(--cs-surface)'} stroke={active ? 'var(--cs-accent)' : 'var(--cs-border)'} strokeWidth={active ? 2 : 1}/>
           <foreignObject width={CARD_WIDTH} height={CARD_HEIGHT}><div data-cs-parent={node.id} style={{display:'flex',height:'100%',alignItems:'stretch'}}>
             <button type="button" className="cs-quiet" disabled={disabled} aria-label={`${t('dragRequirement')} ${node.title}`} title={t('dragRequirement')} onPointerDown={e=>start(e,node.id)} onPointerUp={finish} onPointerCancel={()=>{dragging.current=null;}} onLostPointerCapture={()=>{dragging.current=null;}} style={{flex:'0 0 24px',margin:0,padding:0,border:0,minHeight:0,background:'transparent',cursor:'grab',touchAction:'none',userSelect:'none',display:'grid',placeItems:'center',color:'var(--cs-muted)'}}><GripIcon/></button>
-            <button type="button" className="cs-quiet" disabled={disabled} aria-pressed={active} onClick={() => select(node.id)} title={node.title} style={{flex:'1 1 auto',minWidth:0,height:'100%',margin:0,padding:'0 8px',border:0,minHeight:0,background:'transparent',color:'inherit',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',textAlign:'left',fontSize:'var(--cs-text-sm)',lineHeight:'20px'}}>{node.title}</button>
+            <button type="button" className="cs-quiet" disabled={disabled} aria-pressed={active} onClick={() => select(node.id)} title={node.title} style={{flex:'1 1 auto',minWidth:0,height:'100%',margin:0,padding:'0 8px',border:0,minHeight:0,background:'transparent',color:'inherit',overflow:'hidden',textAlign:'left',fontSize:'var(--cs-text-sm)',lineHeight:'18px',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',whiteSpace:'normal',alignContent:'center'}}>{node.title}</button>
           </div></foreignObject>
         </g>;
       })}
