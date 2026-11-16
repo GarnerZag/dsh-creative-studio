@@ -51,6 +51,10 @@ function ArchitectureForm({id,current,project,busy,save,t,dirty}:{id:string;curr
   });
   const patchContract=(changes:Partial<typeof contract>)=>patch({contract:{...contract,...changes}});
   const patchTask=(changes:Partial<typeof task>)=>patch({task:{...task,...changes}});
+  const [query,setQuery]=React.useState('');
+  const match=(title:string)=>query.trim()===''||title.includes(query.trim());
+  const visibleNodes=project.nodes.filter(node=>match(node.title));
+  const visibleOthers=project.architecture.filter(other=>other.id!==id&&match(other.title));
   const acceptance=project.nodes.flatMap(node=>[
     ...node.desktopAcceptance.map((text,index)=>({id:`${node.id}:desktop:${index+1}`,text:`${node.title} · ${t('desktop')} · ${text}`})),
     ...node.mobileAcceptance.map((text,index)=>({id:`${node.id}:mobile:${index+1}`,text:`${node.title} · ${t('mobile')} · ${text}`})),
@@ -87,8 +91,13 @@ function ArchitectureForm({id,current,project,busy,save,t,dirty}:{id:string;curr
         {acceptance.map(entry=><label key={entry.id} style={{display:'block'}}><input type="checkbox" checked={task.acceptanceIds.includes(entry.id)} onChange={()=>patchTask({acceptanceIds:task.acceptanceIds.includes(entry.id)?task.acceptanceIds.filter(v=>v!==entry.id):[...task.acceptanceIds,entry.id]})}/>{entry.text}</label>)}
       </fieldset>
     </fieldset>}
-    <fieldset disabled={busy}><legend>{t('linkedRequirements')}</legend>{project.nodes.map(node=><label key={node.id} style={{display:'block'}}><input type="checkbox" checked={item.requirementIds.includes(node.id)} onChange={()=>toggle('requirementIds',node.id)}/>{node.title}</label>)}</fieldset>
-    <fieldset disabled={busy}><legend>{t('dependencies')}</legend>{project.architecture.filter(other=>other.id!==id).map(other=><label key={other.id} style={{display:'block'}}><input type="checkbox" checked={item.dependsOn.includes(other.id)} onChange={()=>toggle('dependsOn',other.id)}/>{other.title}</label>)}</fieldset>
+    <fieldset disabled={busy}><legend>{t('linkedRequirements')} · {t('linkedCount').replace('{n}',String(item.requirementIds.length)).replace('{total}',String(project.nodes.length))}</legend>
+      <input aria-label={t('filterLinks')} placeholder={t('filterLinks')} value={query} onChange={e=>setQuery(e.target.value)} style={{marginBottom:8}}/>
+      {visibleNodes.length===0 && <p className="cs-hint">{t('filterNoMatch')}</p>}
+      {visibleNodes.map(node=><label key={node.id} style={{display:'block'}}><input type="checkbox" checked={item.requirementIds.includes(node.id)} onChange={()=>toggle('requirementIds',node.id)}/>{node.title}</label>)}</fieldset>
+    <fieldset disabled={busy}><legend>{t('dependencies')} · {t('linkedCount').replace('{n}',String(item.dependsOn.length)).replace('{total}',String(project.architecture.length-1))}</legend>
+      {visibleOthers.length===0 && <p className="cs-hint">{t('filterNoMatch')}</p>}
+      {visibleOthers.map(other=><label key={other.id} style={{display:'block'}}><input type="checkbox" checked={item.dependsOn.includes(other.id)} onChange={()=>toggle('dependsOn',other.id)}/>{other.title}</label>)}</fieldset>
     <div><button type="submit" disabled={busy || !item.title.trim()}>{t('saveDetails')}</button>{current && <button type="button" disabled={busy} onClick={()=>{if(window.confirm(t('removeArchitecture'))) save({kind:'remove',id});}}>{t('removeNode')}</button>}</div>
   </form>;
 }
