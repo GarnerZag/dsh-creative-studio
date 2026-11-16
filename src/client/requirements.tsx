@@ -46,7 +46,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
       {project.nodes.length===0&&<p className="cs-empty-start">{t('requirementsEmptyHint')}</p>}
       <div className="cs-toolbar">
         <button type="button" className="cs-primary" disabled={busy} onClick={() => save({ kind: 'add', node: { id: newId(), parentId: selected, title: t('newRequirement'), kind: 'feature', description: '', priority: 'normal', dependsOn: [], desktopAcceptance: [], mobileAcceptance: [] } })}>{selected ? t('addChild') : t('addRoot')}</button>
-        <button type="button" disabled={busy} onClick={() => choose(null)}>{t('selectRoot')}</button>
+        <button type="button" disabled={busy} title={t('selectRootHint')} onClick={() => choose(null)}>{selected ? t('clearSelection') : t('selectRoot')}</button>
         <div className="cs-segmented" role="group" aria-label={t('requirementView')}>
           <button type="button" aria-pressed={view === 'canvas'} onClick={() => setView('canvas')}>{t('canvasView')}</button>
           <button type="button" aria-pressed={view === 'outline'} onClick={() => setView('outline')}>{t('outlineView')}</button>
