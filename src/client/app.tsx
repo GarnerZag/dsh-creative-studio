@@ -205,6 +205,7 @@ const styles = `
 .creative-studio-root .cs-steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 0 12px;padding:0}
 .creative-studio-root .cs-steps button{display:inline-flex;align-items:center;gap:8px;min-height:32px}
 .creative-studio-root .cs-steps button[aria-current='step']{border-color:var(--cs-accent);background:var(--cs-soft);font-weight:600}
+.creative-studio-root .cs-empty-start{margin:8px 0 0;padding:12px;max-width:64ch;border:1px dashed var(--cs-border);border-radius:10px;background:var(--cs-surface)}
 .creative-studio-root .cs-demo-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0}
 .creative-studio-root .cs-step-badge{margin-left:8px;color:var(--cs-muted);font-size:12px;line-height:16px;font-weight:400;font-variant-numeric:tabular-nums}
 .creative-studio-root .cs-step-index{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:10px;background:var(--cs-surface-2);font-size:12px;line-height:16px;color:var(--cs-muted)}
