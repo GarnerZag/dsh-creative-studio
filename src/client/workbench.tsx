@@ -2,7 +2,7 @@ import * as React from 'react';
 import {parseLayout} from './layout.js';
 
 export interface StageBlock { id: string; label: string; content: React.ReactNode }
-export interface Stage { id: string; label: string; hint: string; blocks: StageBlock[] }
+export interface Stage { id: string; label: string; hint: string; blocks: StageBlock[]; badge?: string }
 
 export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Stage[];demo:(compare:boolean)=>React.ReactNode;t:(key:string)=>string}):React.ReactElement{
   const key=`creative-studio-layout:${projectId}`;
@@ -20,7 +20,7 @@ export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Sta
   const showStagePane=!compare||active.id!=='requirements';
   const blocks=(list:StageBlock[])=>list.map(block=><section key={block.id} className="cs-block" aria-label={block.label}>{block.content}</section>);
   return <section className="cs-workbench">
-    <ol className="cs-steps" aria-label={t('stages')}>{stages.map((item,index)=><li key={item.id}><button type="button" aria-current={active.id===item.id?'step':undefined} onClick={()=>setStage(item.id)}><span className="cs-step-index" aria-hidden="true">{index+1}</span>{item.label}</button></li>)}</ol>
+    <ol className="cs-steps" aria-label={t('stages')}>{stages.map((item,index)=><li key={item.id}><button type="button" aria-current={active.id===item.id?'step':undefined} onClick={()=>setStage(item.id)}><span className="cs-step-index" aria-hidden="true">{index+1}</span>{item.label}{item.badge&&<small className="cs-step-badge">{item.badge}</small>}</button></li>)}</ol>
     <div className="cs-toolbar">
       <button type="button" title={t('layoutExploreHint')} aria-pressed={!compare} onClick={()=>change({...layout,compare:false})}>{t('layoutExplore')}</button>
       <button type="button" title={t('layoutCompareHint')} aria-pressed={compare} onClick={()=>change({...layout,compare:true})}>{t('layoutCompare')}</button>

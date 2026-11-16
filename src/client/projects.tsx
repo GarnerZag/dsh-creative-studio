@@ -127,22 +127,22 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
     });
   };
   const stages:Stage[]=project?[
-    {id:'idea',label:t('stageIdea'),hint:t('stageHintIdea'),blocks:[
+    {id:'idea',label:t('stageIdea'),hint:t('stageHintIdea'),badge:project.proposalJob?.status==='submitted'?t('badgeAwaitingModel'):project.proposals.length?`${project.proposals.length}${t('badgeCandidates')}`:undefined,blocks:[
       {id:'generate',label:t('generateTitle'),content:<GeneratePanel listWorkspaces={api.listWorkspaces} listModels={api.listModels} key={`generate-${project.id}`} project={project} busy={busy} t={t} generate={(request,workspaceId,model)=>{void run(()=>api.generate(project,request,workspaceId,model));}} refresh={()=>{void run(()=>api.get(project.id));}} continueJob={async(jobId,answers,confirmed)=>api.continueProposal(project,jobId,answers,confirmed)} abandonJob={async jobId=>api.abandonProposal(project,jobId)} editBrief={async(jobId,brief)=>api.editBrief(project,jobId,brief)} readReply={async jobId=>api.jobReply(project,jobId)}/>},
       {id:'proposals',label:t('proposals'),content:<ProposalPanel registerReference={reference=>{void run(()=>api.reference(project,{kind:'save',reference}));}} reject={id=>{void run(()=>api.reject(project,id));}} key={`proposals-${project.id}`} project={project} busy={busy} t={t} adopt={id=>{void run(()=>api.adopt(project,id),true);}}/>},
     ]},
-    {id:'requirements',label:t('stageRequirements'),hint:t('stageHintRequirements'),blocks:[
+    {id:'requirements',label:t('stageRequirements'),hint:t('stageHintRequirements'),badge:`${project.nodes.length}${t('badgeRequirements')}`,blocks:[
       {id:'requirements',label:t('layoutRequirements'),content:<RequirementsEditor onSelect={setSelectedRequirement} key={`${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change => { void run(async() => {const next=await api.edit(project,change);setHistory(h=>{try{return recordEdit(h,project,next);}catch{setError(t('historyDesync'));return undefined;}});return next;}); }}/>},
       {id:'references',label:t('layoutReferences'),content:<><ReferencesPanel key={`references-${project.id}`} project={project} busy={busy} t={t} save={change=>{void run(()=>api.reference(project,change));}}/><FeaturePanel key={`features-${project.id}`} project={project} busy={busy} t={t} save={change=>{void run(()=>api.feature(project,change));}}/></>},
     ]},
-    {id:'architecture',label:t('stageArchitecture'),hint:t('stageHintArchitecture'),blocks:[
+    {id:'architecture',label:t('stageArchitecture'),hint:t('stageHintArchitecture'),badge:`${project.architecture.length}${t('badgeArchitecture')}`,blocks:[
       {id:'architecture',label:t('layoutArchitecture'),content:<ArchitectureEditor key={`architecture-${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change=>{void run(async()=>{const next=await api.architecture(project,change);if(history){setHistory(undefined);setError(t('historyDesync'));}return next;});}}/>},
     ]},
-    {id:'approval',label:t('stageApproval'),hint:t('stageHintApproval'),blocks:[
+    {id:'approval',label:t('stageApproval'),hint:t('stageHintApproval'),badge:project.versions.length?`v${project.versions.length}`:t('badgeUnfrozen'),blocks:[
       {id:'versions',label:t('versions'),content:<VersionPanel key={`versions-${project.id}`} project={project} busy={busy} t={t} confirmTasks={id=>{void run(()=>api.confirmTasks(project,id));}} approve={(label,review)=>{void run(()=>api.approve(project,label,review));}}/>},
       {id:'research',label:t('researchTitle'),content:<ResearchPanel evidence={api.evidence} project={project} busy={busy} t={t} listWorkspaces={api.listWorkspaces} listModels={api.listModels} start={(referenceId,request,workspaceId,model)=>void run(()=>api.research(project,referenceId,request,workspaceId,model))} refresh={()=>void run(()=>api.get(project.id))}/>},
     ]},
-    {id:'handoff',label:t('stageHandoff'),hint:t('stageHintHandoff'),blocks:[
+    {id:'handoff',label:t('stageHandoff'),hint:t('stageHintHandoff'),badge:project.reports.length?`${project.reports.length}${t('badgeReports')}`:undefined,blocks:[
       {id:'handoff',label:t('handoffTitle'),content:<HandoffPanel key={`handoff-${project.id}`} project={project} api={api.handoff} dispatch={api.dispatch} onProject={next=>setProject(current=>current?.id===next.id&&next.projectRevision>=current.projectRevision?next:current)} t={t}/>},
       {id:'reports',label:t('reportsTitle'),content:<ReportsPanel project={project} busy={busy} t={t} refresh={()=>void run(()=>api.get(project.id))} accept={(id,value)=>void run(()=>api.acceptReport(project,id,value))}/>},
     ]},
