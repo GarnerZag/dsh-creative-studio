@@ -79,6 +79,14 @@ export interface DemoSceneData {
 export interface DevelopmentDispatchInfo {id:string;handoffId:string;versionId:string;workspaceId:string;relativeDirectory:string;sessionId:string;agentPreset:string;entryRelativePath:string;status:'preparing'|'copied'|'submitted'|'unknown'|'failed'}
 export interface ImplementationReportInfo{id:string;dispatchId:string;handoffId:string;taskId:string;acceptanceIds:string[];summary:string;changedFiles:string[];testEvidence:string[];unfinished:string[];userAccepted:boolean}
 export interface ResearchJobInfo {id:string;sessionId:string;reference:ProductReference;request:string;status:'queued'|'submitted'|'finished'|'failed'|'unknown';evidence:{callId:string;tool:string}[];conclusion:{summary:string;evidenceCallIds:string[];limitations:string[]}|null}
+/** Structured restatement of the user's raw input, produced before any requirements. */
+export interface BriefInfo {
+  intent:'product'|'operation'|'unclear';
+  restated:string; interpretation:string;
+  goals:string[]; users:string[]; scenarios:string[]; constraints:string[];
+  unknowns:string[]; questions:string[]; needs:string[];
+  createdAt:string;
+}
 export interface ProjectSnapshot extends ProjectHead {
   researchJob:ResearchJobInfo|null;
   reports:ImplementationReportInfo[];
@@ -86,7 +94,7 @@ export interface ProjectSnapshot extends ProjectHead {
   demo:DemoSceneData|null;
   features:FeatureNote[];
   references:ProductReference[];
-  proposalJob: {id:string;sessionId:string;request:string;baseContentRevision:number;status:'queued'|'submitted'|'finished'|'failed'|'unknown';nodes:RequirementNode[];architecture:ArchitectureNode[]}|null;
+  proposalJob: {id:string;sessionId:string;request:string;baseContentRevision:number;status:'queued'|'submitted'|'finished'|'failed'|'unknown';brief:BriefInfo|null;nodes:RequirementNode[];architecture:ArchitectureNode[]}|null;
   proposals: Proposal[];
   versions: ApprovedVersion[];
   schemaVersion: 1;

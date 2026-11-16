@@ -147,6 +147,14 @@ const styles = `
 .creative-studio-root .cs-disclosure{margin:0 0 12px}
 .creative-studio-root .cs-form-stack{display:grid;gap:0;margin:8px 0 0}
 .creative-studio-root .cs-form-stack .cs-checks{margin-bottom:12px}
+.creative-studio-root .cs-brief{margin:16px 0;padding:16px;border:1px solid var(--cs-border);border-radius:12px;background:var(--cs-surface)}
+.creative-studio-root .cs-brief h4{margin:0 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.creative-studio-root .cs-intent{font-size:var(--cs-text-xs);line-height:16px;font-weight:600;padding:2px 8px;border-radius:8px;border:1px solid var(--cs-border);background:var(--cs-soft);color:var(--cs-accent-strong)}
+.creative-studio-root .cs-intent-operation{border-color:light-dark(#e3b3ae,#5d2f2c);color:light-dark(#a3201b,#f2a7a1)}
+.creative-studio-root .cs-intent-unclear{color:var(--cs-muted)}
+.creative-studio-root .cs-brief-restated{margin:0 0 8px;font-size:var(--cs-text-md);line-height:24px}
+.creative-studio-root .cs-brief-list{margin:0;padding-left:20px;font-size:var(--cs-text-sm);line-height:20px}
+.creative-studio-root .cs-brief-list li+li{margin-top:4px}
 .creative-studio-root .cs-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:0 0 16px}
 .creative-studio-root .cs-field{display:grid;gap:4px;min-width:0}
 .creative-studio-root .cs-field>label{margin:0;color:var(--cs-muted);font-weight:500}

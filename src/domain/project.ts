@@ -47,9 +47,21 @@ export const ProposalInputSchema = z.object({
 }).strict();
 export const ProposalSchema = ProposalInputSchema.extend({status:z.enum(['pending','adopted','rejected'])});
 export type ProposalInput = z.infer<typeof ProposalInputSchema>;
+// Structured restatement of the user's input before any requirements are invented.
+// `intent` separates a product idea from an instruction addressed to the studio itself.
+export const BriefSchema = z.object({
+  intent: z.enum(['product', 'operation', 'unclear']),
+  restated: z.string().trim().min(1), interpretation: z.string(),
+  goals: z.array(z.string()), users: z.array(z.string()), scenarios: z.array(z.string()),
+  constraints: z.array(z.string()), unknowns: z.array(z.string()),
+  questions: z.array(z.string()), needs: z.array(z.string()),
+  createdAt: z.iso.datetime(),
+}).strict();
+export type Brief = z.infer<typeof BriefSchema>;
 export const ProposalJobSchema = z.object({
   id, sessionId:id, request:z.string().trim().min(1), baseContentRevision:z.number().int().nonnegative(),
   nodes:z.array(RequirementSchema), architecture:z.array(ArchitectureItemSchema),
+  brief: BriefSchema.nullable().default(null),
   status:z.enum(['queued','submitted','finished','failed','unknown']),
 }).strict();
 export const ReferenceSchema=z.object({

@@ -9,9 +9,9 @@ import {saveFeatureNote,removeFeatureNote} from '../domain/research.js';
 import type {FeatureNote} from '../domain/project.js';
 import {editReference,type ReferenceEdit} from '../domain/references.js';
 import { randomUUID } from 'node:crypto';
-import { beginProposalJob, submitJobProposal } from '../domain/jobs.js';
+import { beginProposalJob, submitJobBrief, submitJobProposal } from '../domain/jobs.js';
 import { saveProposal, adoptProposal, rejectProposal } from '../domain/proposals.js';
-import type { ProposalInput } from '../domain/project.js';
+import type { Brief, ProposalInput } from '../domain/project.js';
 import { approveReviewedVersion, type ApprovalReview } from '../domain/approval-review.js';
 import { editArchitecture, type ArchitectureEdit } from '../domain/architecture.js';
 import type { KvTable } from '@deepseek-ai/dsh-storage-domain';
@@ -103,6 +103,9 @@ export class ProjectStore {
       if(current.proposalJob.status==='finished'||current.proposalJob.status==='failed') return current;
       return validateProject({...current,projectRevision:current.projectRevision+1,proposalJob:{...current.proposalJob,status}});
     }));
+  }
+  async submitJobBrief(id: string, sessionId: string, jobId: string, brief: Brief): Promise<Project> {
+    return validateProject(await this.table.update(id,current=>submitJobBrief(current,sessionId,jobId,brief)));
   }
   async submitJobProposal(id: string, sessionId: string, jobId: string, input: ProposalInput): Promise<Project> {
     return validateProject(await this.table.update(id,current=>submitJobProposal(current,sessionId,jobId,input)));
