@@ -7,16 +7,20 @@ const textOf=(data:unknown):string=>{
  return (message.content??[]).filter(part=>part.type==='text'&&typeof part.text==='string').map(part=>part.text as string).join('\n').trim();
 };
 /**
- * `records` are newest-first. Reasoning parts are dropped: only what the user can act on is shown,
- * and the newest non-empty assistant text wins so an older message never masks the latest answer.
+ * Record order is not assumed: the highest `seq` with visible assistant text wins, so a history page
+ * that arrives chronologically and a wait output that arrives newest-first both resolve to the latest
+ * answer. Reasoning parts are dropped; only text the user can act on is shown.
  */
 export function extractReply(records:readonly HistoryRecord[],truncated:boolean,limit=6000):{text:string;truncated:boolean}{
+ let best='',bestSeq=-Infinity;
  for(const record of records){
   if(record.type!=='assistant/message')continue;
   const text=textOf(record.data);
   if(!text)continue;
-  if(text.length<=limit)return {text,truncated};
-  return {text:text.slice(0,limit),truncated:true};
+  const seq=typeof (record as {seq?:number}).seq==='number'?(record as {seq:number}).seq:bestSeq+1;
+  if(seq>=bestSeq){best=text;bestSeq=seq;}
  }
- return {text:'',truncated};
+ if(!best)return {text:'',truncated};
+ if(best.length<=limit)return {text:best,truncated};
+ return {text:best.slice(0,limit),truncated:true};
 }

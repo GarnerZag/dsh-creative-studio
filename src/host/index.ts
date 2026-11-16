@@ -210,12 +210,14 @@ export default class CreativeStudio extends TypertRemoteService {
   async readJobReply(id:string, jobId:string):Promise<JobReply> {
     const job=this.userStore().get(id).proposalJob;
     if(!job||job.id!==jobId) throw new Error('JOB_SCOPE_MISMATCH');
-    type Wait=(request:{sessionId:string;timeoutMs?:number;maxMessages?:number},signal:AbortSignal)=>Promise<{reason:'idle'|'input-required'|'timeout';state:{running:boolean};output:{records:readonly {type?:string;data?:unknown}[];truncated:boolean}}>;
-    const sessions=this.ctx.get('sessionController') as {wait?:Wait}|undefined;
-    if(!sessions?.wait) throw new Error('SESSION_SERVICE_UNAVAILABLE');
-    const value=await sessions.wait({sessionId:job.sessionId,timeoutMs:0,maxMessages:6},new AbortController().signal);
-    const reply=extractReply(value.output.records,value.output.truncated);
-    return {text:reply.text,truncated:reply.truncated,running:value.state.running,reason:value.reason};
+    type Page=(request:{address:{kind:'session';sessionId:string};maxMessages?:number},signal:AbortSignal)=>Promise<{records:readonly {type?:string;seq?:number;data?:unknown}[];hasMore?:boolean}>;
+    const sessions=this.ctx.get('sessionController') as {events?:Page;page?:Page}|undefined;
+    const readPage=sessions?.events??sessions?.page;
+    if(!readPage) throw new Error('SESSION_SERVICE_UNAVAILABLE');
+    // Passive, cold-safe history read: no wait, no activation, no state change on the job session.
+    const page=await readPage({address:{kind:'session',sessionId:job.sessionId},maxMessages:6},new AbortController().signal);
+    const reply=extractReply(page.records,false);
+    return {text:reply.text,truncated:reply.truncated,running:false,reason:'idle'};
   }
 
   @Remote
