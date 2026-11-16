@@ -67,7 +67,7 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
  const act=async(operation:()=>Promise<ProjectSnapshot>):Promise<void>=>{setBusyLocal(true);setError('');try{setLastProject(await operation());refresh();}catch(e){setError(e instanceof Error?e.message:t('briefContinueStale'));}finally{setBusyLocal(false);}};
  React.useEffect(()=>{let live=true;setWorkspaceError('');void listWorkspaces().then(items=>{if(live){setWorkspaces(items);setWorkspace(id=>items.some(w=>w.id===id)?id:'');}}).catch(e=>{if(live){setWorkspaceError(String(e));setWorkspaces([]);setWorkspace('');}});return()=>{live=false;};},[listWorkspaces,refreshKey]);
  const job=project.proposalJob,active=job&&!['finished','failed'].includes(job.status);
- return <section><h3>{t('generateTitle')}</h3><p>{t('generateNotice')}</p>
+ return <section><p className="cs-lead">{t('generateNotice')}</p>
  <form onSubmit={e=>{e.preventDefault();if(request.trim()&&workspace.trim()&&window.confirm(t('generateConfirm')))generate(request.trim(),workspace.trim(),model);}}>
  <label>{t('roughIdea')}<textarea rows={5} value={request} onChange={e=>setRequest(e.target.value)} placeholder={t('roughIdeaHint')} disabled={busy||!!active}/>{!!active&&<span className="cs-hint">{t('ideaBlockedByActive')}</span>}</label>
  {project.researchJob?.status==='finished'&&project.researchJob.conclusion&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={busy||!!active} onClick={()=>{if(window.confirm(t('researchSeedConfirm')))setRequest(researchSeed(project.researchJob));}}>{t('researchSeed')}</button></div>}
@@ -76,7 +76,7 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
   <ModelSelect value={model} onChange={setModel} disabled={busy||!!active} t={t} load={listModels}/>
  </details>
  <div className="cs-row-actions"><button disabled={busy||!!active||!request.trim()||!workspace.trim()}>{t('generateProposal')}</button>{!request.trim()&&<small className="cs-hint">{t('ideaRequired')}</small>}{!!request.trim()&&!workspace.trim()&&<small className="cs-hint">{t('workspaceRequired')}</small>}</div>
- </form>{job&&<div role="status" className="cs-job-status"><p>{t('jobProgress')}：{t('job_'+job.status)}</p>{job.status==='unknown'&&<p className="cs-hint">{t('unknownJob')}</p>}<details className="cs-advanced"><summary>{t('techDetails')}</summary><small>{t('sessionId')}：{job.sessionId}</small><br/><small>{t('jobIdLabel')}：{job.id}</small></details></div>}
+ </form>{job&&<div role="status" className="cs-job-status"><p className="cs-status"><span className="cs-status-dot" aria-hidden="true"/>{t('jobProgress')}：{t('job_'+job.status)}</p>{job.status==='unknown'&&<p className="cs-hint">{t('unknownJob')}</p>}<details className="cs-advanced"><summary>{t('techDetails')}</summary><small>{t('sessionId')}：{job.sessionId}</small><br/><small>{t('jobIdLabel')}：{job.id}</small></details></div>}
  {job&&<JobReplyBlock jobId={job.id} active={!!active} t={t} load={readReply} refreshKey={project.projectRevision} canEnd={!!active&&!job?.brief} endAttempt={()=>{if(window.confirm(t('jobReplyEndConfirm')))void act(()=>abandonJob(job.id));}}/>}
  {job?.brief&&(editOpen?<BriefEditor brief={job.brief} busy={busy||busyLocal} t={t} cancel={()=>setEditOpen(false)} save={brief=>{void (async()=>{await act(()=>editBrief(job.id,brief));setEditOpen(false);})();}}/>:<>
   <BriefCard brief={job.brief} t={t}/>

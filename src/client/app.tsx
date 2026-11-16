@@ -142,7 +142,7 @@ const styles = `
 .creative-studio-root .cs-advanced[open]>summary::before{content:'▾'}
 .creative-studio-root .cs-advanced>summary:focus-visible{outline:2px solid var(--cs-accent);outline-offset:2px;border-radius:4px}
 .creative-studio-root .cs-advanced>:not(summary){margin-top:8px}
-.creative-studio-root .cs-job-status{margin-top:12px}
+.creative-studio-root .cs-demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.creative-studio-root .cs-demo-head h3{margin:0}.creative-studio-root .cs-demo-controls{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:12px 0}.creative-studio-root .cs-stale{margin:8px 0;font-size:var(--cs-text-sm);line-height:20px}.creative-studio-root .cs-job-status{margin-top:12px}.creative-studio-root .cs-job-status .cs-status{display:flex;align-items:center;gap:8px;margin:0;font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted)}.creative-studio-root .cs-status-dot{width:8px;height:8px;border-radius:50%;background:var(--cs-muted);flex:none}
 .creative-studio-root .cs-id-list{max-height:200px;overflow:auto;margin-top:8px;padding-left:20px}
 .creative-studio-root .cs-onboarding{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0 20px;padding:0;list-style:none}
 .creative-studio-root .cs-onboarding li{display:grid;gap:4px;padding:12px;border:1px solid var(--cs-border);border-radius:10px;background:var(--cs-surface)}
@@ -197,6 +197,8 @@ const styles = `
 .creative-studio-root .cs-grid{display:grid}
 .creative-studio-root .cs-inline-field{display:inline-flex;align-items:center;gap:8px;margin:0;min-height:32px;color:var(--cs-muted)}
 .creative-studio-root .cs-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.creative-studio-root .cs-history{display:flex;gap:4px;margin:0}.creative-studio-root .cs-history .cs-quiet{min-height:24px;padding:2px 8px;color:var(--cs-muted)}
+.creative-studio-root .cs-block-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;font-size:var(--cs-text-sm);color:var(--cs-muted)}.creative-studio-root .cs-block-nav-label{font-size:var(--cs-text-xs);letter-spacing:.02em}.creative-studio-root .cs-block-nav .cs-quiet{padding:2px 10px;min-height:24px;border:1px solid var(--cs-border);border-radius:999px;background:var(--cs-surface);color:inherit}
 .creative-studio-root .cs-pane{min-width:0;padding:12px;border:1px solid var(--cs-border);border-radius:12px;background:var(--cs-surface)}
 .creative-studio-root .cs-split{position:relative;align-self:stretch;min-height:240px;cursor:col-resize;touch-action:none;background:transparent}
 .creative-studio-root .cs-split::before{content:'';position:absolute;inset:0 6px;background:var(--cs-border);border-radius:8px}

@@ -167,6 +167,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
       <div className="cs-project-head">
         <h2 className="cs-project-title">{project.name}</h2>
         <small className="cs-hint">{t('draftRevision')} {project.contentRevision}</small>
+        <div className="cs-toolbar cs-history" role="group" aria-label={t('requirementHistory')} title={`${t('historyScope')}${!historyCurrent?` ${t('historyUnavailable')}`:''}`}><button type="button" className="cs-quiet" disabled={busy||!historyCurrent||!history?.past.length} onClick={()=>restore('undo')}>{t('undoRequirements')}</button><button type="button" className="cs-quiet" disabled={busy||!historyCurrent||!history?.future.length} onClick={()=>restore('redo')}>{t('redoRequirements')}</button></div>
         <details className="cs-advanced cs-project-menu">
           <summary>{t('projectSettings')}</summary>
           <div className="cs-row-actions">
@@ -177,7 +178,6 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
           <p className="cs-hint">{t('projectSettingsHint')}</p>
         </details>
       </div>
-      <div className="cs-toolbar" aria-label={t('requirementHistory')}><button type="button" disabled={busy||!historyCurrent||!history?.past.length} onClick={()=>restore('undo')}>{t('undoRequirements')}</button><button type="button" disabled={busy||!historyCurrent||!history?.future.length} onClick={()=>restore('redo')}>{t('redoRequirements')}</button>{!historyCurrent&&<small className="cs-hint" title={t('historyScope')}>{t('historyUnavailable')}</small>}</div>
       {error && <p role="alert" className="cs-error">{errorText(error)}</p>}
       <Workbench key={project.id} projectId={project.id} t={t} stages={stages}
         demo={compare=><DemoPanel selectedRequirement={selectedRequirement} key={`demo-${project.id}-${editorEpoch}`} project={project} t={t} stacked={compare} busy={busy} save={scene=>{void run(()=>api.demo(project,scene));}}/>}

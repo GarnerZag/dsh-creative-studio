@@ -21,7 +21,7 @@ export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Sta
   const scrollTo=(id:string)=>{const el=document.getElementById('cs-block-'+id);if(!el)return;const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false;el.scrollIntoView({block:'start',behavior:reduce?'auto':'smooth'});};
   // In-stage jump links: a stage can stack several blocks and the editor alone is taller than the viewport.
   const blocks=(list:StageBlock[],withNav=false)=><>
-    {withNav&&list.length>1&&<nav className="cs-block-nav" aria-label={t('blocksNav')}>{list.map(block=><button key={block.id} type="button" className="cs-quiet" onClick={()=>scrollTo(block.id)}>{block.label}</button>)}</nav>}
+    {withNav&&list.length>1&&<nav className="cs-block-nav" aria-label={t('blocksNav')}><span className="cs-block-nav-label">{t('blocksNav')}：</span>{list.map(block=><button key={block.id} type="button" className="cs-quiet" onClick={()=>scrollTo(block.id)}>{block.label}</button>)}</nav>}
     {list.map(block=><section key={block.id} id={withNav?`cs-block-${block.id}`:undefined} className="cs-block" aria-label={block.label}>{block.content}</section>)}
   </>;
   return <section className="cs-workbench">
