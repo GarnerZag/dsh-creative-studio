@@ -4,7 +4,7 @@ import type {ProjectSnapshot,ProductReference,ReferenceChange} from '../types.js
 export function ReferencesPanel({project,busy,t,save}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;save:(change:ReferenceChange)=>void}):React.ReactElement{
  const empty=():ProductReference=>({id:newId(),name:'',location:'',notes:'',license:'unknown',sourceKind:'url',origin:'manual'});
  const [draft,setDraft]=React.useState<ProductReference>(empty);
- const [editing,setEditing]=React.useState(false);
+ const [editing,setEditing]=React.useState(()=>project.references.length===0);
  const existing=project.references.find(r=>r.id===draft.id);
  const dirty=editing&&(existing?JSON.stringify(existing)!==JSON.stringify(draft):Boolean(draft.name||draft.location||draft.notes||draft.license!=='unknown'));
  const choose=(next:ProductReference)=>{if(!dirty||window.confirm(t('discardReferenceEdits'))){setDraft({...next});setEditing(true);}};
