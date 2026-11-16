@@ -1,4 +1,15 @@
 import * as React from 'react';
+
+// Turn raw parser/schema output into something a Chinese-speaking PM can act on.
+function describeSceneError(error:unknown,t:(key:string)=>string):string{
+ const raw=error instanceof Error?error.message:String(error);
+ if(raw.includes('REQUIREMENT_NOT_FOUND'))return t('demoRequirementMissing');
+ if(error instanceof SyntaxError)return t('demoJsonInvalid');
+ if(raw.trim().startsWith('[')){
+  try{const first=(JSON.parse(raw) as {path?:unknown[]}[])[0];const path=Array.isArray(first?.path)?first.path.join('.'):'';return `${t('demoSchemaInvalid')}${path?`（${path}）`:''}`;}catch{return t('demoSchemaInvalid');}
+ }
+ return raw;
+}
 import {demoDocument} from '../domain/demo-document.js';
 import {validateScene,type DemoScene} from '../domain/demo.js';
 import type {ProjectSnapshot} from '../types.js';
@@ -20,6 +31,6 @@ export function DemoPanel({project,t,stacked=false,busy,save,selectedRequirement
  {selected&&<aside aria-label={t('selectedDemoCoverage')}><strong>{selected.title}</strong><p>{t(scene.requirementIds.includes(selected.id)?'selectedDemoMapped':'selectedDemoUnmapped')}</p><small>{t('selectedDemoCaution')}</small></aside>}
   <label>{t('demoViewport')}<select value={mode} onChange={e=>setMode(e.target.value as typeof mode)}><option value="both">{t('demoBoth')}</option><option value="desktop">{t('demoDesktop')}</option><option value="mobile">{t('demoMobile')}</option></select></label>
  <div style={{display:'grid',gridTemplateColumns:mode==='both'&&!stacked?'minmax(0,2fr) minmax(0,1fr)':'minmax(0,1fr)',gap:12}}>{mode!=='mobile'&&<Viewport scene={scene} width={1440} height={900}/>} {mode!=='desktop'&&<Viewport scene={scene} width={390} height={844}/>}</div>
- <details><summary>{t('demoSceneEditor')}</summary><p>{t('demoLocalOnly')}</p><label className="cs-field"><span>{t('demoSceneEditor')}</span><textarea aria-label={t('demoSceneEditor')} rows={10} style={{width:'100%'}} value={input} onChange={e=>setInput(e.target.value)}/></label><button onClick={()=>{try{const next=validateScene(JSON.parse(input));if(next.requirementIds.some(id=>!project.nodes.some(n=>n.id===id)))throw new Error('REQUIREMENT_NOT_FOUND');setCustom(next);setError('');}catch(e){setError(String(e));}}}>{t('demoApply')}</button><button onClick={()=>{setInput(JSON.stringify(scene,null,2));}}>{t('demoLoad')}</button><button onClick={()=>{setCustom(undefined);setError('');}}>{t('demoReset')}</button>{error&&<p role="alert">{error}</p>}</details>
+ <details><summary>{t('demoSceneEditor')}</summary><p>{t('demoLocalOnly')}</p><label className="cs-field"><span>{t('demoSceneEditor')}</span><textarea aria-label={t('demoSceneEditor')} rows={10} style={{width:'100%'}} value={input} onChange={e=>setInput(e.target.value)}/></label><button onClick={()=>{try{const next=validateScene(JSON.parse(input));if(next.requirementIds.some(id=>!project.nodes.some(n=>n.id===id)))throw new Error('REQUIREMENT_NOT_FOUND');setCustom(next);setError('');}catch(e){setError(describeSceneError(e,t));}}}>{t('demoApply')}</button><button onClick={()=>{setInput(JSON.stringify(scene,null,2));}}>{t('demoLoad')}</button><button onClick={()=>{setCustom(undefined);setError('');}}>{t('demoReset')}</button>{error&&<p role="alert" className="cs-error">{error}</p>}</details>
  </section>;
 }
