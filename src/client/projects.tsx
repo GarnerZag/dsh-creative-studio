@@ -147,7 +147,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
     ]},
     {id:'handoff',label:t('stageHandoff'),hint:t('stageHintHandoff'),badge:project.reports.length?`${project.reports.length}${t('badgeReports')}`:undefined,blocks:[
       {id:'handoff',label:t('handoffTitle'),content:<HandoffPanel key={`handoff-${project.id}`} project={project} api={api.handoff} dispatch={api.dispatch} onProject={next=>setProject(current=>current?.id===next.id&&next.projectRevision>=current.projectRevision?next:current)} t={t}/>},
-      {id:'reports',label:t('reportsTitle'),content:<ReportsPanel project={project} busy={busy} t={t} refresh={()=>void run(()=>api.get(project.id))} accept={(id,value)=>void run(()=>api.acceptReport(project,id,value))}/>},
+      ...(project.versions.length||project.reports.length?[{id:'reports',label:t('reportsTitle'),content:<ReportsPanel project={project} busy={busy} t={t} refresh={()=>void run(()=>api.get(project.id))} accept={(id,value)=>void run(()=>api.acceptReport(project,id,value))}/>}]:[]),
     ]},
   ]:[];
   if(!project) return <section className="cs-projects cs-chooser" aria-label={t('projects')}>
