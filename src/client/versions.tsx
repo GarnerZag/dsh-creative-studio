@@ -28,6 +28,7 @@ export function VersionPanel({project,busy,approve,t,confirmTasks}:{confirmTasks
         {nested.length>0&&<ul>{nested.map(entry=><li key={entry.path}>{t(entry.state)} · <code>{entry.path}</code></li>)}</ul>}
       </li>;
     })}</ul></>}
+    {project.versions.length===0&&<p className="cs-hint">{t('approvalFirstTime')}</p>}
     <ApprovalForm project={project} busy={busy} approve={approve} t={t}/>
   </section>;
 }
