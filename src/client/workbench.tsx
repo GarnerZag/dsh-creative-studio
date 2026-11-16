@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {parseLayout} from './layout.js';
+import {hasUnsavedEdits} from './dirty.js';
 
 export interface StageBlock { id: string; label: string; content: React.ReactNode }
 export interface Stage { id: string; label: string; hint: string; blocks: StageBlock[]; badge?: string }
@@ -25,7 +26,7 @@ export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Sta
     {list.map(block=><section key={block.id} id={withNav?`cs-block-${block.id}`:undefined} className="cs-block" aria-label={block.label}>{block.content}</section>)}
   </>;
   return <section className="cs-workbench">
-    <ol className="cs-steps" aria-label={t('stages')}>{stages.map((item,index)=><li key={item.id}><button type="button" aria-current={active.id===item.id?'step':undefined} onClick={()=>setStage(item.id)}><span className="cs-step-index" aria-hidden="true">{index+1}</span>{item.label}{item.badge&&<small className="cs-step-badge">{item.badge}</small>}</button></li>)}</ol>
+    <ol className="cs-steps" aria-label={t('stages')}>{stages.map((item,index)=><li key={item.id}><button type="button" aria-current={active.id===item.id?'step':undefined} onClick={()=>{if(item.id!==stage&&hasUnsavedEdits()&&!window.confirm(t('discardStageEdit')))return;setStage(item.id);}}><span className="cs-step-index" aria-hidden="true">{index+1}</span>{item.label}{item.badge&&<small className="cs-step-badge">{item.badge}</small>}</button></li>)}</ol>
     <div className="cs-toolbar">
       <button type="button" title={t('layoutExploreHint')} aria-pressed={!compare} onClick={()=>change({...layout,compare:false})}>{t('layoutExplore')}</button>
       <button type="button" title={t('layoutCompareHint')} aria-pressed={compare} onClick={()=>change({...layout,compare:true})}>{t('layoutCompare')}</button>

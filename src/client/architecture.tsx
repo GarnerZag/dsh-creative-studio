@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {newId} from './id.js';
+import {registerDirtyGuard} from './dirty.js';
 import {ArchitectureMap} from './architecture-map.js';
 import type { ArchitectureNode, ArchitectureChange, ProjectSnapshot } from '../types.js';
 
@@ -7,6 +8,7 @@ export function ArchitectureEditor({project,busy,save,t}:{project:ProjectSnapsho
   const [selected,setSelected]=React.useState(()=>project.architecture[0]?.id ?? newId());
   const [dirty,setDirty]=React.useState(false);
   const choose=(id:string)=>{if(id===selected || !dirty || window.confirm(t('discardEdits'))){setDirty(false);setSelected(id);}};
+  React.useEffect(()=>registerDirtyGuard(()=>dirty),[dirty]);
   const current=project.architecture.find(item=>item.id===selected);  const lastRev=React.useRef(project.contentRevision);
   const [savedRev,setSavedRev]=React.useState<number|null>(null);
   React.useEffect(()=>{if(project.contentRevision===lastRev.current)return;lastRev.current=project.contentRevision;setSavedRev(project.contentRevision);const timer=setTimeout(()=>setSavedRev(null),2600);return()=>clearTimeout(timer);},[project.contentRevision]);

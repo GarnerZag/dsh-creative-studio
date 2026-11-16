@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {orderedChildren} from '../domain/requirement-order.js';
 import {newId} from './id.js';
+import {registerDirtyGuard} from './dirty.js';
 import {openEditor,refreshEditor,editorDirty} from './editor-state.js';
 import { MindMap } from './mind-map.js';
 import type { ProjectSnapshot, RequirementChange } from '../types.js';
@@ -76,6 +77,9 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   const visibleRows = needle ? rows.filter(row => keep.has(row.id)) : rows;
   const matchCount = needle ? project.nodes.filter(n => n.title.includes(needle)).length : 0;
   const lines = (text: string) => text.split('\n').map(s => s.trim()).filter(Boolean);
+  const unsavedDraft = React.useRef(false);
+  unsavedDraft.current = Boolean(node) && (editorDirty(editor) || dependenciesChanged || priorityChanged);
+  React.useEffect(()=>registerDirtyGuard(()=>unsavedDraft.current),[]);
   return <section className={`cs-editor ${node ? (view === 'canvas' ? 'cs-editor-canvas' : 'cs-editor-outline') : ''}`}>
     <style>{`.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start;margin-top:16px}@container (min-width:820px){.creative-studio-root .cs-editor-canvas{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.creative-studio-root .cs-editor-outline{grid-template-columns:minmax(240px,1fr) minmax(260px,1fr)}}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}.creative-studio-root .cs-segmented{display:flex;gap:4px;margin-left:auto}.creative-studio-root .cs-outline-no{display:inline-block;min-width:32px;text-align:right;margin-right:8px;color:var(--cs-muted);font-size:var(--cs-text-xs);font-variant-numeric:tabular-nums}.creative-studio-root .cs-inspector-title{margin:0 0 8px}.creative-studio-root .cs-tree-search{width:100%;margin-bottom:8px}@media(max-width:1024px){.creative-studio-root .cs-editor{grid-template-columns:minmax(0,1fr)}}`}</style>
     <div className="cs-canvas-column">
