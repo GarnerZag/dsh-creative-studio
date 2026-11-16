@@ -19,6 +19,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   const field=(key:keyof stringFields,value:string)=>setEditor(current=>({...current,values:{...current.values,[key]:value}}));
   const setTitle=(v:string)=>field('title',v),setDescription=(v:string)=>field('description',v),setDesktop=(v:string)=>field('desktop',v),setMobile=(v:string)=>field('mobile',v);
   React.useEffect(()=>{setEditor(current=>refreshEditor(current,node?.id??null,snapshot()));},[node]);
+  const depthOf=(id:string)=>{let d=0;let cur=project.nodes.find(n=>n.id===id);while(cur&&cur.parentId){d+=1;cur=project.nodes.find(n=>n.id===cur!.parentId);}return d;};
   const subtreeCount=(id:string)=>{const seen=new Set([id]);let grew=true;while(grew){grew=false;for(const item of project.nodes){if(item.parentId!==null&&seen.has(item.parentId)&&!seen.has(item.id)){seen.add(item.id);grew=true;}}}return seen.size-1;};
   const removePrompt=()=>{if(!node)return t('confirmRemove');const kids=subtreeCount(node.id);if(kids===0)return t('confirmRemove');return t('confirmRemoveBranch').replace('{title}',node.title).replace('{children}',String(kids)).replace('{total}',String(kids+1));};
   const lastRev = React.useRef(project.contentRevision);
@@ -112,7 +113,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
       <div className="cs-toolbar"><button type="button" disabled={position<=0} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position-1]!.id})}>{t('moveEarlier')}</button><button type="button" disabled={position<0||position>=siblings.length-1} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position+2]?.id??null})}>{t('moveLater')}</button><button type="button" disabled={busy} onClick={()=>choose(node.parentId)}>{t('selectParent')}</button></div>
       <p className="cs-hint">{t('dragAlternativeHint')}</p>
       <form onSubmit={e => { e.preventDefault(); if (title.trim()) save({ kind: 'rename', id: node.id, title }); }}><label>{t('nodeTitle')}<input value={title} onChange={e => setTitle(e.target.value)} /></label><button disabled={!title.trim()||title.trim()===node.title}>{t('rename')}</button>{title.trim()!==node.title&&<p className="cs-hint" role="status">{t('renameDirty')}</p>}</form>
-      <label>{t('parentNode')}<select aria-label={t('parentNode')} value={node.parentId ?? ''} onChange={e => save({ kind: 'move', id: node.id, parentId: e.target.value || null })}><option value="">{t('selectRoot')}</option>{project.nodes.filter(n => n.id !== node.id).map(n => <option key={n.id} value={n.id}>{n.title}</option>)}</select></label>
+      <label>{t('parentNode')}<select aria-label={t('parentNode')} value={node.parentId ?? ''} onChange={e => save({ kind: 'move', id: node.id, parentId: e.target.value || null })}><option value="">{t('selectRoot')}</option>{project.nodes.filter(n => n.id !== node.id).map(n => <option key={n.id} value={n.id}>{`${'\u3000'.repeat(depthOf(n.id))}${n.title}`}</option>)}</select></label>
       <fieldset className="cs-deps" style={{ border: 0, padding: 0, minWidth: 0 }}>
         <legend>{t('requirementDependencies')}</legend>
         <p className="cs-hint">{t('requirementDependencyHint')}</p>
@@ -122,8 +123,8 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
       <form onSubmit={e => { e.preventDefault(); save({ kind: 'details', id: node.id, description, priority, desktopAcceptance: lines(desktop), mobileAcceptance: lines(mobile) }); }}>
         <label>{t('requirementPriority')}<select value={priority} onChange={e => setPriorityDraft(e.target.value as 'low'|'normal'|'high')}><option value="high">{t('priorityHigh')}</option><option value="normal">{t('priorityNormal')}</option><option value="low">{t('priorityLow')}</option></select></label>
         <label>{t('nodeDescription')}<textarea aria-label={t('nodeDescription')} rows={4} value={description} onChange={e => setDescription(e.target.value)}/></label>
-        <label>{t('desktopAcceptance')}<textarea aria-label={t('desktopAcceptance')} rows={3} value={desktop} onChange={e => setDesktop(e.target.value)}/></label>
-        <label>{t('mobileAcceptance')}<textarea aria-label={t('mobileAcceptance')} rows={3} value={mobile} onChange={e => setMobile(e.target.value)}/></label>
+        <label>{t('desktopAcceptance')}<textarea aria-label={t('desktopAcceptance')} rows={3} placeholder={t('acceptanceExample')} value={desktop} onChange={e => setDesktop(e.target.value)}/></label>
+        <label>{t('mobileAcceptance')}<textarea aria-label={t('mobileAcceptance')} rows={3} placeholder={t('acceptanceExample')} value={mobile} onChange={e => setMobile(e.target.value)}/></label>
         <button disabled={busy}>{busy ? t('working') : t('saveDetails')}</button>
         {(priorityChanged||description!==node.description||lines(desktop).join('\n')!==node.desktopAcceptance.join('\n')||lines(mobile).join('\n')!==node.mobileAcceptance.join('\n'))&&<p className="cs-hint" role="status">{t('detailsDirty')}</p>}
       </form>
