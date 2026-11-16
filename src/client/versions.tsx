@@ -19,8 +19,12 @@ export function VersionPanel({project,busy,approve,t,confirmTasks}:{confirmTasks
     {before&&after&&<><p>{differences.length===0?t('noDifferences'):`${t('differences')}: ${differences.length}`}</p><ul>{differences.map(change=>{
       const oldItem=change.collection==='architecture'?before.architecture.find(item=>item.id===change.id):undefined;
       const newItem=change.collection==='architecture'?after.architecture.find(item=>item.id===change.id):undefined;
+      const oldNode=change.collection==='nodes'?before.nodes.find(item=>item.id===change.id):undefined;
+      const newNode=change.collection==='nodes'?after.nodes.find(item=>item.id===change.id):undefined;
+      const renamed=oldNode&&newNode&&oldNode.title!==newNode.title;
       const nested=(change.collection==='architecture'&&(change.fields.includes('contract')||change.fields.includes('task')))?structuredFieldChanges(oldItem,newItem):[];
       return <li key={`${change.collection}-${change.id}`}><strong>{t(change.kind)} · {change.title}</strong><span> — {t(change.collection==='nodes'?'approvalCollectionNodes':'approvalCollectionArchitecture')} {change.fields.map(field=>fieldLabel(field,t)).join(', ')}</span>
+        {renamed&&<span className="cs-diff-shift"><del>{oldNode.title}</del> → <ins>{newNode.title}</ins></span>}
         {nested.length>0&&<ul>{nested.map(entry=><li key={entry.path}>{t(entry.state)} · <code>{entry.path}</code></li>)}</ul>}
       </li>;
     })}</ul></>}
