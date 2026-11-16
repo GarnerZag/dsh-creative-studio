@@ -1,0 +1,13 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',colorScheme:'dark',viewport:{width:1440,height:1000}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1800);
+await page.getByRole('button',{name:'创意工坊'}).first().click();
+await page.waitForTimeout(1200);
+await page.screenshot({path:'.preview/review/zh9-dark-chooser.png'});
+const scheme=await page.evaluate(()=>matchMedia('(prefers-color-scheme: dark)').matches);
+const cardBg=await page.locator('.cs-onboarding li').first().evaluate(e=>getComputedStyle(e).backgroundColor);
+console.log(JSON.stringify({scheme,cardBg,errs}));
+await ctx.close();

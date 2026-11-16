@@ -1,0 +1,17 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1100}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1800);
+await page.getByRole('button',{name:'创意工坊'}).first().click();
+await page.waitForTimeout(900);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();
+await page.waitForTimeout(1400);
+await page.locator('.cs-steps button').nth(4).click();
+await page.waitForTimeout(700);
+const note=await page.locator('.cs-stage-body p[role=status]').first().innerText().catch(()=>'');
+const firstOption=await page.locator('.cs-stage-body select option').first().innerText().catch(()=>'');
+await page.screenshot({path:'.preview/review/zh10-handoff-noversion.png'});
+console.log(JSON.stringify({note,firstOption,errs}));
+await ctx.close();
