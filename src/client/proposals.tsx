@@ -24,6 +24,8 @@ export function ProposalPanel({project,busy,adopt,reject,registerReference,t}:{r
    {differences.length===0&&<p>{t('noDifferences')}</p>}
    <button disabled={busy||stale||proposal.status!=='pending'} onClick={()=>{if(window.confirm(t('confirmAdopt'))) adopt(proposal.id);}}>{t('adoptProposal')}</button>
   <button disabled={busy||proposal.status!=='pending'} onClick={()=>{if(window.confirm(t('confirmReject')))reject(proposal.id);}}>{t('rejectProposal')}</button>
+   {proposal.status==='adopted'&&<p className="cs-hint">{t('proposalAdoptedHint')}</p>}
+   {proposal.status==='rejected'&&<p className="cs-hint">{t('proposalRejectedHint')}</p>}
    </article>;
  })}</section>;
 }
