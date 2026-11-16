@@ -50,6 +50,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
   const [projects, setProjects] = React.useState<ProjectSummary[]>([]);
   const [project, setProject] = React.useState<ProjectSnapshot>();
   const [name, setName] = React.useState('');
+  const taken = name.trim() !== '' && projects.some(p => p.name.trim() === name.trim());
   const [error, setError] = React.useState('');
   const [busy, setBusy] = React.useState(false);
   const [editorEpoch,setEditorEpoch]=React.useState(0);
@@ -151,8 +152,9 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
   if(!project) return <section className="cs-projects cs-chooser" aria-label={t('projects')}>
     <div className="cs-chooser-head"><h2 className="cs-chooser-title">{t('projects')}</h2><small className="cs-hint">{t('chooserHint')}</small></div>
     <form className="cs-form" onSubmit={e => { e.preventDefault(); if (name.trim()) void run(() => api.create(name.trim())); }}>
-      <div className="cs-field"><label htmlFor="cs-project-name">{t('projectName')}</label><input id="cs-project-name" aria-label={t('projectName')} placeholder={t('projectName')} value={name} onChange={e => setName(e.target.value)} disabled={busy} /></div>
-      <button disabled={busy || !name.trim()} type="submit">{busy ? t('working') : t('newProject')}</button>
+      <div className="cs-field"><label htmlFor="cs-project-name">{t('projectName')}</label><input id="cs-project-name" aria-label={t('projectName')} placeholder={t('projectName')} value={name} onChange={e => setName(e.target.value)} disabled={busy} aria-invalid={taken||undefined} aria-describedby={taken?'cs-project-name-taken':undefined} /></div>
+      {taken&&<p id="cs-project-name-taken" className="cs-hint">{t('projectNameTaken')}</p>}
+      <button disabled={busy || !name.trim() || taken} type="submit">{busy ? t('working') : t('newProject')}</button>
     </form>
     {error && <p role="alert" className="cs-error">{errorText(error)}</p>}
     <ol className="cs-onboarding" aria-label={t('chooserSteps')}>
