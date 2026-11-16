@@ -30,6 +30,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
     return () => clearTimeout(timer);
   }, [project.contentRevision]);
   const [view,setView]=React.useState<'canvas'|'outline'>('canvas');
+  const [search,setSearch]=React.useState('');
   const [dependencyState,setDependencyState]=React.useState<{id:string|null;ids:string[]}>({id:null,ids:[]});
   const dependencyDraft=dependencyState.id===(node?.id??null)?dependencyState.ids:(node?.dependsOn??[]);
   const setDependencyDraft=(ids:string[])=>setDependencyState({id:node?.id??null,ids});
@@ -62,9 +63,21 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
     }
   };
   visit(null, 0, '');
+  const needle = search.trim();
+  const keep = new Set<string>();
+  if (needle) {
+    const byId = new Map(project.nodes.map(n => [n.id, n]));
+    for (const node of project.nodes) {
+      if (!node.title.includes(needle)) continue;
+      let cursor: typeof node | undefined = node;
+      while (cursor) { keep.add(cursor.id); const parent: string | null = cursor.parentId; cursor = parent ? byId.get(parent) : undefined; }
+    }
+  }
+  const visibleRows = needle ? rows.filter(row => keep.has(row.id)) : rows;
+  const matchCount = needle ? project.nodes.filter(n => n.title.includes(needle)).length : 0;
   const lines = (text: string) => text.split('\n').map(s => s.trim()).filter(Boolean);
   return <section className={`cs-editor ${view === 'canvas' ? 'cs-editor-canvas' : 'cs-editor-outline'}`}>
-    <style>{`.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start;margin-top:16px}@container (min-width:820px){.creative-studio-root .cs-editor-canvas{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.creative-studio-root .cs-editor-outline{grid-template-columns:minmax(240px,1fr) minmax(260px,1fr)}}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}.creative-studio-root .cs-segmented{display:flex;gap:4px;margin-left:auto}.creative-studio-root .cs-outline-no{display:inline-block;min-width:32px;text-align:right;margin-right:8px;color:var(--cs-muted);font-size:var(--cs-text-xs);font-variant-numeric:tabular-nums}.creative-studio-root .cs-inspector-title{margin:0 0 8px}@media(max-width:1024px){.creative-studio-root .cs-editor{grid-template-columns:minmax(0,1fr)}}`}</style>
+    <style>{`.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start;margin-top:16px}@container (min-width:820px){.creative-studio-root .cs-editor-canvas{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.creative-studio-root .cs-editor-outline{grid-template-columns:minmax(240px,1fr) minmax(260px,1fr)}}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}.creative-studio-root .cs-segmented{display:flex;gap:4px;margin-left:auto}.creative-studio-root .cs-outline-no{display:inline-block;min-width:32px;text-align:right;margin-right:8px;color:var(--cs-muted);font-size:var(--cs-text-xs);font-variant-numeric:tabular-nums}.creative-studio-root .cs-inspector-title{margin:0 0 8px}.creative-studio-root .cs-tree-search{width:100%;margin-bottom:8px}@media(max-width:1024px){.creative-studio-root .cs-editor{grid-template-columns:minmax(0,1fr)}}`}</style>
     <div className="cs-canvas-column">
       {project.nodes.length===0&&<p className="cs-empty-start">{t('requirementsEmptyHint')}</p>}
       <div className="cs-toolbar">
@@ -77,7 +90,11 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
       </div>
       {view === 'canvas'
         ? <MindMap t={t} move={(id,parentId)=>save({kind:'move',id,parentId})} nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>
-        : <div className="cs-tree" aria-label={t('requirements')}>{rows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 24 }}><button type="button" disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}><span className="cs-outline-no" aria-hidden="true">{row.label}</span>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>}
+        : <div className="cs-tree" aria-label={t('requirements')}>
+            <input className="cs-tree-search" aria-label={t('filterRequirements')} placeholder={t('filterRequirements')} value={search} onChange={e => setSearch(e.target.value)} />
+            {needle && matchCount > 0 && <p className="cs-hint">{t('filterMatches').replace('{n}', String(matchCount))}</p>}
+            {needle && visibleRows.length === 0 && <p className="cs-hint">{t('filterNoMatch')}</p>}
+            {visibleRows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 24 }}><button type="button" disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}><span className="cs-outline-no" aria-hidden="true">{row.label}</span>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>}
       {view === 'outline'&&<p className="cs-hint">{t('outlineHint')}</p>}
     </div>
     {editor.conflicts.length>0&&<p role="alert">{t('editorConflict')} <button type="button" disabled={busy} onClick={()=>{if(window.confirm(t('discardEdits')))setEditor(openEditor(node?.id??null,snapshot()));}}>{t('editorReload')}</button></p>}
