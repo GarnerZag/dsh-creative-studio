@@ -24,22 +24,22 @@ export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Sta
     <div className="cs-toolbar">
       <button type="button" title={t('layoutExploreHint')} aria-pressed={!compare} onClick={()=>change({...layout,compare:false})}>{t('layoutExplore')}</button>
       <button type="button" title={t('layoutCompareHint')} aria-pressed={compare} onClick={()=>change({...layout,compare:true})}>{t('layoutCompare')}</button>
-      <label className="cs-inline-field" title={t('layoutWidthHint')}><span>{t('layoutWidth')}</span><input type="range" min="30" max="70" value={split} onChange={e=>change({...layout,split:Number(e.target.value)})}/></label>
+      {!compare&&!focus&&<label className="cs-inline-field" title={t('layoutWidthHint')}><span>{t('layoutWidth')}</span><input type="range" min="30" max="70" value={split} onChange={e=>change({...layout,split:Number(e.target.value)})}/></label>}
       <button type="button" title={t('layoutFocusHint')} aria-pressed={focus} onClick={()=>setFocus(!focus)}>{t('layoutFocus')}</button>
     </div>
     {!compare&&<p className="cs-hint cs-stage-hint">{active.hint}</p>}
-    <div ref={grid} className="cs-grid" style={{gridTemplateColumns:focus?'minmax(0,1fr)':`minmax(0,${split}fr) 24px minmax(0,${100-split}fr)`,gap:12,marginTop:12,alignItems:'start'}}>
-      <div hidden={focus} className="cs-stage-body" style={{display:focus?'none':'grid',gridTemplateRows:compare?'minmax(200px,1fr) minmax(200px,1fr)':'auto',gap:12,minWidth:0}}>
+    <div ref={grid} className="cs-grid" style={{gridTemplateColumns:focus||compare?'minmax(0,1fr)':`minmax(0,${split}fr) 24px minmax(0,${100-split}fr)`,gap:12,marginTop:12,alignItems:'start'}}>
+      <div className="cs-stage-body" style={{display:'grid',gridTemplateRows:compare&&!focus?'auto auto':'auto',gap:12,minWidth:0}}>
         {showRequirementPane&&requirementStage&&<section className="cs-pane cs-pane-scroll" style={{gridRow:1}} aria-label={requirementStage.label}>{blocks(requirementStage.blocks)}</section>}
         {showStagePane&&(!compare?<div style={{gridRow:1,minWidth:0}}>{blocks(active.blocks)}</div>:<section className="cs-pane cs-pane-scroll" style={{gridRow:2}} aria-label={active.label}>{blocks(active.blocks)}</section>)}
       </div>
-      <div hidden={focus} role="separator" aria-label={t('layoutWidth')} aria-orientation="vertical" aria-valuemin={30} aria-valuemax={70} aria-valuenow={Math.round(split)} tabIndex={focus?-1:0}
+      <div hidden={focus||compare} role="separator" aria-label={t('layoutWidth')} aria-orientation="vertical" aria-valuemin={30} aria-valuemax={70} aria-valuenow={Math.round(split)} tabIndex={focus?-1:0}
         onKeyDown={e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();change({...layout,split:Math.max(30,Math.min(70,split+(e.key==='ArrowRight'?2:-2)))});}}}
         onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);resize(e.clientX);}}
         onPointerMove={e=>{if(e.currentTarget.hasPointerCapture(e.pointerId))resize(e.clientX);}}
         onPointerUp={e=>{if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}}
         className="cs-split"/>
-      <div className="cs-demo-pane" style={{minWidth:0,position:'sticky',top:12}}>{demo(compare)}</div>
+      <div hidden={focus} className="cs-demo-pane" style={{minWidth:0,position:compare?'static':'sticky',top:12,gridColumn:compare?1:undefined}}>{demo(compare)}</div>
     </div>
   </section>;
 }
