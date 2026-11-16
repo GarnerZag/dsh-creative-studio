@@ -7,12 +7,16 @@ export function ArchitectureEditor({project,busy,save,t}:{project:ProjectSnapsho
   const [selected,setSelected]=React.useState(()=>project.architecture[0]?.id ?? newId());
   const [dirty,setDirty]=React.useState(false);
   const choose=(id:string)=>{if(id===selected || !dirty || window.confirm(t('discardEdits'))){setDirty(false);setSelected(id);}};
-  const current=project.architecture.find(item=>item.id===selected);
+  const current=project.architecture.find(item=>item.id===selected);  const lastRev=React.useRef(project.contentRevision);
+  const [savedRev,setSavedRev]=React.useState<number|null>(null);
+  React.useEffect(()=>{if(project.contentRevision===lastRev.current)return;lastRev.current=project.contentRevision;setSavedRev(project.contentRevision);const timer=setTimeout(()=>setSavedRev(null),2600);return()=>clearTimeout(timer);},[project.contentRevision]);
+
   return <section aria-label={t('architecture')}>
     <h3>{t('architecture')}</h3>
     {project.architecture.length===0&&<p className="cs-hint cs-empty-start">{t('architectureEmptyHint')}</p>}
     <ArchitectureMap items={project.architecture} selected={selected} busy={busy} select={choose} t={t}/>
     {project.architecture.length>0&&<p className="cs-hint">{t('architecturePickHint')}</p>}
+    {savedRev!==null&&<p role="status" className="cs-hint">{t('savedNotice').replace('{rev}',String(savedRev))}</p>}
     {(['module','contract','decision','task'] as const).map(kind=>{const items=project.architecture.filter(item=>item.kind===kind);
       if(!items.length&&kind!=='module')return null;
       return <div key={kind}><p className="cs-muted cs-arch-kind">{t(`architecture_${kind}`)}</p>

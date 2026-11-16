@@ -20,6 +20,15 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   React.useEffect(()=>{setEditor(current=>refreshEditor(current,node?.id??null,snapshot()));},[node]);
   const subtreeCount=(id:string)=>{const seen=new Set([id]);let grew=true;while(grew){grew=false;for(const item of project.nodes){if(item.parentId!==null&&seen.has(item.parentId)&&!seen.has(item.id)){seen.add(item.id);grew=true;}}}return seen.size-1;};
   const removePrompt=()=>{if(!node)return t('confirmRemove');const kids=subtreeCount(node.id);if(kids===0)return t('confirmRemove');return t('confirmRemoveBranch').replace('{title}',node.title).replace('{children}',String(kids)).replace('{total}',String(kids+1));};
+  const lastRev = React.useRef(project.contentRevision);
+  const [savedRev, setSavedRev] = React.useState<number|null>(null);
+  React.useEffect(() => {
+    if (project.contentRevision === lastRev.current) return;
+    lastRev.current = project.contentRevision;
+    setSavedRev(project.contentRevision);
+    const timer = setTimeout(() => setSavedRev(null), 2600);
+    return () => clearTimeout(timer);
+  }, [project.contentRevision]);
   const [view,setView]=React.useState<'canvas'|'outline'>('canvas');
   const [dependencyState,setDependencyState]=React.useState<{id:string|null;ids:string[]}>({id:null,ids:[]});
   const dependencyDraft=dependencyState.id===(node?.id??null)?dependencyState.ids:(node?.dependsOn??[]);
@@ -74,6 +83,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
     {editor.conflicts.length>0&&<p role="alert">{t('editorConflict')} <button type="button" disabled={busy} onClick={()=>{if(window.confirm(t('discardEdits')))setEditor(openEditor(node?.id??null,snapshot()));}}>{t('editorReload')}</button></p>}
     <div className="cs-inspector">
       <h4 className="cs-inspector-title">{t('inspectorTitle')}</h4>
+      {savedRev!==null&&<p role="status" className="cs-hint">{t('savedNotice').replace('{rev}',String(savedRev))}</p>}
     {node ? <fieldset disabled={busy||editor.conflicts.length>0} style={{ border: 0, padding: 0, minWidth: 0 }}>
       <legend className="cs-visually-hidden">{t('nodeDetails')}</legend>
       <div className="cs-toolbar"><button type="button" disabled={position<=0} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position-1]!.id})}>{t('moveEarlier')}</button><button type="button" disabled={position<0||position>=siblings.length-1} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position+2]?.id??null})}>{t('moveLater')}</button><button type="button" disabled={busy} onClick={()=>choose(node.parentId)}>{t('selectParent')}</button></div>
