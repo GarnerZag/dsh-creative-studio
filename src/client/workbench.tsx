@@ -18,7 +18,12 @@ export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Sta
   const compare=layout.compare;
   const showRequirementPane=compare&&Boolean(requirementStage);
   const showStagePane=!compare||active.id!=='requirements';
-  const blocks=(list:StageBlock[])=>list.map(block=><section key={block.id} className="cs-block" aria-label={block.label}>{block.content}</section>);
+  const scrollTo=(id:string)=>{const el=document.getElementById('cs-block-'+id);if(!el)return;const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false;el.scrollIntoView({block:'start',behavior:reduce?'auto':'smooth'});};
+  // In-stage jump links: a stage can stack several blocks and the editor alone is taller than the viewport.
+  const blocks=(list:StageBlock[],withNav=false)=><>
+    {withNav&&list.length>1&&<nav className="cs-block-nav" aria-label={t('blocksNav')}>{list.map(block=><button key={block.id} type="button" className="cs-quiet" onClick={()=>scrollTo(block.id)}>{block.label}</button>)}</nav>}
+    {list.map(block=><section key={block.id} id={withNav?`cs-block-${block.id}`:undefined} className="cs-block" aria-label={block.label}>{block.content}</section>)}
+  </>;
   return <section className="cs-workbench">
     <ol className="cs-steps" aria-label={t('stages')}>{stages.map((item,index)=><li key={item.id}><button type="button" aria-current={active.id===item.id?'step':undefined} onClick={()=>setStage(item.id)}><span className="cs-step-index" aria-hidden="true">{index+1}</span>{item.label}{item.badge&&<small className="cs-step-badge">{item.badge}</small>}</button></li>)}</ol>
     <div className="cs-toolbar">
@@ -31,7 +36,7 @@ export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Sta
     <div ref={grid} className="cs-grid" style={{gridTemplateColumns:focus||compare?'minmax(0,1fr)':`minmax(0,${split}fr) 24px minmax(0,${100-split}fr)`,gap:12,marginTop:12,alignItems:'start'}}>
       <div className="cs-stage-body" style={{display:'grid',gridTemplateRows:compare&&!focus?'auto auto':'auto',gap:12,minWidth:0}}>
         {showRequirementPane&&requirementStage&&<section className="cs-pane cs-pane-scroll" style={{gridRow:1}} aria-label={requirementStage.label}>{compare&&<p className="cs-pane-label">{t('paneCompareReference')}</p>}{blocks(requirementStage.blocks)}</section>}
-        {showStagePane&&(!compare?<div style={{gridRow:1,minWidth:0}}>{blocks(active.blocks)}</div>:<section className="cs-pane cs-pane-scroll" style={{gridRow:2}} aria-label={active.label}>{compare&&<p className="cs-pane-label">{t('paneCurrent')}：{active.label}</p>}{blocks(active.blocks)}</section>)}
+        {showStagePane&&(!compare?<div style={{gridRow:1,minWidth:0}}>{blocks(active.blocks,true)}</div>:<section className="cs-pane cs-pane-scroll" style={{gridRow:2}} aria-label={active.label}>{compare&&<p className="cs-pane-label">{t('paneCurrent')}：{active.label}</p>}{blocks(active.blocks)}</section>)}
       </div>
       <div hidden={focus||compare} role="separator" aria-label={t('layoutWidth')} aria-orientation="vertical" aria-valuemin={30} aria-valuemax={70} aria-valuenow={Math.round(split)} tabIndex={focus?-1:0}
         onKeyDown={e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();change({...layout,split:Math.max(30,Math.min(70,split+(e.key==='ArrowRight'?2:-2)))});}}}
