@@ -55,7 +55,7 @@ function JobReplyBlock({jobId,active,t,load,refreshKey,canEnd,endAttempt}:{jobId
   <h4>{t('jobReply')}<button type="button" className="cs-quiet" disabled={loading} onClick={fetchReply}>{t('jobReplyRefresh')}</button></h4>
   {unavailable?<p className="cs-hint">{t('jobReplyNeedsRestart')}</p>:error?<p role="alert" className="cs-error">{error}</p>:reply?.text?<div className="cs-reply-text">{reply.text}{reply.truncated&&<span className="cs-hint"> {t('jobReplyTruncated')}</span>}</div>:<p className="cs-hint">{loading?t('jobReplyLoading'):active?t('jobReplyWaiting'):`${t('jobReplyEmpty')}${reply?`（${t('jobReplyRecords')} ${reply.records??0}）`:''}`}</p>}
   {reply&&(reply.text||reply.running)&&<p className="cs-hint">{reply.running?t('jobReplyRunning'):t('jobReplyEnded')}</p>}
-  {canEnd&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={loading} onClick={endAttempt}>{t('jobReplyEndAttempt')}</button><small className="cs-hint">{t('jobReplyEndHint')}</small></div>}
+  {canEnd&&!reply?.running&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={loading} onClick={endAttempt}>{t('jobReplyEndAttempt')}</button><small className="cs-hint">{t('jobReplyEndHint')}</small></div>}
  </section>;
 }
 export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels,continueJob,abandonJob,editBrief,readReply}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void;continueJob:(jobId:string,answers:string,confirmed:boolean)=>Promise<ProjectSnapshot>;abandonJob:(jobId:string)=>Promise<ProjectSnapshot>;editBrief:(jobId:string,brief:BriefInfo)=>Promise<ProjectSnapshot>;readReply:(jobId:string)=>Promise<JobReply>}):React.ReactElement {
@@ -76,7 +76,7 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
  </details>
  <div className="cs-row-actions"><button disabled={busy||!!active||!request.trim()||!workspace.trim()}>{t('generateProposal')}</button></div>
  </form>{job&&<div role="status" className="cs-job-status"><p>{t('jobProgress')}：{t('job_'+job.status)}</p>{job.status==='unknown'&&<p className="cs-hint">{t('unknownJob')}</p>}<details className="cs-advanced"><summary>{t('techDetails')}</summary><small>{t('sessionId')}：{job.sessionId}</small><br/><small>{t('jobIdLabel')}：{job.id}</small></details></div>}
- {job&&<JobReplyBlock jobId={job.id} active={!!active} t={t} load={readReply} refreshKey={project.projectRevision} canEnd={!!active&&!project.proposals.length} endAttempt={()=>{if(window.confirm(t('jobReplyEndConfirm')))void act(()=>abandonJob(job.id));}}/>}
+ {job&&<JobReplyBlock jobId={job.id} active={!!active} t={t} load={readReply} refreshKey={project.projectRevision} canEnd={!!active} endAttempt={()=>{if(window.confirm(t('jobReplyEndConfirm')))void act(()=>abandonJob(job.id));}}/>}
  {job?.brief&&(editOpen?<BriefEditor brief={job.brief} busy={busy||busyLocal} t={t} cancel={()=>setEditOpen(false)} save={brief=>{void (async()=>{await act(()=>editBrief(job.id,brief));setEditOpen(false);})();}}/>:<>
   <BriefCard brief={job.brief} t={t}/>
   {active&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={busy||busyLocal} onClick={()=>setEditOpen(true)}>{t('briefEdit')}</button></div>}
