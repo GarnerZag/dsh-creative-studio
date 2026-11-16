@@ -4,6 +4,7 @@ import {ResearchPanel} from './research.js';
 import {ReportsPanel} from './reports.js';
 import {HandoffPanel,type HandoffActions} from './handoff.js';
 import {Workbench,type Stage} from './workbench.js';
+import {hasUnsavedEdits} from './dirty.js';
 import {DemoPanel} from './demo.js';
 import {FeaturePanel} from './features.js';
 import type {FeatureChange} from '../types.js';
@@ -168,13 +169,13 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
   return <section className="cs-projects" aria-label={t('projects')}>
     <article>
       <div className="cs-project-head">
+        <button type="button" className="cs-quiet cs-back" disabled={busy} onClick={() => { if(window.confirm(hasUnsavedEdits()?t('discardProjectEdit'):t('confirmProjectChange'))) { setProject(undefined); setHistory(undefined); setSelectedRequirement(null); } }}>← {t('allProjects')}</button>
         <h2 className="cs-project-title">{project.name}</h2>
         <small className="cs-hint">{t('draftRevision')} {project.contentRevision}</small>
         <div className="cs-toolbar cs-history" role="group" aria-label={t('requirementHistory')} title={`${t('historyScope')}${!historyCurrent?` ${t('historyUnavailable')}`:''}`}><button type="button" className="cs-quiet" disabled={busy||!historyCurrent||!history?.past.length} onClick={()=>restore('undo')}>{t('undoRequirements')}</button><button type="button" className="cs-quiet" disabled={busy||!historyCurrent||!history?.future.length} onClick={()=>restore('redo')}>{t('redoRequirements')}</button></div>
         <details className="cs-advanced cs-project-menu">
           <summary>{t('projectSettings')}</summary>
           <div className="cs-row-actions">
-            <button type="button" className="cs-quiet" disabled={busy} onClick={() => { if(window.confirm(t('confirmProjectChange'))) { setProject(undefined); setHistory(undefined); setSelectedRequirement(null); } }}>{t('allProjects')}</button>
             <button type="button" className="cs-quiet" disabled={busy} onClick={()=>setRenaming(project.name)}>{t('renameProject')}</button>
             <button type="button" className="cs-danger" disabled={busy} onClick={()=>{void removeProject();}}>{t('deleteProject')}</button>
           </div>
