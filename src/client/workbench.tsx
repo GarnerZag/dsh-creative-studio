@@ -11,6 +11,9 @@ export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Sta
   const [stage,setStage]=React.useState(stages[0]?.id??'');
   const [focus,setFocus]=React.useState(false);
   const grid=React.useRef<HTMLDivElement>(null);
+  const shell=React.useRef<HTMLElement>(null);
+  const [narrow,setNarrow]=React.useState(false);
+  React.useEffect(()=>{const el=shell.current;if(!el)return;const observer=new ResizeObserver(()=>setNarrow(el.clientWidth<1080));observer.observe(el);setNarrow(el.clientWidth<1080);return()=>observer.disconnect();},[]);
   const split=layout.split;
   const change=(next:typeof layout)=>{setLayout(next);try{localStorage.setItem(key,JSON.stringify(next));}catch{/* storage is optional */}};
   const resize=(x:number)=>{const box=grid.current?.getBoundingClientRect();if(box&&box.width>0)change({...layout,split:Math.max(30,Math.min(70,(x-box.left)/box.width*100))});};
@@ -25,13 +28,14 @@ export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Sta
     {withNav&&list.length>1&&<nav className="cs-block-nav" aria-label={t('blocksNav')}><span className="cs-block-nav-label">{t('blocksNav')}：</span>{list.map(block=><button key={block.id} type="button" className="cs-quiet" onClick={()=>scrollTo(block.id)}>{block.label}</button>)}</nav>}
     {list.map(block=><section key={block.id} id={withNav?`cs-block-${block.id}`:undefined} className="cs-block" aria-label={block.label}>{block.content}</section>)}
   </>;
-  return <section className="cs-workbench">
+  return <section className="cs-workbench" ref={shell}>
     <ol className="cs-steps" aria-label={t('stages')}>{stages.map((item,index)=><li key={item.id}><button type="button" aria-current={active.id===item.id?'step':undefined} onClick={()=>{if(item.id!==stage&&hasUnsavedEdits()&&!window.confirm(t('discardStageEdit')))return;setStage(item.id);}}><span className="cs-step-index" aria-hidden="true">{index+1}</span>{item.label}{item.badge&&<small className="cs-step-badge">{item.badge}</small>}</button></li>)}</ol>
     <div className="cs-toolbar">
-      <button type="button" title={t('layoutExploreHint')} aria-pressed={!compare} onClick={()=>change({...layout,compare:false})}>{t('layoutExplore')}</button>
-      <button type="button" title={t('layoutCompareHint')} aria-pressed={compare} onClick={()=>change({...layout,compare:true})}>{t('layoutCompare')}</button>
-      {!compare&&!focus&&<label className="cs-inline-field" title={t('layoutWidthHint')}><span>{t('layoutWidth')}</span><input type="range" min="30" max="70" value={split} onChange={e=>change({...layout,split:Number(e.target.value)})}/></label>}
+      {!narrow&&<button type="button" title={t('layoutExploreHint')} aria-pressed={!compare} onClick={()=>change({...layout,compare:false})}>{t('layoutExplore')}</button>}
+      {!narrow&&<button type="button" title={t('layoutCompareHint')} aria-pressed={compare} onClick={()=>change({...layout,compare:true})}>{t('layoutCompare')}</button>}
+      {!narrow&&!compare&&!focus&&<label className="cs-inline-field" title={t('layoutWidthHint')}><span>{t('layoutWidth')}</span><input type="range" min="30" max="70" value={split} onChange={e=>change({...layout,split:Number(e.target.value)})}/></label>}
       <button type="button" title={t('layoutFocusHint')} aria-pressed={focus} onClick={()=>setFocus(!focus)}>{t('layoutFocus')}</button>
+      {narrow&&!focus&&<span className="cs-hint cs-narrow-hint">{t('layoutNarrowHint')}</span>}
     </div>
     {!compare&&<p className="cs-hint cs-stage-hint">{active.hint}</p>}
     <div ref={grid} className="cs-grid" style={{gridTemplateColumns:focus||compare?'minmax(0,1fr)':`minmax(0,${split}fr) 24px minmax(0,${100-split}fr)`,gap:12,marginTop:12,alignItems:'start'}}>
