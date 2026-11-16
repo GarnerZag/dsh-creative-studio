@@ -15356,6 +15356,7 @@ ${preset || t2("defaultAgent")}`)) return;
     return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("section", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("h3", { children: t2("handoffTitle") }),
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: t2("handoffExplanation") }),
+      !project2.versions.length && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { role: "status", className: "cs-hint", children: t2("handoffNoVersion") }),
       /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("label", { children: [
         t2("handoffVersion"),
         /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("select", { "aria-label": t2("handoffVersion"), disabled: busy, value: versionId, onChange: (e) => {
@@ -15364,7 +15365,7 @@ ${preset || t2("defaultAgent")}`)) return;
           setReadiness(void 0);
           setError("");
         }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("option", { value: "", children: t2("handoffVersion") }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("option", { value: "", children: t2("handoffSelectPlaceholder") }),
           project2.versions.map((v) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("option", { value: v.id, children: [
             v.label,
             " \xB7 ",
@@ -15460,22 +15461,22 @@ ${preset || t2("defaultAgent")}`)) return;
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "cs-toolbar", children: [
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", title: t2("layoutExploreHint"), "aria-pressed": !compare, onClick: () => change({ ...layout, compare: false }), children: t2("layoutExplore") }),
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", title: t2("layoutCompareHint"), "aria-pressed": compare, onClick: () => change({ ...layout, compare: true }), children: t2("layoutCompare") }),
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("label", { className: "cs-inline-field", title: t2("layoutWidthHint"), children: [
+        !compare && !focus && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("label", { className: "cs-inline-field", title: t2("layoutWidthHint"), children: [
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { children: t2("layoutWidth") }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("input", { type: "range", min: "30", max: "70", value: split, onChange: (e) => change({ ...layout, split: Number(e.target.value) }) })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", title: t2("layoutFocusHint"), "aria-pressed": focus, onClick: () => setFocus(!focus), children: t2("layoutFocus") })
       ] }),
       !compare && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { className: "cs-hint cs-stage-hint", children: active.hint }),
-      /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { ref: grid, className: "cs-grid", style: { gridTemplateColumns: focus ? "minmax(0,1fr)" : `minmax(0,${split}fr) 24px minmax(0,${100 - split}fr)`, gap: 12, marginTop: 12, alignItems: "start" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { hidden: focus, className: "cs-stage-body", style: { display: focus ? "none" : "grid", gridTemplateRows: compare ? "minmax(200px,1fr) minmax(200px,1fr)" : "auto", gap: 12, minWidth: 0 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { ref: grid, className: "cs-grid", style: { gridTemplateColumns: focus || compare ? "minmax(0,1fr)" : `minmax(0,${split}fr) 24px minmax(0,${100 - split}fr)`, gap: 12, marginTop: 12, alignItems: "start" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "cs-stage-body", style: { display: "grid", gridTemplateRows: compare && !focus ? "auto auto" : "auto", gap: 12, minWidth: 0 }, children: [
           showRequirementPane && requirementStage && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("section", { className: "cs-pane cs-pane-scroll", style: { gridRow: 1 }, "aria-label": requirementStage.label, children: blocks(requirementStage.blocks) }),
           showStagePane && (!compare ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { style: { gridRow: 1, minWidth: 0 }, children: blocks(active.blocks) }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("section", { className: "cs-pane cs-pane-scroll", style: { gridRow: 2 }, "aria-label": active.label, children: blocks(active.blocks) }))
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
           "div",
           {
-            hidden: focus,
+            hidden: focus || compare,
             role: "separator",
             "aria-label": t2("layoutWidth"),
             "aria-orientation": "vertical",
@@ -15502,7 +15503,7 @@ ${preset || t2("defaultAgent")}`)) return;
             className: "cs-split"
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "cs-demo-pane", style: { minWidth: 0, position: "sticky", top: 12 }, children: demo2(compare) })
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { hidden: focus, className: "cs-demo-pane", style: { minWidth: 0, position: compare ? "static" : "sticky", top: 12, gridColumn: compare ? 1 : void 0 }, children: demo2(compare) })
       ] })
     ] });
   }
@@ -30584,7 +30585,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         ] })
       ] }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: loading ? t2("jobReplyLoading") : active ? t2("jobReplyWaiting") : `${t2("jobReplyEmpty")}${reply ? `\uFF08${t2("jobReplyRecords")} ${reply.records ?? 0}\uFF09` : ""}` }),
       reply && (reply.text || reply.running) && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: reply.running ? t2("jobReplyRunning") : t2("jobReplyEnded") }),
-      canEnd && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "cs-row-actions", children: [
+      canEnd && !reply?.running && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "cs-row-actions", children: [
         /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { type: "button", className: "cs-quiet", disabled: loading, onClick: endAttempt, children: t2("jobReplyEndAttempt") }),
         /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("small", { className: "cs-hint", children: t2("jobReplyEndHint") })
       ] })
@@ -30686,7 +30687,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           ] })
         ] })
       ] }),
-      job && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(JobReplyBlock, { jobId: job.id, active: !!active, t: t2, load: readReply, refreshKey: project2.projectRevision, canEnd: !!active && !project2.proposals.length, endAttempt: () => {
+      job && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(JobReplyBlock, { jobId: job.id, active: !!active, t: t2, load: readReply, refreshKey: project2.projectRevision, canEnd: !!active, endAttempt: () => {
         if (window.confirm(t2("jobReplyEndConfirm"))) void act(() => abandonJob(job.id));
       } }),
       job?.brief && (editOpen ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(BriefEditor, { brief: job.brief, busy: busy || busyLocal, t: t2, cancel: () => setEditOpen(false), save: (brief) => {
@@ -31508,7 +31509,8 @@ ${r.featureIdeas.join("\n")}` });
         items.flatMap((n) => n.dependsOn.map((id3) => {
           const a = positions.get(n.id), b = positions.get(id3);
           if (!a || !b) return null;
-          return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("path", { d: `M ${a.x + 112} ${a.y + 76} C ${a.x + 112} ${a.y + 100},${b.x + 112} ${b.y - 24},${b.x + 112} ${b.y}`, fill: "none", stroke: "currentColor", opacity: "0.45", markerEnd: `url(#${marker})`, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("title", { children: [
+          const related = !selected || selected === n.id || selected === id3;
+          return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("path", { d: `M ${a.x + 112} ${a.y + 76} C ${a.x + 112} ${a.y + 100},${b.x + 112} ${b.y - 24},${b.x + 112} ${b.y}`, fill: "none", stroke: !selected || related ? "var(--cs-accent)" : "currentColor", strokeWidth: related && selected ? 2 : 1, opacity: !selected ? 0.45 : related ? 0.9 : 0.12, markerEnd: `url(#${marker})`, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("title", { children: [
             n.title,
             " \u2192 ",
             items.find((i) => i.id === id3)?.title
@@ -31849,16 +31851,19 @@ ${r.featureIdeas.join("\n")}` });
       }
     };
     const rows = [];
-    const visit = (parent, depth) => {
+    const visit = (parent, depth, prefix) => {
+      let index = 0;
       for (const n of orderedChildren(project2.nodes, parent)) {
-        rows.push({ id: n.id, depth });
-        visit(n.id, depth + 1);
+        index += 1;
+        const label = prefix ? `${prefix}.${index}` : `${index}`;
+        rows.push({ id: n.id, depth, label });
+        visit(n.id, depth + 1, label);
       }
     };
-    visit(null, 0);
+    visit(null, 0, "");
     const lines = (text) => text.split("\n").map((s) => s.trim()).filter(Boolean);
     return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("section", { className: `cs-editor ${view === "canvas" ? "cs-editor-canvas" : "cs-editor-outline"}`, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("style", { children: `.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start;margin-top:16px}@container (min-width:820px){.creative-studio-root .cs-editor-canvas{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.creative-studio-root .cs-editor-outline{grid-template-columns:minmax(240px,1fr) minmax(260px,1fr)}}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}.creative-studio-root .cs-segmented{display:flex;gap:4px;margin-left:auto}.creative-studio-root .cs-inspector-title{margin:0 0 8px}@media(max-width:1024px){.creative-studio-root .cs-editor{grid-template-columns:minmax(0,1fr)}}` }),
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("style", { children: `.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start;margin-top:16px}@container (min-width:820px){.creative-studio-root .cs-editor-canvas{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.creative-studio-root .cs-editor-outline{grid-template-columns:minmax(240px,1fr) minmax(260px,1fr)}}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}.creative-studio-root .cs-segmented{display:flex;gap:4px;margin-left:auto}.creative-studio-root .cs-outline-no{display:inline-block;min-width:32px;text-align:right;margin-right:8px;color:var(--cs-muted);font-size:var(--cs-text-xs);font-variant-numeric:tabular-nums}.creative-studio-root .cs-inspector-title{margin:0 0 8px}@media(max-width:1024px){.creative-studio-root .cs-editor{grid-template-columns:minmax(0,1fr)}}` }),
       /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-canvas-column", children: [
         /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-toolbar", children: [
           /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", className: "cs-primary", disabled: busy, onClick: () => save({ kind: "add", node: { id: newId(), parentId: selected, title: t2("newRequirement"), kind: "feature", description: "", priority: "normal", dependsOn: [], desktopAcceptance: [], mobileAcceptance: [] } }), children: selected ? t2("addChild") : t2("addRoot") }),
@@ -31868,7 +31873,10 @@ ${r.featureIdeas.join("\n")}` });
             /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", "aria-pressed": view === "outline", onClick: () => setView("outline"), children: t2("outlineView") })
           ] })
         ] }),
-        view === "canvas" ? /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(MindMap, { t: t2, move: (id3, parentId) => save({ kind: "move", id: id3, parentId }), nodes: project2.nodes, selected, select: choose, disabled: busy }) : /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "cs-tree", "aria-label": t2("requirements"), children: rows.map((row) => /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { style: { paddingLeft: row.depth * 24 }, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", disabled: busy, "aria-pressed": selected === row.id, onClick: () => choose(row.id), children: project2.nodes.find((n) => n.id === row.id)?.title }) }, row.id)) }),
+        view === "canvas" ? /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(MindMap, { t: t2, move: (id3, parentId) => save({ kind: "move", id: id3, parentId }), nodes: project2.nodes, selected, select: choose, disabled: busy }) : /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "cs-tree", "aria-label": t2("requirements"), children: rows.map((row) => /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { style: { paddingLeft: row.depth * 24 }, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("button", { type: "button", disabled: busy, "aria-pressed": selected === row.id, onClick: () => choose(row.id), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "cs-outline-no", "aria-hidden": "true", children: row.label }),
+          project2.nodes.find((n) => n.id === row.id)?.title
+        ] }) }, row.id)) }),
         /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2(view === "canvas" ? "canvasHint" : "outlineHint") })
       ] }),
       editor.conflicts.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("p", { role: "alert", children: [
@@ -32811,7 +32819,7 @@ ${r.featureIdeas.join("\n")}` });
     jobReplyEmpty: "\u8FD9\u4E00\u8F6E\u6A21\u578B\u6CA1\u6709\u5199\u51FA\u53EF\u89C1\u7684\u6587\u5B57\u56DE\u590D\u3002\u53EF\u4EE5\u770B\u4E0B\u65B9\u5019\u9009\u65B9\u6848\uFF1B\u5982\u679C\u6CA1\u6709\u5019\u9009\uFF0C\u70B9\u300C\u7ED3\u675F\u8FD9\u6B21\u63A8\u5BFC\u300D\u91CD\u65B0\u5F00\u59CB\u3002",
     jobReplyRecords: "\u8BFB\u53D6\u5230\u5386\u53F2\u8BB0\u5F55",
     jobReplyEndAttempt: "\u7ED3\u675F\u8FD9\u6B21\u63A8\u5BFC",
-    jobReplyEndHint: "\u8FD9\u4E00\u8F6E\u5DF2\u7ECF\u7ED3\u675F\u4F46\u6CA1\u6709\u4EFB\u4F55\u5019\u9009\uFF1B\u7ED3\u675F\u5B83\uFF0C\u8865\u5145\u4FE1\u606F\u540E\u91CD\u65B0\u5F00\u59CB\u3002",
+    jobReplyEndHint: "\u5982\u679C\u8FD9\u4E00\u8F6E\u4E00\u76F4\u6CA1\u7ED9\u51FA\u5019\u9009\uFF0C\u53EF\u4EE5\u7ED3\u675F\u5B83\uFF0C\u8865\u5145\u4FE1\u606F\u540E\u91CD\u65B0\u5F00\u59CB\u3002",
     jobReplyEndConfirm: "\u7ED3\u675F\u8FD9\u6B21\u63A8\u5BFC\uFF1F\u8FD9\u4E00\u8F6E\u7684\u4F1A\u8BDD\u8BB0\u5F55\u4F1A\u4FDD\u7559\uFF0C\u4F46\u4E0D\u4F1A\u518D\u751F\u6210\u5019\u9009\u3002",
     jobReplyNeedsRestart: "\u8BFB\u53D6\u4F1A\u8BDD\u56DE\u590D\u9700\u8981\u91CD\u542F\u4E00\u6B21 dsh web\uFF08Host \u4FA7\u65B0\u7AEF\u70B9\u5C1A\u672A\u52A0\u8F7D\uFF09\u3002",
     jobReplyRunning: "\u4F1A\u8BDD\u4ECD\u5728\u8FD0\u884C\u2026",
@@ -32914,6 +32922,8 @@ ${r.featureIdeas.join("\n")}` });
     handoffTitle: "\u4EA4\u4ED8\u5F00\u53D1",
     handoffExplanation: "\u5BFC\u51FA\u9009\u5B9A\u5BA1\u6279\u7248\u672C\uFF0C\u4E0D\u542B\u5F53\u524D\u8349\u7A3F\u6216\u672A\u51BB\u7ED3\u7684\u53C2\u8003\u8D44\u6599\u3002\u6B64\u5165\u53E3\u4E0D\u4F1A\u542F\u52A8\u5F00\u53D1\u3002",
     handoffVersion: "\u9009\u62E9\u5BA1\u6279\u7248\u672C",
+    handoffSelectPlaceholder: "\u8BF7\u9009\u62E9\u4E00\u4E2A\u5DF2\u51BB\u7ED3\u7684\u7248\u672C",
+    handoffNoVersion: "\u8FD8\u6CA1\u6709\u51BB\u7ED3\u8FC7\u5BA1\u6279\u7248\u672C\u3002\u8BF7\u5148\u5230\u300C\u5BA1\u6279\u300D\u9636\u6BB5\u6279\u51C6\u5E76\u51BB\u7ED3\u4E00\u7248\uFF0C\u518D\u56DE\u6765\u5BFC\u51FA\u4EA4\u63A5\u5305\u3002",
     handoffCheck: "\u68C0\u67E5\u5C31\u7EEA\u72B6\u6001",
     handoffReady: "\u53EF\u4EA4\u63A5\uFF08\u542F\u52A8\u5F00\u53D1\u4ECD\u9700\u786E\u8BA4\uFF09",
     handoffReviewOnly: "\u4EC5\u4F9B\u8BC4\u5BA1\uFF0C\u4E0D\u53EF\u76F4\u63A5\u5B9E\u65BD",
@@ -33073,7 +33083,7 @@ ${r.featureIdeas.join("\n")}` });
     canvasView: "\u753B\u5E03",
     outlineView: "\u5927\u7EB2",
     canvasHint: "\u62D6\u52A8\u5361\u7247\u5DE6\u4FA7\u7684\u624B\u67C4\u53EF\u6539\u7236\u5B50\u5173\u7CFB\uFF1B\u70B9\u9009\u5361\u7247\u540E\u5728\u53F3\u4FA7\u68C0\u67E5\u5668\u91CC\u7F16\u8F91\u5185\u5BB9\u3002",
-    outlineHint: "\u5927\u7EB2\u89C6\u56FE\u7528\u4E8E\u5FEB\u901F\u6392\u5E8F\u3001\u6539\u540D\u4E0E\u6279\u91CF\u6838\u5BF9\u5C42\u7EA7\uFF1B\u5207\u6362\u56DE\u753B\u5E03\u53EF\u770B\u7ED3\u6784\u3002",
+    outlineHint: "\u5927\u7EB2\u6309\u5C42\u7EA7\u5217\u51FA\u9700\u6C42\u5E76\u81EA\u52A8\u7F16\u53F7\uFF1B\u70B9\u9009\u540E\u5728\u53F3\u4FA7\u68C0\u67E5\u5668\u91CC\u6539\u540D\u3001\u8C03\u987A\u5E8F\u6216\u6539\u7236\u8282\u70B9\uFF0C\u5207\u6362\u56DE\u753B\u5E03\u53EF\u770B\u7ED3\u6784\u3002",
     selectParent: "\u9009\u4E2D\u5176\u7236\u8282\u70B9",
     dragAlternativeHint: "\u4E5F\u53EF\u4EE5\u4E0D\u7528\u62D6\u52A8\uFF1A\u7528\u201C\u540C\u7EA7\u4E0A\u79FB/\u4E0B\u79FB\u201D\u8C03\u6574\u987A\u5E8F\uFF0C\u6216\u7528\u4E0B\u65B9\u201C\u7236\u8282\u70B9\u201D\u4E0B\u62C9\u76F4\u63A5\u6539\u7236\u7EA7\u3002",
     working: "\u5904\u7406\u4E2D\u2026",

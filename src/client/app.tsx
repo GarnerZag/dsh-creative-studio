@@ -149,6 +149,7 @@ const styles = `
 .creative-studio-root .cs-onboarding strong{font-size:var(--cs-text-md);font-weight:600}
 .creative-studio-root .cs-onboarding span{font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted)}
 @media (max-width:900px){.creative-studio-root .cs-onboarding{grid-template-columns:minmax(0,1fr)}}
+.creative-studio-root .cs-pane-label{margin:0 0 8px;font-size:var(--cs-text-xs);letter-spacing:.02em;color:var(--cs-muted)}
 .creative-studio-root .cs-card-flag{color:var(--cs-accent-text,var(--cs-muted));font-weight:500}
 .creative-studio-root .cs-id-list li{display:flex;gap:8px;align-items:baseline;padding:4px 0;font-size:var(--cs-text-sm)}
 .creative-studio-root .cs-id-list small{color:var(--cs-muted);font-size:var(--cs-text-xs)}
