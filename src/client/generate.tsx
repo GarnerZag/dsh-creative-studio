@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {researchSeed} from './research-seed.js';
 import {ModelSelect} from './model-picker.js';
-import type {WorkspaceOption,ProjectSnapshot,ModelCatalogView,ModelChoice,BriefInfo} from '../types.js';
+import type {WorkspaceOption,ProjectSnapshot,ModelCatalogView,ModelChoice,BriefInfo,JobReply} from '../types.js';
 function BriefCard({brief,t}:{brief:BriefInfo;t:(key:string)=>string}):React.ReactElement {
  const list=(label:string,items:string[],ordered=false):React.ReactElement|null=>items.length===0?null:<>
   <dt>{label}</dt>
@@ -46,7 +46,17 @@ function BriefEditor({brief,busy,t,save,cancel}:{brief:BriefInfo;busy:boolean;t:
   </form>
  </section>;
 }
-export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels,continueJob,abandonJob,editBrief}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void;continueJob:(jobId:string,answers:string,confirmed:boolean)=>Promise<ProjectSnapshot>;abandonJob:(jobId:string)=>Promise<ProjectSnapshot>;editBrief:(jobId:string,brief:BriefInfo)=>Promise<ProjectSnapshot>}):React.ReactElement {
+function JobReplyBlock({jobId,t,load,refreshKey}:{jobId:string;t:(key:string)=>string;load:(jobId:string)=>Promise<JobReply>;refreshKey:number}):React.ReactElement {
+ const [reply,setReply]=React.useState<JobReply|null>(null),[error,setError]=React.useState(''),[loading,setLoading]=React.useState(false);
+ const fetchReply=React.useCallback(()=>{setLoading(true);setError('');void load(jobId).then(value=>setReply(value)).catch(e=>setError(e instanceof Error?e.message:String(e))).finally(()=>setLoading(false));},[jobId,load]);
+ React.useEffect(()=>{fetchReply();},[fetchReply,refreshKey]);
+ return <section className="cs-reply" aria-label={t('jobReply')}>
+  <h4>{t('jobReply')}<button type="button" className="cs-quiet" disabled={loading} onClick={fetchReply}>{t('jobReplyRefresh')}</button></h4>
+  {error?<p role="alert" className="cs-error">{error}</p>:reply?.text?<div className="cs-reply-text">{reply.text}{reply.truncated&&<span className="cs-hint"> {t('jobReplyTruncated')}</span>}</div>:<p className="cs-hint">{loading?t('jobReplyRunning'):t('jobReplyEmpty')}</p>}
+  {reply&&<p className="cs-hint">{reply.running?t('jobReplyRunning'):t('jobReplyEnded')}</p>}
+ </section>;
+}
+export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels,continueJob,abandonJob,editBrief,readReply}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void;continueJob:(jobId:string,answers:string,confirmed:boolean)=>Promise<ProjectSnapshot>;abandonJob:(jobId:string)=>Promise<ProjectSnapshot>;editBrief:(jobId:string,brief:BriefInfo)=>Promise<ProjectSnapshot>;readReply:(jobId:string)=>Promise<JobReply>}):React.ReactElement {
  const [request,setRequest]=React.useState(''),[workspace,setWorkspace]=React.useState(''),[model,setModel]=React.useState<ModelChoice|undefined>(undefined);
  const [workspaces,setWorkspaces]=React.useState<WorkspaceOption[]>([]),[workspaceError,setWorkspaceError]=React.useState(''),[refreshKey,setRefreshKey]=React.useState(0);
  const [answers,setAnswers]=React.useState(''),[lastProject,setLastProject]=React.useState<ProjectSnapshot>(project),[busyLocal,setBusyLocal]=React.useState(false),[error,setError]=React.useState(''),[editOpen,setEditOpen]=React.useState(false);
@@ -62,6 +72,7 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
   <label>{t('roughIdea')}<textarea rows={4} value={request} onChange={e=>setRequest(e.target.value)} disabled={busy||!!active}/></label>
  <button disabled={busy||!!active||!request.trim()||!workspace.trim()}>{t('generateProposal')}</button>
  </form>{job&&<div role="status"><p>{t('jobStatus')}: {t('job_'+job.status)}</p><small>{t('sessionId')}: {job.sessionId}</small>{job.status==='unknown'&&<p>{t('unknownJob')}</p>}</div>}
+ {job&&<JobReplyBlock jobId={job.id} t={t} load={readReply} refreshKey={project.projectRevision}/>}
  {job?.brief&&(editOpen?<BriefEditor brief={job.brief} busy={busy||busyLocal} t={t} cancel={()=>setEditOpen(false)} save={brief=>{void (async()=>{await act(()=>editBrief(job.id,brief));setEditOpen(false);})();}}/>:<>
   <BriefCard brief={job.brief} t={t}/>
   {active&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={busy||busyLocal} onClick={()=>setEditOpen(true)}>{t('briefEdit')}</button></div>}

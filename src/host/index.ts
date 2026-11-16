@@ -13,11 +13,12 @@ import { requireUserAuthority } from './authority.js';
 
 import {HandoffStore,StoredHandoffSchema,type StoredHandoff} from './handoff-store.js';
 import {checkHandoff} from '../domain/handoff.js';
-import type { BriefInfo, ModelCatalogView, ModelChoice, WorkspaceOption,HandoffInfo,HandoffChunk,HandoffReadinessResult,DemoSceneData, StudioHealth, ProjectHead, ProjectSnapshot, RequirementChange, ArchitectureChange, ProposalInput, ReferenceChange, FeatureChange } from '../types.js';
+import type { BriefInfo, JobReply, ModelCatalogView, ModelChoice, WorkspaceOption,HandoffInfo,HandoffChunk,HandoffReadinessResult,DemoSceneData, StudioHealth, ProjectHead, ProjectSnapshot, RequirementChange, ArchitectureChange, ProposalInput, ReferenceChange, FeatureChange } from '../types.js';
 import { defineDomain, domainTable } from '@deepseek-ai/dsh-storage-domain';
 import { ProjectSchema, type Project } from '../domain/project.js';
 import { ProjectStore } from './store.js';
 import { continueProposal, startProposal, type ProposalSessionGateway } from './proposal-runner.js';
+import { extractReply } from './session-reply.js';
 import { proposalTools, proposalGuard, type ProposalToolRegistry } from './proposal-tools.js';
 
 declare module '@deepseek-ai/cordis' {
@@ -203,6 +204,18 @@ export default class CreativeStudio extends TypertRemoteService {
     if(!sessions) throw new Error('SESSION_SERVICE_UNAVAILABLE');
     await startProposal(store,sessions,{projectId:id,expectedProjectRevision,request,workspaceId,...(model?{model}:{})},signal);
     return store.get(id);
+  }
+
+  @Remote
+  async readJobReply(id:string, jobId:string):Promise<JobReply> {
+    const job=this.userStore().get(id).proposalJob;
+    if(!job||job.id!==jobId) throw new Error('JOB_SCOPE_MISMATCH');
+    type Wait=(request:{sessionId:string;timeoutMs?:number;maxMessages?:number})=>Promise<{reason:'idle'|'input-required'|'timeout';state:{running:boolean};output:{records:readonly {type?:string;data?:unknown}[];truncated:boolean}}>;
+    const sessions=this.ctx.get('sessionController') as {wait?:Wait}|undefined;
+    if(!sessions?.wait) throw new Error('SESSION_SERVICE_UNAVAILABLE');
+    const value=await sessions.wait({sessionId:job.sessionId,timeoutMs:0,maxMessages:6});
+    const reply=extractReply(value.output.records,value.output.truncated);
+    return {text:reply.text,truncated:reply.truncated,running:value.state.running,reason:value.reason};
   }
 
   @Remote

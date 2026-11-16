@@ -79,6 +79,8 @@ export interface DemoSceneData {
 export interface DevelopmentDispatchInfo {id:string;handoffId:string;versionId:string;workspaceId:string;relativeDirectory:string;sessionId:string;agentPreset:string;entryRelativePath:string;status:'preparing'|'copied'|'submitted'|'unknown'|'failed'}
 export interface ImplementationReportInfo{id:string;dispatchId:string;handoffId:string;taskId:string;acceptanceIds:string[];summary:string;changedFiles:string[];testEvidence:string[];unfinished:string[];userAccepted:boolean}
 export interface ResearchJobInfo {id:string;sessionId:string;reference:ProductReference;request:string;status:'queued'|'submitted'|'finished'|'failed'|'unknown';evidence:{callId:string;tool:string}[];conclusion:{summary:string;evidenceCallIds:string[];limitations:string[]}|null}
+/** Last visible answer of a job session, so a stopped session is never a blank screen. */
+export interface JobReply { text:string; truncated:boolean; running:boolean; reason:'idle'|'input-required'|'timeout' }
 /** Structured restatement of the user's raw input, produced before any requirements. */
 export interface BriefInfo {
   intent:'product'|'operation'|'unclear';
