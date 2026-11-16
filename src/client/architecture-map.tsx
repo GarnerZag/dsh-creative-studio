@@ -11,9 +11,16 @@ export function ArchitectureMap({items,selected,busy,select,t}:{items:Architectu
  React.useEffect(()=>{const el=box.current;if(!el)return;const ro=new ResizeObserver(()=>setAvail(el.clientWidth));ro.observe(el);setAvail(el.clientWidth);return()=>ro.disconnect();},[]);
  const width=1100,height=Math.max(160,rows*108+60);
  const scale=avail>0?Math.min(1,Math.max(0.85,(avail-2)/width)):1;
- const readRows=Math.min(rows,3);
- const maxHeight=Math.ceil((48+(readRows-1)*108+76+8)*scale);
- React.useEffect(()=>{const el=box.current;const p=positions.get(selected);if(!el||!p)return;el.scrollTo({left:Math.max(0,p.x*scale-20),top:Math.max(0,p.y*scale-12),behavior:'smooth'});},[selected,scale]);
+ const limit=440;
+ const fitRows=Math.max(1,Math.floor((limit/scale-48-76-8)/108)+1);
+ const readRows=Math.min(rows,fitRows);
+ const maxHeight=Math.min(limit,Math.ceil((48+(readRows-1)*108+76+8)*scale));
+ React.useEffect(()=>{const el=box.current;const p=positions.get(selected);if(!el||!p)return;if(!el.clientHeight)return;
+  // Only move when the card is actually out of view, so focusing the first row does not clip the last one.
+  const left=Math.max(0,p.x*scale-20);const top=Math.max(0,p.y*scale-12);
+  const outX=left<el.scrollLeft||left+230>el.scrollLeft+el.clientWidth;
+  const outY=top<el.scrollTop||top+80>el.scrollTop+el.clientHeight;
+  if(outX||outY)el.scrollTo({left,top,behavior:'smooth'});},[selected,scale]);
  return <div style={{marginBlock:12}}><div ref={box} style={{overflow:'auto',maxHeight}}><div style={{width:Math.ceil(width*scale),height:Math.ceil(height*scale)}}><svg width={width} height={height} style={{display:'block',transform:`scale(${scale})`,transformOrigin:'top left'}} aria-label={t('architectureGraph')} role="group">
  <defs><marker id={marker} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker></defs>
  {kinds.map((kind,i)=><text key={kind} x={20+i*270} y={24} fill="currentColor">{t(`architecture_${kind}`)}</text>)}
