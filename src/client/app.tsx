@@ -121,7 +121,7 @@ const styles = `
 .creative-studio-root .cs-project-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 12px;margin:0 0 8px}
 .creative-studio-root .cs-project-head .cs-project-title{grid-column:1}
 .creative-studio-root .cs-project-head>.cs-hint{grid-column:1}
-.creative-studio-root .cs-project-head .cs-toolbar{margin:0};.creative-studio-root .cs-project-head>.cs-back{grid-column:1/-1;justify-self:start;margin:0 0 4px;padding-left:0;font-size:var(--cs-text-sm)}
+.creative-studio-root .cs-project-head .cs-toolbar{margin:0}
 .creative-studio-root .cs-project-title{margin:0}
 .creative-studio-root .cs-table-wrap{overflow-x:auto;border:1px solid var(--cs-border);border-radius:12px;margin:0 0 16px}
 .creative-studio-root .cs-table{border-collapse:collapse;width:100%;font-size:var(--cs-text-sm);line-height:20px}
