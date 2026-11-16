@@ -62,6 +62,7 @@ export const ProposalJobSchema = z.object({
   id, sessionId:id, request:z.string().trim().min(1), baseContentRevision:z.number().int().nonnegative(),
   nodes:z.array(RequirementSchema), architecture:z.array(ArchitectureItemSchema),
   brief: BriefSchema.nullable().default(null),
+  briefConfirmedAt: z.iso.datetime().nullable().default(null),
   status:z.enum(['queued','submitted','finished','failed','unknown']),
 }).strict();
 export const ReferenceSchema=z.object({

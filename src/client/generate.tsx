@@ -46,7 +46,7 @@ function BriefEditor({brief,busy,t,save,cancel}:{brief:BriefInfo;busy:boolean;t:
   </form>
  </section>;
 }
-export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels,continueJob,abandonJob,editBrief}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void;continueJob:(jobId:string,answers:string)=>Promise<ProjectSnapshot>;abandonJob:(jobId:string)=>Promise<ProjectSnapshot>;editBrief:(jobId:string,brief:BriefInfo)=>Promise<ProjectSnapshot>}):React.ReactElement {
+export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels,continueJob,abandonJob,editBrief}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void;continueJob:(jobId:string,answers:string,confirmed:boolean)=>Promise<ProjectSnapshot>;abandonJob:(jobId:string)=>Promise<ProjectSnapshot>;editBrief:(jobId:string,brief:BriefInfo)=>Promise<ProjectSnapshot>}):React.ReactElement {
  const [request,setRequest]=React.useState(''),[workspace,setWorkspace]=React.useState(''),[model,setModel]=React.useState<ModelChoice|undefined>(undefined);
  const [workspaces,setWorkspaces]=React.useState<WorkspaceOption[]>([]),[workspaceError,setWorkspaceError]=React.useState(''),[refreshKey,setRefreshKey]=React.useState(0);
  const [answers,setAnswers]=React.useState(''),[lastProject,setLastProject]=React.useState<ProjectSnapshot>(project),[busyLocal,setBusyLocal]=React.useState(false),[error,setError]=React.useState(''),[editOpen,setEditOpen]=React.useState(false);
@@ -66,10 +66,12 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
   <BriefCard brief={job.brief} t={t}/>
   {active&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={busy||busyLocal} onClick={()=>setEditOpen(true)}>{t('briefEdit')}</button></div>}
  </>)}
- {job&&active&&job.brief&&job.brief.intent!=='product'&&<div className="cs-brief-actions">
+ {job&&active&&job.brief&&<div className="cs-brief-actions">
   <label>{t('briefAnswers')}<textarea rows={3} value={answers} onChange={e=>setAnswers(e.target.value)} placeholder={t('briefAnswersHint')} disabled={busy||busyLocal}/></label>
   <div className="cs-row-actions">
-   <button type="button" disabled={busy||busyLocal||!answers.trim()} onClick={()=>{if(window.confirm(t('briefContinueConfirm')))void act(()=>continueJob(job.id,answers.trim()));}}>{t('briefContinue')}</button>
+   {job.brief.intent==='product'
+    ? <button type="button" disabled={busy||busyLocal||!!job.briefConfirmedAt} onClick={()=>{if(window.confirm(t('briefConfirmConfirm')))void act(()=>continueJob(job.id,answers.trim(),true));}}>{job.briefConfirmedAt?t('briefConfirmed'):t('briefConfirm')}</button>
+    : <button type="button" disabled={busy||busyLocal||!answers.trim()} onClick={()=>{if(window.confirm(t('briefContinueConfirm')))void act(()=>continueJob(job.id,answers.trim(),false));}}>{t('briefContinue')}</button>}
    <button type="button" className="cs-quiet" disabled={busy||busyLocal} onClick={()=>{if(window.confirm(t('briefAbandonConfirm')))void act(()=>abandonJob(job.id));}}>{t('briefAbandon')}</button>
   </div>
   {error&&<p role="alert" className="cs-error">{error}</p>}

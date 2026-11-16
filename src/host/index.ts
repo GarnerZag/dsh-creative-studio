@@ -211,12 +211,18 @@ export default class CreativeStudio extends TypertRemoteService {
   }
 
   @Remote
-  async continueProposalJob(id:string, expectedProjectRevision:number, jobId:string, answers:string, signal:AbortSignal):Promise<ProjectSnapshot> {
+  async continueProposalJob(id:string, expectedProjectRevision:number, jobId:string, answers:string, confirmed:boolean, signal:AbortSignal):Promise<ProjectSnapshot> {
     const store=this.userStore();
-    if(!answers.trim()) throw new Error('ANSWERS_REQUIRED');
+    if(!confirmed&&!answers.trim()) throw new Error('ANSWERS_REQUIRED');
     const sessions=this.ctx.get('sessionController') as ProposalSessionGateway|undefined;
     if(!sessions) throw new Error('SESSION_SERVICE_UNAVAILABLE');
-    await continueProposal(store,sessions,{projectId:id,expectedProjectRevision,jobId,answers},signal);
+    // Confirming is a user action on this call: freeze it before the session may propose.
+    let project=store.get(id);
+    if(project.projectRevision!==expectedProjectRevision) throw new Error('CONFLICT');
+    if(project.proposalJob?.id!==jobId) throw new Error('JOB_SCOPE_MISMATCH');
+    if(confirmed&&!project.proposalJob.briefConfirmedAt)
+      project=await store.confirmJobBrief(id,project.projectRevision,jobId,new Date().toISOString());
+    await continueProposal(store,sessions,{projectId:id,expectedProjectRevision:project.projectRevision,jobId,answers,confirmed},signal);
     return store.get(id);
   }
 

@@ -94,7 +94,7 @@ export interface ProjectSnapshot extends ProjectHead {
   demo:DemoSceneData|null;
   features:FeatureNote[];
   references:ProductReference[];
-  proposalJob: {id:string;sessionId:string;request:string;baseContentRevision:number;status:'queued'|'submitted'|'finished'|'failed'|'unknown';brief:BriefInfo|null;nodes:RequirementNode[];architecture:ArchitectureNode[]}|null;
+  proposalJob: {id:string;sessionId:string;request:string;baseContentRevision:number;status:'queued'|'submitted'|'finished'|'failed'|'unknown';brief:BriefInfo|null;briefConfirmedAt:string|null;nodes:RequirementNode[];architecture:ArchitectureNode[]}|null;
   proposals: Proposal[];
   versions: ApprovedVersion[];
   schemaVersion: 1;

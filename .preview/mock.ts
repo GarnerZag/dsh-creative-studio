@@ -122,7 +122,22 @@ export const project: ProjectSnapshot = {
       evidenceCallIds: ['c1'], limitations: ['未验证其内部实现，仅基于页面与文档推断。'],
     },
   },
-  proposalJob: null,
+  proposalJob: {
+    id:'job-demo', sessionId:'sess-demo', request:'读取另一个会话里进行到一半的开发工作', baseContentRevision:7,
+    status:'submitted',
+    brief:{
+      intent:'operation',
+      restated:'你现在需要的是把这个项目在另一个会话里已经推进到的开发成果接上，而不是从零再推导一遍需求。',
+      interpretation:'这条输入是给我的操作指令（读取另一个会话），不是产品要解决的问题，所以按 operation 处理，不生成候选需求。',
+      goals:[], users:[], scenarios:[], constraints:['插件不能跨会话读取内容，只能读取当前项目已保存的草稿与已冻结版本'],
+      unknowns:['另一个会话推进到了哪一步、产物在哪里'],
+      questions:['那个会话的关键结论或产出能否导出成文件放到 Host？','是否可以把其中已完成的需求直接登记为当前草稿的参考来源？'],
+      needs:['另一个会话的结论摘要或产出文件路径','可作为参考来源登记的本地文件或仓库地址'],
+      createdAt:'2026-11-16T04:20:00.000Z',
+    },
+    nodes:[],
+    architecture:[],
+  },
 };
 
 export const heads: ProjectHead[] = [
@@ -135,6 +150,10 @@ const ok = async (): Promise<ProjectSnapshot> => project;
 export const actions: ProjectActions = {
   reject: ok, rename: ok, evidence: async () => ({ text: 'raw evidence', nextOffset: null, total: 1 }),
   research: ok, acceptReport: ok, listWorkspaces: async () => [{ id: 'ws1', title: 'dsh运维', path: '/dsh-home/dsh运维' }],
+  listModels: async () => ({ default: { provider: 'deepseek', model: 'deepseek-reasoner', reasoningEffort: 'high' }, options: [
+    { provider: 'deepseek', providerName: 'DeepSeek', model: 'deepseek-chat', name: 'deepseek-chat' },
+    { provider: 'deepseek', providerName: 'DeepSeek', model: 'deepseek-reasoner', name: 'deepseek-reasoner', description: '扩展思考，适合架构推导', reasoningEfforts: [{ id: 'low', name: '低' }, { id: 'medium', name: '中' }, { id: 'high', name: '高' }], defaultEffort: 'high' },
+  ], failures: [] }),
   handoff: {
     readiness: async () => ({ versionId: 'v1', ready: true, blockers: [], warnings: [] }),
     export: async () => ({ handoffId: 'h1', projectId: 'p1', versionId: 'v1', ready: true, manifestDigest: 'sha256:abc', archiveSha256: 'sha256:def', size: 5425 }),
@@ -145,6 +164,7 @@ export const actions: ProjectActions = {
     send: ok, get: ok,
   },
   confirmTasks: ok, demo: ok, feature: ok, reference: ok, generate: ok,
+  continueProposal: ok, abandonProposal: ok,
   list: async () => heads, adopt: ok, approve: ok, create: ok, get: async () => project, remove: async () => heads,
   architecture: ok, edit: ok,
 };

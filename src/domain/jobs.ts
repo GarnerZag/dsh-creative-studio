@@ -4,7 +4,7 @@ export function beginProposalJob(current:Project,id:string,sessionId:string,requ
  const project=validateProject(current);
  if(project.proposalJob && !['finished','failed'].includes(project.proposalJob.status)) throw new Error('JOB_ALREADY_ACTIVE');
  project.proposalSessions=[...new Set([...project.proposalSessions,...(project.proposalJob?[project.proposalJob.sessionId]:[]),sessionId])];
- project.proposalJob={id,sessionId,request,baseContentRevision:project.contentRevision,nodes:structuredClone(project.nodes),architecture:structuredClone(project.architecture),brief:null,status:'queued'};
+ project.proposalJob={id,sessionId,request,baseContentRevision:project.contentRevision,nodes:structuredClone(project.nodes),architecture:structuredClone(project.architecture),brief:null,briefConfirmedAt:null,status:'queued'};
  project.projectRevision++;
  return validateProject(project);
 }
@@ -15,6 +15,8 @@ export function submitJobBrief(current:Project,sessionId:string,jobId:string,bri
  if(!['queued','submitted','unknown'].includes(job.status)) throw new Error('JOB_NOT_ACTIVE');
  const next=structuredClone(current);
  next.proposalJob!.brief=brief;
+ // A corrected understanding must be confirmed again before it can produce requirements.
+ next.proposalJob!.briefConfirmedAt=null;
  next.projectRevision++;
  return validateProject(next);
 }
@@ -25,6 +27,8 @@ export function editJobBrief(current:Project,jobId:string,brief:Brief):Project {
  if(!['queued','submitted','unknown'].includes(job.status)) throw new Error('JOB_NOT_ACTIVE');
  const next=structuredClone(current);
  next.proposalJob!.brief=brief;
+ // A corrected understanding must be confirmed again before it can produce requirements.
+ next.proposalJob!.briefConfirmedAt=null;
  next.projectRevision++;
  return validateProject(next);
 }
@@ -38,6 +42,17 @@ export function abandonProposalJob(current:Project,jobId:string):Project {
  next.projectRevision++;
  return validateProject(next);
 }
+/** The user confirms the understanding; only then may the session submit requirements. */
+export function confirmJobBrief(current:Project,jobId:string,confirmedAt:string):Project {
+ const job=current.proposalJob;
+ if(!job || job.id!==jobId) throw new Error('JOB_SCOPE_MISMATCH');
+ if(!['queued','submitted','unknown'].includes(job.status)) throw new Error('JOB_NOT_ACTIVE');
+ if(!job.brief) throw new Error('PROPOSAL_BRIEF_REQUIRED');
+ const next=structuredClone(current);
+ next.proposalJob!.briefConfirmedAt=confirmedAt;
+ next.projectRevision++;
+ return validateProject(next);
+}
 export function submitJobProposal(current:Project,sessionId:string,jobId:string,input:ProposalInput):Project {
  const job=current.proposalJob;
  if(!job || job.sessionId!==sessionId || job.id!==jobId) throw new Error('JOB_SCOPE_MISMATCH');
@@ -45,6 +60,8 @@ export function submitJobProposal(current:Project,sessionId:string,jobId:string,
  if(!job.brief) throw new Error('PROPOSAL_BRIEF_REQUIRED');
  // An instruction addressed to the studio is not a product idea: never invent requirements from it.
  if(job.brief.intent!=='product') throw new Error('PROPOSAL_REQUIRES_PRODUCT_INTENT');
+ // Nothing becomes a candidate requirement until the user confirms the understanding.
+ if(!job.briefConfirmedAt) throw new Error('PROPOSAL_CONFIRMATION_REQUIRED');
  if(input.baseContentRevision!==job.baseContentRevision) throw new Error('JOB_BASE_MISMATCH');
  const next=saveProposal(current,input);
  next.proposalJob!.status='finished';

@@ -32,7 +32,7 @@ export interface ProjectActions {
   feature(project:ProjectSnapshot,change:FeatureChange):Promise<ProjectSnapshot>;
   reference(project:ProjectSnapshot,change:ReferenceChange):Promise<ProjectSnapshot>;
   generate(project:ProjectSnapshot,request:string,workspaceId:string,model?:import('../types.js').ModelChoice):Promise<ProjectSnapshot>;
-  continueProposal(project:ProjectSnapshot,jobId:string,answers:string):Promise<ProjectSnapshot>;
+  continueProposal(project:ProjectSnapshot,jobId:string,answers:string,confirmed:boolean):Promise<ProjectSnapshot>;
   abandonProposal(project:ProjectSnapshot,jobId:string):Promise<ProjectSnapshot>;
   editBrief(project:ProjectSnapshot,jobId:string,brief:import('../types.js').BriefInfo):Promise<ProjectSnapshot>;
   list(): Promise<ProjectHead[]>;
@@ -127,7 +127,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
   };
   const stages:Stage[]=project?[
     {id:'idea',label:t('stageIdea'),hint:t('stageHintIdea'),blocks:[
-      {id:'generate',label:t('generateTitle'),content:<GeneratePanel listWorkspaces={api.listWorkspaces} listModels={api.listModels} key={`generate-${project.id}`} project={project} busy={busy} t={t} generate={(request,workspaceId,model)=>{void run(()=>api.generate(project,request,workspaceId,model));}} refresh={()=>{void run(()=>api.get(project.id));}} continueJob={async(jobId,answers)=>api.continueProposal(project,jobId,answers)} abandonJob={async jobId=>api.abandonProposal(project,jobId)} editBrief={async(jobId,brief)=>api.editBrief(project,jobId,brief)}/>},
+      {id:'generate',label:t('generateTitle'),content:<GeneratePanel listWorkspaces={api.listWorkspaces} listModels={api.listModels} key={`generate-${project.id}`} project={project} busy={busy} t={t} generate={(request,workspaceId,model)=>{void run(()=>api.generate(project,request,workspaceId,model));}} refresh={()=>{void run(()=>api.get(project.id));}} continueJob={async(jobId,answers,confirmed)=>api.continueProposal(project,jobId,answers,confirmed)} abandonJob={async jobId=>api.abandonProposal(project,jobId)} editBrief={async(jobId,brief)=>api.editBrief(project,jobId,brief)}/>},
       {id:'proposals',label:t('proposals'),content:<ProposalPanel registerReference={reference=>{void run(()=>api.reference(project,{kind:'save',reference}));}} reject={id=>{void run(()=>api.reject(project,id));}} key={`proposals-${project.id}`} project={project} busy={busy} t={t} adopt={id=>{void run(()=>api.adopt(project,id),true);}}/>},
     ]},
     {id:'requirements',label:t('stageRequirements'),hint:t('stageHintRequirements'),blocks:[

@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createProject} from '../../src/domain/project.js';
-import {abandonProposalJob,beginProposalJob,editJobBrief,submitJobBrief,submitJobProposal} from '../../src/domain/jobs.js';
+import {abandonProposalJob,beginProposalJob,confirmJobBrief,editJobBrief,submitJobBrief,submitJobProposal} from '../../src/domain/jobs.js';
 const brief=(intent:'product'|'operation'|'unclear')=>({intent,restated:'整理需求',interpretation:'判断依据',goals:[],users:[],scenarios:[],constraints:[],unknowns:[],questions:[],needs:[],createdAt:new Date().toISOString()});
 test('job output binds to exact session and original draft, not model-supplied scope',()=>{
  const p=beginProposalJob(createProject('p','产品'),'job','session','整理需求');
@@ -13,7 +13,11 @@ test('job output binds to exact session and original draft, not model-supplied s
  assert.throws(()=>submitJobProposal(p,'session','job',input),/PROPOSAL_BRIEF_REQUIRED/);
  const briefed=submitJobBrief(p,'session','job',brief('product'));
  assert.equal(briefed.proposals.length,0);assert.equal(briefed.proposalJob!.brief!.intent,'product');
- const done=submitJobProposal(briefed,'session','job',input);
+ // Nothing becomes a requirement before the user confirms the understanding.
+ assert.throws(()=>submitJobProposal(briefed,'session','job',input),/PROPOSAL_CONFIRMATION_REQUIRED/);
+ const confirmed=confirmJobBrief(briefed,'job',new Date().toISOString());
+ assert.ok(confirmed.proposalJob!.briefConfirmedAt);
+ const done=submitJobProposal(confirmed,'session','job',input);
  assert.equal(done.proposals.length,1);assert.equal(done.proposalJob!.status,'finished');assert.equal(done.versions.length,0);
  assert.throws(()=>submitJobProposal(done,'session','job',{...input,id:'another'}),/JOB_NOT_ACTIVE/);
  assert.throws(()=>beginProposalJob(p,'second','session','其他'),/JOB_ALREADY_ACTIVE/);
@@ -30,7 +34,12 @@ test('an instruction to the studio never becomes product requirements',()=>{
  // Answering the questions may still turn it into a product idea; a second brief is allowed.
  const product=submitJobBrief(operation,'session','job',brief('product'));
  assert.equal(product.proposals.length,0);
- assert.equal(submitJobProposal(product,'session','job',input).proposals.length,1);
+ assert.throws(()=>submitJobProposal(product,'session','job',input),/PROPOSAL_CONFIRMATION_REQUIRED/);
+ const confirmed=confirmJobBrief(product,'job',new Date().toISOString());
+ assert.equal(submitJobProposal(confirmed,'session','job',input).proposals.length,1);
+ // Re-confirming is required after a correction, because the confirmed text changed.
+ const corrected=confirmJobBrief(submitJobBrief(product,'session','job',brief('product')),'job',new Date().toISOString());
+ assert.ok(corrected.proposalJob!.briefConfirmedAt);
 });
 test('a job the session cannot answer is abandoned by the user, not retried',()=>{
  const p=beginProposalJob(createProject('p','产品'),'job','session','读取另一个会话');
