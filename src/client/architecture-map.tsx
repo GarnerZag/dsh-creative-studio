@@ -10,7 +10,7 @@ export function ArchitectureMap({items,selected,busy,select,t}:{items:Architectu
  const box=React.useRef<HTMLDivElement>(null);
  React.useEffect(()=>{const el=box.current;if(!el)return;const ro=new ResizeObserver(()=>setAvail(el.clientWidth));ro.observe(el);setAvail(el.clientWidth);return()=>ro.disconnect();},[]);
  const width=1100,height=Math.max(160,rows*108+60);
- const scale=avail>0?Math.min(1,Math.max(0.75,(avail-2)/width)):1;
+ const scale=avail>0?Math.min(1,Math.max(0.85,(avail-2)/width)):1;
  return <div style={{marginBlock:12}}><div ref={box} style={{overflow:'auto',maxHeight:440}}><div style={{width:Math.ceil(width*scale),height:Math.ceil(height*scale)}}><svg width={width} height={height} style={{display:'block',transform:`scale(${scale})`,transformOrigin:'top left'}} aria-label={t('architectureGraph')} role="group">
  <defs><marker id={marker} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker></defs>
  {kinds.map((kind,i)=><text key={kind} x={20+i*270} y={24} fill="currentColor">{t(`architecture_${kind}`)}</text>)}

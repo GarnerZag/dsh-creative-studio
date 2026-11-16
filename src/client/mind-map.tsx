@@ -43,7 +43,7 @@ export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes:
   const box=React.useRef<HTMLDivElement>(null);
   React.useEffect(()=>{const el=box.current;if(!el)return;const ro=new ResizeObserver(()=>setAvail(el.clientWidth));ro.observe(el);setAvail(el.clientWidth);return()=>ro.disconnect();},[]);
   // Fit wide trees without shrinking text past comfortable reading size.
-  const scale=avail>0?Math.min(1,Math.max(0.75,(avail-2)/width)):1;
+  const scale=avail>0?Math.min(1,Math.max(0.85,(avail-2)/width)):1;
   React.useEffect(()=>{const el=box.current;if(!el||!selected)return;const p=positions.get(selected);if(!p)return;el.scrollTo({left:Math.max(0,p.x*scale-40),top:Math.max(0,p.y*scale-20),behavior:'smooth'});},[selected,scale]);
   return <div ref={root} style={{minWidth:0}}>
     <p className="cs-hint">{t('nodeDragHint')}</p>
