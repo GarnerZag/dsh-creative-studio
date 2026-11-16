@@ -34,6 +34,14 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
     const dirty = editorDirty(editor) || dependenciesChanged || priorityChanged;
     if (!dirty || window.confirm(t('discardEdits'))) { setDependencyState({ id: null, ids: [] }); setSelected(id); }
   };
+  const addNode = (parentId: string | null) => {
+    const dirty = editorDirty(editor) || dependenciesChanged || priorityChanged;
+    if (dirty && !window.confirm(t('discardEdits'))) return;
+    const id = newId();
+    setDependencyState({ id: null, ids: [] });
+    setSelected(id);
+    save({ kind: 'add', node: { id, parentId, title: t('newRequirement'), kind: 'feature', description: '', priority: 'normal', dependsOn: [], desktopAcceptance: [], mobileAcceptance: [] } });
+  };
   const rows: Array<{ id: string; depth: number; label: string }> = [];
   const visit = (parent: string | null, depth: number, prefix: string) => {
     let index = 0;
@@ -51,7 +59,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
     <div className="cs-canvas-column">
       {project.nodes.length===0&&<p className="cs-empty-start">{t('requirementsEmptyHint')}</p>}
       <div className="cs-toolbar">
-        <button type="button" className="cs-primary" disabled={busy} onClick={() => save({ kind: 'add', node: { id: newId(), parentId: selected, title: t('newRequirement'), kind: 'feature', description: '', priority: 'normal', dependsOn: [], desktopAcceptance: [], mobileAcceptance: [] } })}>{selected ? t('addChild') : t('addRoot')}</button>
+        <button type="button" className="cs-primary" disabled={busy} onClick={() => addNode(selected)}>{selected ? t('addChild') : t('addRoot')}</button>
         <button type="button" disabled={busy} title={t('selectRootHint')} onClick={() => choose(null)}>{selected ? t('clearSelection') : t('selectRoot')}</button>
         <div className="cs-segmented" role="group" aria-label={t('requirementView')}>
           <button type="button" aria-pressed={view === 'canvas'} onClick={() => setView('canvas')}>{t('canvasView')}</button>
