@@ -21,7 +21,10 @@ export function ApprovalForm({project,busy,approve,t}:{project:ProjectSnapshot;b
  {selectionEmpty&&<p role="status">{t('approvalSelectSomething')}</p>}
  {error&&<p role="alert">{selectionError(error,t)}</p>}
  {preview&&<><p>{t('approvalCoverageNotice')}</p><p>{t('demoMapped')}: {preview.approval.mappedRequirementIds.length?preview.approval.mappedRequirementIds.map(id=>requirementName(id)).join('、'):'—'}</p><details><summary>{t('demoUncovered')} ({preview.approval.uncoveredRequirementIds.length})</summary>{preview.approval.uncoveredRequirementIds.length?<ul className="cs-id-list">{preview.approval.uncoveredRequirementIds.map(id=><li key={id}><span>{requirementName(id)}</span><small>{id}</small></li>)}</ul>:<p className="cs-hint">{t('approvalNothingUncovered')}</p>}</details><details><summary>{t('unverifiedAcceptance')} ({preview.approval.unverifiedAcceptanceIds.length})</summary>{preview.approval.unverifiedAcceptanceIds.length?<ul className="cs-id-list">{preview.approval.unverifiedAcceptanceIds.map(id=><li key={id}>{id}</li>)}</ul>:<p className="cs-hint">{t('approvalNothingUnverified')}</p>}</details>{preview.needsAcknowledgement&&<label><input type="checkbox" checked={review.acknowledgeUnverified} onChange={e=>{setAck(e.target.checked);setAckRevision(project.projectRevision);}}/>{t('ackUnverified')}</label>}</>}
- <label>{t('versionLabel')}<input aria-label={t('versionLabel')} value={label} onChange={e=>setLabel(e.target.value)} placeholder={t('versionLabel')}/></label><button disabled={!ready||!label.trim()}>{t('approveVersion')}</button>
+ <label>{t('versionLabel')}<input aria-label={t('versionLabel')} value={label} onChange={e=>setLabel(e.target.value)} placeholder={t('versionLabel')}/></label>
+ {preview&&<p className="cs-hint">{(project.nodes.length===0?t('approvalNothingToFreeze'):`${t('approvalWillFreeze')}${project.nodes.length}${t('approvalReqUnit')}、${project.architecture.length}${t('approvalArchUnit')}${base&&changes.length>0?`，${t('approvalBaselineChanges')}${changes.length}${t('approvalChangesUnit')}`:''}`)}</p>}
+ {!label.trim()&&<p className="cs-hint">{t('approvalNeedLabel')}</p>}
+ <button disabled={!ready||!label.trim()}>{t('approveVersion')}</button>
  </fieldset></form>;
 }
 function fieldLabel(field:string,t:(key:string)=>string):string{
