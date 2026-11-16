@@ -64,7 +64,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
       <legend className="cs-visually-hidden">{t('nodeDetails')}</legend>
       <div className="cs-toolbar"><button type="button" disabled={position<=0} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position-1]!.id})}>{t('moveEarlier')}</button><button type="button" disabled={position<0||position>=siblings.length-1} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position+2]?.id??null})}>{t('moveLater')}</button><button type="button" disabled={busy} onClick={()=>choose(node.parentId)}>{t('selectParent')}</button></div>
       <p className="cs-hint">{t('dragAlternativeHint')}</p>
-      <form onSubmit={e => { e.preventDefault(); if (title.trim()) save({ kind: 'rename', id: node.id, title }); }}><label>{t('nodeTitle')}<input value={title} onChange={e => setTitle(e.target.value)} /></label><button disabled={!title.trim()}>{t('rename')}</button></form>
+      <form onSubmit={e => { e.preventDefault(); if (title.trim()) save({ kind: 'rename', id: node.id, title }); }}><label>{t('nodeTitle')}<input value={title} onChange={e => setTitle(e.target.value)} /></label><button disabled={!title.trim()||title.trim()===node.title}>{t('rename')}</button>{title.trim()!==node.title&&<p className="cs-hint" role="status">{t('renameDirty')}</p>}</form>
       <label>{t('parentNode')}<select aria-label={t('parentNode')} value={node.parentId ?? ''} onChange={e => save({ kind: 'move', id: node.id, parentId: e.target.value || null })}><option value="">{t('selectRoot')}</option>{project.nodes.filter(n => n.id !== node.id).map(n => <option key={n.id} value={n.id}>{n.title}</option>)}</select></label>
       <fieldset className="cs-deps" style={{ border: 0, padding: 0, minWidth: 0 }}>
         <legend>{t('requirementDependencies')}</legend>
@@ -77,6 +77,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
         <label>{t('desktopAcceptance')}<textarea aria-label={t('desktopAcceptance')} rows={3} value={desktop} onChange={e => setDesktop(e.target.value)}/></label>
         <label>{t('mobileAcceptance')}<textarea aria-label={t('mobileAcceptance')} rows={3} value={mobile} onChange={e => setMobile(e.target.value)}/></label>
         <button disabled={busy}>{busy ? t('working') : t('saveDetails')}</button>
+        {(description!==node.description||lines(desktop).join('\n')!==node.desktopAcceptance.join('\n')||lines(mobile).join('\n')!==node.mobileAcceptance.join('\n'))&&<p className="cs-hint" role="status">{t('detailsDirty')}</p>}
       </form>
       <button type="button" onClick={() => { if (window.confirm(t('confirmRemove'))) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button>
     </fieldset> : <p className="cs-hint">{t('selectNode')}</p>}
