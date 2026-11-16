@@ -165,6 +165,7 @@ export const actions: ProjectActions = {
   },
   confirmTasks: ok, demo: ok, feature: ok, reference: ok, generate: ok,
   continueProposal: ok, abandonProposal: ok,
+  jobReply: async () => ({text:'判定：这是操作指令，不是产品需求。\n\n有三件事必须如实告诉你：\n1. 本作业没有跨会话读取能力，我无法自行打开『市场中台开发』。\n2. 本作业也不能真的继续开发，最多给出一份交接基线。\n3. 请把该会话的关键内容用下面任一方式给我。',truncated:false,running:false,reason:'idle'}),
   list: async () => heads, adopt: ok, approve: ok, create: ok, get: async () => project, remove: async () => heads,
   architecture: ok, edit: ok,
 };

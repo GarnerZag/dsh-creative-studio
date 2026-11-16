@@ -47,12 +47,13 @@ function BriefEditor({brief,busy,t,save,cancel}:{brief:BriefInfo;busy:boolean;t:
  </section>;
 }
 function JobReplyBlock({jobId,t,load,refreshKey}:{jobId:string;t:(key:string)=>string;load:(jobId:string)=>Promise<JobReply>;refreshKey:number}):React.ReactElement {
- const [reply,setReply]=React.useState<JobReply|null>(null),[error,setError]=React.useState(''),[loading,setLoading]=React.useState(false);
- const fetchReply=React.useCallback(()=>{setLoading(true);setError('');void load(jobId).then(value=>setReply(value)).catch(e=>setError(e instanceof Error?e.message:String(e))).finally(()=>setLoading(false));},[jobId,load]);
+ const [reply,setReply]=React.useState<JobReply|null>(null),[error,setError]=React.useState(''),[unavailable,setUnavailable]=React.useState(false),[loading,setLoading]=React.useState(false);
+ // An older Host process answers 404 for this method: say so plainly instead of showing a transport stack.
+ const fetchReply=React.useCallback(()=>{setLoading(true);setError('');void load(jobId).then(value=>{setReply(value);setUnavailable(false);}).catch(e=>{const message=e instanceof Error?e.message:String(e);if(/HTTP 404|not found|unknown method/i.test(message))setUnavailable(true);else setError(message);}).finally(()=>setLoading(false));},[jobId,load]);
  React.useEffect(()=>{fetchReply();},[fetchReply,refreshKey]);
  return <section className="cs-reply" aria-label={t('jobReply')}>
   <h4>{t('jobReply')}<button type="button" className="cs-quiet" disabled={loading} onClick={fetchReply}>{t('jobReplyRefresh')}</button></h4>
-  {error?<p role="alert" className="cs-error">{error}</p>:reply?.text?<div className="cs-reply-text">{reply.text}{reply.truncated&&<span className="cs-hint"> {t('jobReplyTruncated')}</span>}</div>:<p className="cs-hint">{loading?t('jobReplyRunning'):t('jobReplyEmpty')}</p>}
+  {unavailable?<p className="cs-hint">{t('jobReplyNeedsRestart')}</p>:error?<p role="alert" className="cs-error">{error}</p>:reply?.text?<div className="cs-reply-text">{reply.text}{reply.truncated&&<span className="cs-hint"> {t('jobReplyTruncated')}</span>}</div>:<p className="cs-hint">{loading?t('jobReplyRunning'):t('jobReplyEmpty')}</p>}
   {reply&&<p className="cs-hint">{reply.running?t('jobReplyRunning'):t('jobReplyEnded')}</p>}
  </section>;
 }
