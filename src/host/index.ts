@@ -17,7 +17,7 @@ import type { ModelCatalogView, ModelChoice, WorkspaceOption,HandoffInfo,Handoff
 import { defineDomain, domainTable } from '@deepseek-ai/dsh-storage-domain';
 import { ProjectSchema, type Project } from '../domain/project.js';
 import { ProjectStore } from './store.js';
-import { startProposal, type ProposalSessionGateway } from './proposal-runner.js';
+import { continueProposal, startProposal, type ProposalSessionGateway } from './proposal-runner.js';
 import { proposalTools, proposalGuard, type ProposalToolRegistry } from './proposal-tools.js';
 
 declare module '@deepseek-ai/cordis' {
@@ -203,6 +203,21 @@ export default class CreativeStudio extends TypertRemoteService {
     if(!sessions) throw new Error('SESSION_SERVICE_UNAVAILABLE');
     await startProposal(store,sessions,{projectId:id,expectedProjectRevision,request,workspaceId,...(model?{model}:{})},signal);
     return store.get(id);
+  }
+
+  @Remote
+  async continueProposalJob(id:string, expectedProjectRevision:number, jobId:string, answers:string, signal:AbortSignal):Promise<ProjectSnapshot> {
+    const store=this.userStore();
+    if(!answers.trim()) throw new Error('ANSWERS_REQUIRED');
+    const sessions=this.ctx.get('sessionController') as ProposalSessionGateway|undefined;
+    if(!sessions) throw new Error('SESSION_SERVICE_UNAVAILABLE');
+    await continueProposal(store,sessions,{projectId:id,expectedProjectRevision,jobId,answers},signal);
+    return store.get(id);
+  }
+
+  @Remote
+  async abandonProposalJob(id:string, expectedProjectRevision:number, jobId:string):Promise<ProjectSnapshot> {
+    return this.userStore().abandonProposalJob(id,expectedProjectRevision,jobId);
   }
 
   @Remote

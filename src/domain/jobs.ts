@@ -15,9 +15,16 @@ export function submitJobBrief(current:Project,sessionId:string,jobId:string,bri
  if(!['queued','submitted','unknown'].includes(job.status)) throw new Error('JOB_NOT_ACTIVE');
  const next=structuredClone(current);
  next.proposalJob!.brief=brief;
- // A non-product input ends here: there is nothing to propose, and an active job would
- // block the next attempt from the studio UI.
- if(brief.intent!=='product') next.proposalJob!.status='finished';
+ next.projectRevision++;
+ return validateProject(next);
+}
+/** User-side stop for a job the session will not turn into requirements. */
+export function abandonProposalJob(current:Project,jobId:string):Project {
+ const job=current.proposalJob;
+ if(!job || job.id!==jobId) throw new Error('JOB_SCOPE_MISMATCH');
+ if(!['queued','submitted','unknown'].includes(job.status)) throw new Error('JOB_NOT_ACTIVE');
+ const next=structuredClone(current);
+ next.proposalJob!.status='failed';
  next.projectRevision++;
  return validateProject(next);
 }

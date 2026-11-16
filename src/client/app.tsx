@@ -155,6 +155,7 @@ const styles = `
 .creative-studio-root .cs-brief-restated{margin:0 0 8px;font-size:var(--cs-text-md);line-height:24px}
 .creative-studio-root .cs-brief-list{margin:0;padding-left:20px;font-size:var(--cs-text-sm);line-height:20px}
 .creative-studio-root .cs-brief-list li+li{margin-top:4px}
+.creative-studio-root .cs-brief-actions{margin:12px 0 16px;padding:16px;border:1px dashed var(--cs-border);border-radius:12px}
 .creative-studio-root .cs-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:0 0 16px}
 .creative-studio-root .cs-field{display:grid;gap:4px;min-width:0}
 .creative-studio-root .cs-field>label{margin:0;color:var(--cs-muted);font-weight:500}

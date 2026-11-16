@@ -23,9 +23,12 @@ function BriefCard({brief,t}:{brief:BriefInfo;t:(key:string)=>string}):React.Rea
   {brief.intent!=='product'&&<p role="status" className="cs-hint">{t('briefNotProduct')}</p>}
  </section>;
 }
-export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void}):React.ReactElement {
+export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels,continueJob,abandonJob}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void;continueJob:(jobId:string,answers:string)=>Promise<ProjectSnapshot>;abandonJob:(jobId:string)=>Promise<ProjectSnapshot>}):React.ReactElement {
  const [request,setRequest]=React.useState(''),[workspace,setWorkspace]=React.useState(''),[model,setModel]=React.useState<ModelChoice|undefined>(undefined);
  const [workspaces,setWorkspaces]=React.useState<WorkspaceOption[]>([]),[workspaceError,setWorkspaceError]=React.useState(''),[refreshKey,setRefreshKey]=React.useState(0);
+ const [answers,setAnswers]=React.useState(''),[lastProject,setLastProject]=React.useState<ProjectSnapshot>(project),[busyLocal,setBusyLocal]=React.useState(false),[error,setError]=React.useState('');
+ if(project.projectRevision!==lastProject.projectRevision){setLastProject(project);setError('');}
+ const act=async(operation:()=>Promise<ProjectSnapshot>):Promise<void>=>{setBusyLocal(true);setError('');try{setLastProject(await operation());}catch(e){setError(e instanceof Error?e.message:t('briefContinueStale'));}finally{setBusyLocal(false);}};
  React.useEffect(()=>{let live=true;setWorkspaceError('');void listWorkspaces().then(items=>{if(live){setWorkspaces(items);setWorkspace(id=>items.some(w=>w.id===id)?id:'');}}).catch(e=>{if(live){setWorkspaceError(String(e));setWorkspaces([]);setWorkspace('');}});return()=>{live=false;};},[listWorkspaces,refreshKey]);
  const job=project.proposalJob,active=job&&!['finished','failed'].includes(job.status);
  return <section><h3>{t('generateTitle')}</h3><p>{t('generateNotice')}</p>
@@ -37,6 +40,14 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
  <button disabled={busy||!!active||!request.trim()||!workspace.trim()}>{t('generateProposal')}</button>
  </form>{job&&<div role="status"><p>{t('jobStatus')}: {t('job_'+job.status)}</p><small>{t('sessionId')}: {job.sessionId}</small>{job.status==='unknown'&&<p>{t('unknownJob')}</p>}</div>}
  {job?.brief&&<BriefCard brief={job.brief} t={t}/>}
+ {job&&active&&job.brief&&job.brief.intent!=='product'&&<div className="cs-brief-actions">
+  <label>{t('briefAnswers')}<textarea rows={3} value={answers} onChange={e=>setAnswers(e.target.value)} placeholder={t('briefAnswersHint')} disabled={busy||busyLocal}/></label>
+  <div className="cs-row-actions">
+   <button type="button" disabled={busy||busyLocal||!answers.trim()} onClick={()=>{if(window.confirm(t('briefContinueConfirm')))void act(()=>continueJob(job.id,answers.trim()));}}>{t('briefContinue')}</button>
+   <button type="button" className="cs-quiet" disabled={busy||busyLocal} onClick={()=>{if(window.confirm(t('briefAbandonConfirm')))void act(()=>abandonJob(job.id));}}>{t('briefAbandon')}</button>
+  </div>
+  {error&&<p role="alert" className="cs-error">{error}</p>}
+ </div>}
  <button type="button" disabled={busy} onClick={refresh}>{t('refreshProposal')}</button>
  </section>;
 }
