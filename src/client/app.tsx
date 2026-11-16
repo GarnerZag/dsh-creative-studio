@@ -194,6 +194,7 @@ const styles = `
 .creative-studio-root .cs-article-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0 0 8px}
 .creative-studio-root .cs-article-head h3{margin:0}
 .creative-studio-root .cs-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
+.creative-studio-root .cs-toolbar .cs-narrow-hint{flex:1 1 100%;max-width:none;margin:0}
 .creative-studio-root .cs-stack{display:flex;flex-direction:column;gap:12px}
 .creative-studio-root .cs-workbench{margin-top:16px}
 .creative-studio-root .cs-grid{display:grid}
