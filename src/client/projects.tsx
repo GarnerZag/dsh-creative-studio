@@ -140,7 +140,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
       {id:'architecture',label:t('layoutArchitecture'),content:<ArchitectureEditor key={`architecture-${project.id}-${editorEpoch}`} project={project} busy={busy} t={t} save={change=>{void run(async()=>{const next=await api.architecture(project,change);if(history){setHistory(undefined);setError(t('historyDesync'));}return next;});}}/>},
     ]},
     {id:'approval',label:t('stageApproval'),hint:t('stageHintApproval'),badge:project.versions.length?`v${project.versions.length}`:t('badgeUnfrozen'),blocks:[
-      {id:'versions',label:t('versions'),content:<><VersionPanel key={`versions-${project.id}`} project={project} busy={busy} t={t} confirmTasks={id=>{void run(()=>api.confirmTasks(project,id));}} approve={(label,review)=>{void run(()=>api.approve(project,label,review));}}/><p className="cs-hint">{t('approvalResearchPointer')}</p></>},
+      {id:'versions',label:t('versions'),content:<><VersionPanel key={`versions-${project.id}`} project={project} busy={busy} t={t} confirmTasks={id=>{void run(()=>api.confirmTasks(project,id));}} approve={(label,review)=>{void run(()=>api.approve(project,label,review));}}/></>},
     ]},
     {id:'handoff',label:t('stageHandoff'),hint:t('stageHintHandoff'),badge:project.reports.length?`${project.reports.length}${t('badgeReports')}`:undefined,blocks:[
       {id:'handoff',label:t('handoffTitle'),content:<HandoffPanel key={`handoff-${project.id}`} project={project} api={api.handoff} dispatch={api.dispatch} onProject={next=>setProject(current=>current?.id===next.id&&next.projectRevision>=current.projectRevision?next:current)} t={t}/>},

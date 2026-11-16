@@ -13,7 +13,7 @@ export function VersionPanel({project,busy,approve,t,confirmTasks}:{confirmTasks
   const options=project.versions.map(v=><option key={v.id} value={v.id}>{revisionText(v)}</option>);
   return <section aria-label={t('versions')}><h3>{t('versions')}</h3>
     <p>{t('approvalScope')}</p>
-    <ApprovalForm project={project} busy={busy} approve={approve} t={t}/>
+    <div className="cs-versions-list"><ol>{[...project.versions].reverse().map(v=><li key={v.id}>{revisionText(v)} · <time dateTime={v.createdAt}>{t('versionFrozenAt')}{formatWhen(v.createdAt)}</time> · {v.nodes.length}{t('approvalReqUnit')} / {v.architecture.length}{t('approvalArchUnit')}<ApprovalReceipt record={v.approval} t={t}/><details><summary>{t('taskPlanReview')}</summary><ol>{v.architecture.filter(a=>a.kind==='task').map(a=><li key={a.id}><strong>{a.title}</strong><pre style={{whiteSpace:'pre-wrap'}}>{a.body}</pre>{a.task&&<ul><li>{t('taskInputs')}: {a.task.inputs.join(' / ')||'—'}</li><li>{t('taskOutputs')}: {a.task.outputs.join(' / ')||'—'}</li><li>{t('taskAcceptance')}: {a.task.acceptanceIds.join(' / ')||'—'}</li></ul>}<small>{a.requirementIds.join(', ')} · {a.dependsOn.join(', ')}</small></li>)}</ol><button disabled={busy||v.taskPlanConfirmed||!v.architecture.some(a=>a.kind==='task')} onClick={()=>{if(window.confirm(t('confirmTasksNotice')))confirmTasks(v.id);}}>{v.taskPlanConfirmed?t('tasksConfirmed'):t('confirmTasks')}</button></details></li>)}</ol></div>
     <label>{t('compareFrom')}<select value={base} onChange={e=>setBase(e.target.value)}><option value="">{t('selectVersion')}</option>{options}</select></label>
     <label>{t('compareTo')}<select value={target} onChange={e=>setTarget(e.target.value)}><option value="draft">{t('currentDraft')}</option>{options}</select></label>
     {before&&after&&<><p>{differences.length===0?t('noDifferences'):`${t('differences')}: ${differences.length}`}</p><ul>{differences.map(change=>{
@@ -24,7 +24,7 @@ export function VersionPanel({project,busy,approve,t,confirmTasks}:{confirmTasks
         {nested.length>0&&<ul>{nested.map(entry=><li key={entry.path}>{t(entry.state)} · <code>{entry.path}</code></li>)}</ul>}
       </li>;
     })}</ul></>}
-    <ol>{[...project.versions].reverse().map(v=><li key={v.id}>{revisionText(v)} · <time dateTime={v.createdAt}>{t('versionFrozenAt')}{formatWhen(v.createdAt)}</time> · {v.nodes.length}{t('approvalReqUnit')} / {v.architecture.length}{t('approvalArchUnit')}<ApprovalReceipt record={v.approval} t={t}/><details><summary>{t('taskPlanReview')}</summary><ol>{v.architecture.filter(a=>a.kind==='task').map(a=><li key={a.id}><strong>{a.title}</strong><pre style={{whiteSpace:'pre-wrap'}}>{a.body}</pre>{a.task&&<ul><li>{t('taskInputs')}: {a.task.inputs.join(' / ')||'—'}</li><li>{t('taskOutputs')}: {a.task.outputs.join(' / ')||'—'}</li><li>{t('taskAcceptance')}: {a.task.acceptanceIds.join(' / ')||'—'}</li></ul>}<small>{a.requirementIds.join(', ')} · {a.dependsOn.join(', ')}</small></li>)}</ol><button disabled={busy||v.taskPlanConfirmed||!v.architecture.some(a=>a.kind==='task')} onClick={()=>{if(window.confirm(t('confirmTasksNotice')))confirmTasks(v.id);}}>{v.taskPlanConfirmed?t('tasksConfirmed'):t('confirmTasks')}</button></details></li>)}</ol>
+    <ApprovalForm project={project} busy={busy} approve={approve} t={t}/>
   </section>;
 }
 

@@ -55,7 +55,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
       {view === 'canvas'
         ? <MindMap t={t} move={(id,parentId)=>save({kind:'move',id,parentId})} nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>
         : <div className="cs-tree" aria-label={t('requirements')}>{rows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 24 }}><button type="button" disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}><span className="cs-outline-no" aria-hidden="true">{row.label}</span>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>}
-      <p className="cs-hint">{t(view === 'canvas' ? 'canvasHint' : 'outlineHint')}</p>
+      {view === 'outline'&&<p className="cs-hint">{t('outlineHint')}</p>}
     </div>
     {editor.conflicts.length>0&&<p role="alert">{t('editorConflict')} <button type="button" disabled={busy} onClick={()=>{if(window.confirm(t('discardEdits')))setEditor(openEditor(node?.id??null,snapshot()));}}>{t('editorReload')}</button></p>}
     <div className="cs-inspector">

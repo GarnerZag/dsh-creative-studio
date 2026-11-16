@@ -17,9 +17,10 @@ function GripIcon(): React.ReactElement {
 export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes: RequirementNode[]; selected: string | null; select: (id: string) => void; disabled: boolean; move:(id:string,parentId:string|null)=>void; t:(key:string)=>string }): React.ReactElement {
   const root=React.useRef<HTMLDivElement>(null);
   const dragging=React.useRef<{id:string;pointerId:number;x:number;y:number}|null>(null);
-  const start=(event:React.PointerEvent<HTMLButtonElement>,id:string)=>{if(disabled||event.button!==0)return;event.preventDefault();dragging.current={id,pointerId:event.pointerId,x:event.clientX,y:event.clientY};event.currentTarget.setPointerCapture(event.pointerId);};
+  const [dragActive,setDragActive]=React.useState(false);
+  const start=(event:React.PointerEvent<HTMLButtonElement>,id:string)=>{if(disabled||event.button!==0)return;event.preventDefault();dragging.current={id,pointerId:event.pointerId,x:event.clientX,y:event.clientY};setDragActive(true);event.currentTarget.setPointerCapture(event.pointerId);};
   const finish=(event:React.PointerEvent<HTMLButtonElement>)=>{
-    const drag=dragging.current;dragging.current=null;
+    const drag=dragging.current;dragging.current=null;setDragActive(false);
     if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
     if(disabled||!drag||drag.pointerId!==event.pointerId||Math.hypot(event.clientX-drag.x,event.clientY-drag.y)<6)return;
     const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-cs-parent]');
@@ -38,10 +39,16 @@ export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes:
   visit(null, 0);
   const width = Math.max(480, ...Array.from(positions.values(), p => p.x + CARD_WIDTH + OFFSET));
   const height = Math.max(180, row * ROW_GAP + OFFSET * 2);
+  const [avail,setAvail]=React.useState(0);
+  const box=React.useRef<HTMLDivElement>(null);
+  React.useEffect(()=>{const el=box.current;if(!el)return;const ro=new ResizeObserver(()=>setAvail(el.clientWidth));ro.observe(el);setAvail(el.clientWidth);return()=>ro.disconnect();},[]);
+  // Fit wide trees without shrinking text past comfortable reading size.
+  const scale=avail>0?Math.min(1,Math.max(0.75,(avail-2)/width)):1;
+  React.useEffect(()=>{const el=box.current;if(!el||!selected)return;const p=positions.get(selected);if(!p)return;el.scrollTo({left:Math.max(0,p.x*scale-40),top:Math.max(0,p.y*scale-20),behavior:'smooth'});},[selected,scale]);
   return <div ref={root} style={{minWidth:0}}>
     <p className="cs-hint">{t('nodeDragHint')}</p>
-    <div role="note" data-cs-parent="" style={{padding:12,marginBottom:12,border:'1px dashed var(--cs-border)',borderRadius:12,background:'var(--cs-surface)',fontSize:'var(--cs-text-sm)',lineHeight:'20px',color:'var(--cs-muted)'}}>{t('nodeDropRoot')}</div>
-    <div style={{overflow:'auto',maxHeight:560,border:'1px solid var(--cs-border)',borderRadius:12}}><svg width={width} height={height} style={{ display: 'block' }}>
+    {dragActive&&<div role="note" data-cs-parent="" style={{padding:8,marginBottom:12,border:'1px dashed var(--cs-accent)',borderRadius:10,background:'var(--cs-soft)',fontSize:'var(--cs-text-sm)',lineHeight:'20px'}}>{t('nodeDropRoot')}</div>}
+    <div ref={box} style={{overflow:'auto',maxHeight:560,border:'1px solid var(--cs-border)',borderRadius:12}}><div style={{width:Math.ceil(width*scale),height:Math.ceil(height*scale)}}><svg width={width} height={height} style={{ display: 'block', transform:`scale(${scale})`, transformOrigin:'top left' }}>
       {nodes.map(node => {
         const p = positions.get(node.id); const parent = node.parentId ? positions.get(node.parentId) : undefined;
         if (!p || !parent) return null;
@@ -58,6 +65,6 @@ export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes:
           </div></foreignObject>
         </g>;
       })}
-    </svg></div>
+    </svg></div></div>{height*scale>560&&<p className="cs-hint">{t('canvasScrollHint')}</p>}
   </div>;
 }
