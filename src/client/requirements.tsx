@@ -22,10 +22,14 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   const [dependencyState,setDependencyState]=React.useState<{id:string|null;ids:string[]}>({id:null,ids:[]});
   const dependencyDraft=dependencyState.id===(node?.id??null)?dependencyState.ids:(node?.dependsOn??[]);
   const setDependencyDraft=(ids:string[])=>setDependencyState({id:node?.id??null,ids});
+  const [priorityState,setPriorityState]=React.useState<{id:string|null;value:'low'|'normal'|'high'}>({id:null,value:'normal'});
+  const priority=priorityState.id===(node?.id??null)?priorityState.value:(node?.priority??'normal');
+  const setPriorityDraft=(value:'low'|'normal'|'high')=>setPriorityState({id:node?.id??null,value});
+  const priorityChanged=!!node&&priority!==node.priority;
   const dependenciesChanged=(()=>{const a=[...dependencyDraft].sort(),b=[...(node?.dependsOn??[])].sort();return JSON.stringify(a)!==JSON.stringify(b);})();
   const choose = (id: string | null) => {
     if (id === selected) { setSelected(id); return; }
-    const dirty = editorDirty(editor) || dependenciesChanged;
+    const dirty = editorDirty(editor) || dependenciesChanged || priorityChanged;
     if (!dirty || window.confirm(t('discardEdits'))) { setDependencyState({ id: null, ids: [] }); setSelected(id); }
   };
   const rows: Array<{ id: string; depth: number; label: string }> = [];
@@ -72,12 +76,13 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
         <div className="cs-checks">{project.nodes.filter(n => n.id !== node.id).map(n => <label key={n.id}><input type="checkbox" checked={dependencyDraft.includes(n.id)} onChange={e => setDependencyDraft(e.target.checked ? [...dependencyDraft, n.id] : dependencyDraft.filter(id => id !== n.id))} />{n.title}</label>)}</div>
         <div className="cs-toolbar"><button type="button" disabled={busy || !dependenciesChanged} onClick={() => save({ kind: 'dependencies', id: node.id, dependsOn: dependencyDraft })}>{t('saveRequirementDependencies')}</button></div>
       </fieldset>
-      <form onSubmit={e => { e.preventDefault(); save({ kind: 'details', id: node.id, description, priority: node.priority, desktopAcceptance: lines(desktop), mobileAcceptance: lines(mobile) }); }}>
+      <form onSubmit={e => { e.preventDefault(); save({ kind: 'details', id: node.id, description, priority, desktopAcceptance: lines(desktop), mobileAcceptance: lines(mobile) }); }}>
+        <label>{t('requirementPriority')}<select value={priority} onChange={e => setPriorityDraft(e.target.value as 'low'|'normal'|'high')}><option value="high">{t('priorityHigh')}</option><option value="normal">{t('priorityNormal')}</option><option value="low">{t('priorityLow')}</option></select></label>
         <label>{t('nodeDescription')}<textarea aria-label={t('nodeDescription')} rows={4} value={description} onChange={e => setDescription(e.target.value)}/></label>
         <label>{t('desktopAcceptance')}<textarea aria-label={t('desktopAcceptance')} rows={3} value={desktop} onChange={e => setDesktop(e.target.value)}/></label>
         <label>{t('mobileAcceptance')}<textarea aria-label={t('mobileAcceptance')} rows={3} value={mobile} onChange={e => setMobile(e.target.value)}/></label>
         <button disabled={busy}>{busy ? t('working') : t('saveDetails')}</button>
-        {(description!==node.description||lines(desktop).join('\n')!==node.desktopAcceptance.join('\n')||lines(mobile).join('\n')!==node.mobileAcceptance.join('\n'))&&<p className="cs-hint" role="status">{t('detailsDirty')}</p>}
+        {(priorityChanged||description!==node.description||lines(desktop).join('\n')!==node.desktopAcceptance.join('\n')||lines(mobile).join('\n')!==node.mobileAcceptance.join('\n'))&&<p className="cs-hint" role="status">{t('detailsDirty')}</p>}
       </form>
       <button type="button" onClick={() => { if (window.confirm(t('confirmRemove'))) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button>
     </fieldset> : <p className="cs-hint">{t('selectNode')}</p>}
