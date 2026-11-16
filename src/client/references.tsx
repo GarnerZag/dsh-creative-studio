@@ -38,6 +38,6 @@ export function ReferencesPanel({project,busy,t,save}:{project:ProjectSnapshot;b
    </div>
   </form>
  </details>
- <p className="cs-hint">{t('referenceUnverified')}</p>
+ {!!project.references.length&&<p className="cs-hint">{t('referenceUnverified')}</p>}
  </section>;
 }

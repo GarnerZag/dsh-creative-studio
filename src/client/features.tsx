@@ -37,7 +37,7 @@ export function FeaturePanel({project,busy,t,save}:{project:ProjectSnapshot;busy
    <button type="button" className="cs-quiet" onClick={()=>setOpenId('')}>{t('collapse')}</button>
   </div>
  </article>}
- <details className="cs-disclosure" open={!editing&&!project.features.length} >
+ {!!project.references.length&&<details className="cs-disclosure" open={!editing&&!project.features.length} >
   <summary>{editing?t('editFeature'):t('newFeature')}</summary>
   <form className="cs-form cs-form-stack" onSubmit={e=>{e.preventDefault();if(draft.name.trim()&&draft.referenceId){save({kind:'save',feature:draft});setOpenId(draft.id);}}}>
    <label>{t('referenceName')}<select disabled={busy} value={draft.referenceId} onChange={e=>change({referenceId:e.target.value})}><option value="">—</option>{project.references.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
@@ -49,6 +49,6 @@ export function FeaturePanel({project,busy,t,save}:{project:ProjectSnapshot;busy
     {editing&&<button type="button" className="cs-quiet cs-danger" disabled={busy} onClick={()=>{if(window.confirm(t('removeFeatureConfirm')))save({kind:'remove',id:draft.id});}}>{t('removeFeature')}</button>}
    </div>
   </form>
- </details>
+ </details>}
  </section>;
 }
