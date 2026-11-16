@@ -3,24 +3,22 @@ import {researchSeed} from './research-seed.js';
 import {ModelSelect} from './model-picker.js';
 import type {WorkspaceOption,ProjectSnapshot,ModelCatalogView,ModelChoice,BriefInfo,JobReply} from '../types.js';
 function BriefCard({brief,t}:{brief:BriefInfo;t:(key:string)=>string}):React.ReactElement {
- const list=(label:string,items:string[],ordered=false):React.ReactElement|null=>items.length===0?null:<>
-  <dt>{label}</dt>
-  <dd>{ordered?<ol className="cs-brief-list">{items.map((text,i)=><li key={i}>{text}</li>)}</ol>:<ul className="cs-brief-list">{items.map((text,i)=><li key={i}>{text}</li>)}</ul>}</dd>
- </>;
+ const list=(label:string,items:string[],ordered=false):React.ReactElement|null=>items.length===0?null:<><dt>{label}</dt><dd>{ordered?<ol className="cs-brief-list">{items.map((text,i)=><li key={i}>{text}</li>)}</ol>:<ul className="cs-brief-list">{items.map((text,i)=><li key={i}>{text}</li>)}</ul>}</dd></>;
+ const details=brief.goals.length+brief.users.length+brief.scenarios.length+brief.constraints.length+brief.unknowns.length+brief.needs.length>0;
  return <section className="cs-brief" aria-label={t('briefTitle')}>
   <h4>{t('briefTitle')}<span className={`cs-intent cs-intent-${brief.intent}`}>{t('intent_'+brief.intent)}</span></h4>
   {brief.questions.length>0&&<p className="cs-hint">{t('briefPendingPrefix')}{brief.questions.length}{t('briefPendingSuffix')}</p>}
   <p className="cs-brief-restated">{brief.restated}</p>
   {brief.interpretation&&<details className="cs-advanced"><summary>{t('briefInterpretationLabel')}</summary><p className="cs-hint">{brief.interpretation}</p></details>}
-  <dl className="cs-pairs">
+  {brief.questions.length>0&&<div className="cs-brief-ask"><p className="cs-brief-ask-title">{t('briefQuestions')}</p><ol className="cs-brief-list">{brief.questions.map((text,i)=><li key={i}>{text}</li>)}</ol></div>}
+  {details&&<details className="cs-advanced"><summary>{t('briefMore')}</summary><dl className="cs-pairs">
    {list(t('briefGoals'),brief.goals)}
    {list(t('briefUsers'),brief.users)}
    {list(t('briefScenarios'),brief.scenarios)}
    {list(t('briefConstraints'),brief.constraints)}
    {list(t('briefUnknowns'),brief.unknowns)}
    {list(t('briefNeeds'),brief.needs)}
-   {list(t('briefQuestions'),brief.questions,true)}
-  </dl>
+  </dl></details>}
   {brief.intent!=='product'&&<p role="status" className="cs-hint">{t('briefNotProduct')}</p>}
  </section>;
 }

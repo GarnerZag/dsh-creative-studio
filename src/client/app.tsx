@@ -211,6 +211,9 @@ const styles = `
 .creative-studio-root .cs-steps button[aria-current='step']{border-color:var(--cs-accent);background:var(--cs-soft);font-weight:600}
 .creative-studio-root .cs-empty-start{margin:8px 0 0;padding:12px;max-width:64ch;border:1px dashed var(--cs-border);border-radius:10px;background:var(--cs-surface)}
 .creative-studio-root .cs-demo-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0}
+.creative-studio-root .cs-brief-ask{margin:12px 0;padding:12px;border:1px solid var(--cs-border);border-radius:10px;background:var(--cs-surface)}
+.creative-studio-root .cs-brief-ask-title{margin:0 0 8px;font-weight:600}
+.creative-studio-root .cs-brief-ask .cs-brief-list{margin:0}
 .creative-studio-root .cs-diff-shift{display:block;margin-top:4px;font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted)}
 .creative-studio-root .cs-diff-shift del{text-decoration:line-through;opacity:.7}
 .creative-studio-root .cs-diff-shift ins{text-decoration:none;color:var(--cs-fg)}
