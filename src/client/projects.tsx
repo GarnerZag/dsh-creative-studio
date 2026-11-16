@@ -56,6 +56,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
   const [history,setHistory]=React.useState<RequirementHistory>();
   const historyCurrent=history&&project&&history.projectId===project.id&&history.revision===project.contentRevision;
   const [selectedRequirement,setSelectedRequirement]=React.useState<string|null>(null);
+  const [renaming,setRenaming]=React.useState<string|null>(null);
   const errorText=(message:string):string=>{
     const rule=(pattern:RegExp,key:string)=>{
       const m=message.match(pattern);
@@ -172,9 +173,13 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
           <summary>{t('projectSettings')}</summary>
           <div className="cs-row-actions">
             <button type="button" className="cs-quiet" disabled={busy} onClick={() => { if(window.confirm(t('confirmProjectChange'))) { setProject(undefined); setHistory(undefined); setSelectedRequirement(null); } }}>{t('allProjects')}</button>
-            <button type="button" className="cs-quiet" disabled={busy} onClick={()=>{const next=window.prompt(t('renameProject'),project.name);if(next?.trim()&&next.trim()!==project.name)void run(()=>api.rename(project,next.trim()));}}>{t('renameProject')}</button>
+            <button type="button" className="cs-quiet" disabled={busy} onClick={()=>setRenaming(project.name)}>{t('renameProject')}</button>
             <button type="button" className="cs-danger" disabled={busy} onClick={()=>{void removeProject();}}>{t('deleteProject')}</button>
           </div>
+          {renaming!==null&&<form className="cs-rename" onSubmit={e=>{e.preventDefault();const next=renaming.trim();if(!next){setRenaming(null);return;}if(next!==project.name)void run(()=>api.rename(project,next));setRenaming(null);}}>
+            <label>{t('renameProject')}<input aria-label={t('renameProject')} autoFocus value={renaming} onChange={e=>setRenaming(e.target.value)} disabled={busy}/></label>
+            <div className="cs-row-actions"><button type="submit" disabled={busy||!renaming.trim()}>{t('saveDetails')}</button><button type="button" className="cs-quiet" disabled={busy} onClick={()=>setRenaming(null)}>{t('cancel')}</button></div>
+          </form>}
           <p className="cs-hint">{t('projectSettingsHint')}</p>
         </details>
       </div>

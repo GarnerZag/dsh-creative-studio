@@ -154,6 +154,7 @@ const styles = `
 .creative-studio-root .cs-card-flag{color:var(--cs-accent-text,var(--cs-muted));font-weight:500}
 .creative-studio-root .cs-id-list li{display:flex;gap:8px;align-items:baseline;padding:4px 0;font-size:var(--cs-text-sm)}
 .creative-studio-root .cs-id-list small{color:var(--cs-muted);font-size:var(--cs-text-xs)}
+.creative-studio-root .cs-rename{display:grid;gap:8px;margin:8px 0}
 .creative-studio-root .cs-project-menu{grid-column:2;grid-row:1/-1;align-self:start;border-top:none;padding-top:0;margin-top:0}
 .creative-studio-root .cs-table .cs-row-actions{margin-top:0}
 .creative-studio-root .cs-chip{display:inline-flex;flex-direction:column;align-items:flex-start;gap:0;text-align:left;padding:4px 8px;min-height:32px;margin:0 4px 4px 0;background:var(--cs-surface);border-color:var(--cs-border)}
