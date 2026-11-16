@@ -10,6 +10,7 @@ export function ArchitectureEditor({project,busy,save,t}:{project:ProjectSnapsho
   const current=project.architecture.find(item=>item.id===selected);
   return <section aria-label={t('architecture')}>
     <h3>{t('architecture')}</h3>
+    {project.architecture.length===0&&<p className="cs-hint cs-empty-start">{t('architectureEmptyHint')}</p>}
     <ArchitectureMap items={project.architecture} selected={selected} busy={busy} select={choose} t={t}/>
     <nav style={{display:'flex',gap:8,flexWrap:'wrap'}}>{project.architecture.map(item=><button key={item.id} disabled={busy} aria-pressed={selected===item.id} onClick={()=>choose(item.id)}>{t(`architecture_${item.kind}`)} · {item.title}</button>)}<button disabled={busy} onClick={()=>choose(newId())}>{t('addArchitecture')}</button></nav>
     <ArchitectureForm key={selected} id={selected} current={current} project={project} busy={busy} save={save} t={t} dirty={setDirty}/>
