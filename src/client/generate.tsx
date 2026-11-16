@@ -54,7 +54,7 @@ function JobReplyBlock({jobId,active,t,load,refreshKey,canEnd,endAttempt}:{jobId
  React.useEffect(()=>{fetchReply();},[fetchReply,refreshKey]);
  return <section className="cs-reply" aria-label={t('jobReply')}>
   <h4>{t('jobReply')}<button type="button" className="cs-quiet" disabled={loading} onClick={fetchReply}>{t('jobReplyRefresh')}</button></h4>
-  {unavailable?<p className="cs-hint">{t('jobReplyNeedsRestart')}</p>:error?<p role="alert" className="cs-error">{error}</p>:reply?.text?<div className="cs-reply-text">{reply.text}{reply.truncated&&<span className="cs-hint"> {t('jobReplyTruncated')}</span>}</div>:<p className="cs-hint">{loading?t('jobReplyLoading'):active?t('jobReplyWaiting'):`${t('jobReplyEmpty')}${reply?`（${t('jobReplyRecords')} ${reply.records??0}）`:''}`}</p>}
+  {unavailable?<p className="cs-hint">{t('jobReplyNeedsRestart')}</p>:error?<p role="alert" className="cs-error">{error}</p>:reply?.text?<div className="cs-reply-text">{reply.text}{reply.truncated&&<span className="cs-hint"> {t('jobReplyTruncated')}</span>}</div>:<p className="cs-hint">{loading?t('jobReplyLoading'):active&&!(reply&&!reply.running)?t('jobReplyWaiting'):`${t('jobReplyEmpty')}${reply?`（${t('jobReplyRecords')} ${reply.records??0}）`:''}`}</p>}
   {reply&&(reply.text||reply.running)&&<p className="cs-hint">{reply.running?t('jobReplyRunning'):t('jobReplyEnded')}</p>}
   {canEnd&&!reply?.running&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={loading} onClick={endAttempt}>{t('jobReplyEndAttempt')}</button><small className="cs-hint">{t('jobReplyEndHint')}</small></div>}
  </section>;
