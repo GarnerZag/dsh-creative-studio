@@ -197,6 +197,7 @@ const styles = `
 .creative-studio-root .cs-stack{display:flex;flex-direction:column;gap:12px}
 .creative-studio-root .cs-workbench{margin-top:16px}
 .creative-studio-root .cs-grid{display:grid}
+.creative-studio-root .cs-workbench{container-type:inline-size}
 .creative-studio-root .cs-inline-field{display:inline-flex;align-items:center;gap:8px;margin:0;min-height:32px;color:var(--cs-muted)}
 .creative-studio-root .cs-tabs{display:flex;flex-wrap:wrap;gap:8px}
 .creative-studio-root .cs-coverage{margin:8px 0 12px;padding:8px 12px;border-radius:10px;background:var(--cs-surface)}.creative-studio-root .cs-coverage p{margin:0 0 4px}.creative-studio-root .cs-coverage p:last-child{margin-bottom:0}
@@ -235,6 +236,8 @@ const styles = `
 .creative-studio-root:has(.cs-projects article) .cs-welcome > :is(.cs-eyebrow,h1,.cs-lead,.cs-flow,.cs-empty){display:none}
 .creative-studio-root:has(.cs-projects article) .cs-header{padding-bottom:16px}
 @media(max-width:900px){.creative-studio-root .cs-grid{grid-template-columns:minmax(0,1fr)!important}.creative-studio-root .cs-split{display:none}.creative-studio-root .cs-demo-pane{position:static!important}.creative-studio-root .cs-inline-field{display:none}}
+/* Panel narrower than ~1080px: stack editor above the demo, the editor column would be too cramped for the maps. */
+@container (max-width:1080px){.creative-studio-root .cs-grid{grid-template-columns:minmax(0,1fr)!important}.creative-studio-root .cs-split{display:none}.creative-studio-root .cs-demo-pane{position:static!important}}
 @media(max-width:900px){.creative-studio-root{padding:20px 16px 16px}.creative-studio-root .cs-flow{grid-template-columns:repeat(3,1fr)}.creative-studio-root .cs-welcome{margin:32px 0 24px}}
 .creative-studio-root .cs-arch-kind{margin:12px 0 4px;font-size:13px;letter-spacing:.02em}
 @media(prefers-reduced-motion:reduce){.creative-studio-root *{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
