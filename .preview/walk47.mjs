@@ -1,0 +1,18 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1400}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1600);
+await page.getByRole('button',{name:'创意工坊'}).first().click();
+await page.waitForTimeout(900);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();
+await page.waitForTimeout(1400);
+await page.locator('.cs-steps button').nth(2).click();
+await page.waitForTimeout(1100);
+const kinds=await page.locator('.cs-arch-kind').allInnerTexts();
+const groups=await page.locator('.cs-arch-kind + .cs-row-actions button').count();
+const hint=await page.getByText('先按类别选中一条').count();
+await page.screenshot({path:'.preview/review/zh41-arch-grouped.png',fullPage:true});
+console.log(JSON.stringify({kinds,groups,hint,errs}));
+await ctx.close();

@@ -1,0 +1,33 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN'});
+const page=ctx.pages()[0]??await ctx.newPage();
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+const out=await page.evaluate(async()=>{
+ const call=async(method,argsObj)=>{
+  const r=await fetch('/api/creativeStudio/'+method,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:'e2e-'+Math.random().toString(36).slice(2),method:'creativeStudio/'+method,payload:{args:argsObj}})});
+  const j=await r.json().catch(()=>({raw:true}));
+  if(!j.result) throw new Error(JSON.stringify(j).slice(0,200));
+  if(!j.result.ok) throw new Error(method+': '+JSON.stringify(j.result.error).slice(0,200));
+  return j.result.value;
+ };
+ const log=[];
+ const snap=await call('createProject',{name:'E2E 功能巡检（临时，将删除）'});
+ log.push({step:'create',id:snap.id,rev:snap.projectRevision,content:snap.contentRevision,nodes:snap.nodes.length});
+ const node={id:'e2e-req',parentId:null,title:'巡检需求：搜索结果按标签收窄',kind:'feature',description:'用于自动化功能巡检',priority:'normal',desktopAcceptance:['桌面端可点击标签收窄结果'],mobileAcceptance:['手机端可点击标签收窄结果']};
+ let s2=await call('editRequirements',{id:snap.id,expectedProjectRevision:snap.projectRevision,expectedContentRevision:snap.contentRevision,change:{kind:'add',node}});
+ log.push({step:'addNode',nodes:s2.nodes.length,content:s2.contentRevision});
+ const mod={id:'e2e-mod',kind:'module',title:'巡检模块',body:'职责：验证保存链路。',requirementIds:['e2e-req'],dependsOn:[]};
+ let s3=await call('editArchitecture',{id:s2.id,expectedProjectRevision:s2.projectRevision,expectedContentRevision:s2.contentRevision,change:{kind:'save',item:mod}});
+ log.push({step:'saveModule',arch:s3.architecture.length,content:s3.contentRevision});
+ const readiness=await call('handoffReadiness',{id:s3.id,versionId:s3.versions.at(-1)?.id??''});
+ log.push({step:'readiness',ready:readiness.ready,blockers:readiness.blockers.map(b=>b.code).slice(0,6)});
+ const list=await call('listProjects',{});
+ log.push({step:'list',count:list.length,hasCounts:typeof list[0].requirementCount==='number'});
+ await call('deleteProject',{id:s3.id,expectedProjectRevision:s3.projectRevision});
+ const after=await call('listProjects',{});
+ log.push({step:'delete',count:after.length});
+ return log;
+}).catch(e=>({error:String(e).slice(0,300)}));
+console.log(JSON.stringify(out));
+await ctx.close();

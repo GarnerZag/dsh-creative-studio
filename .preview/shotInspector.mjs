@@ -1,0 +1,14 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1100}});
+const page=ctx.pages()[0]??await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(700);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();await page.waitForTimeout(1200);
+await page.locator('.cs-steps button').nth(1).click();await page.waitForTimeout(1000);
+await page.locator('.cs-stage-body button[aria-pressed]').first().click();
+await page.waitForTimeout(600);
+await page.locator('.cs-inspector').screenshot({path:'.preview/review/inspector.png'});
+console.log(JSON.stringify(await page.evaluate(()=>({fields:[...document.querySelectorAll('.cs-inspector input,.cs-inspector textarea')].map(e=>[e.getAttribute('placeholder')||'',e.value.slice(0,20)])}))));
+console.log(JSON.stringify({errs}));await ctx.close();

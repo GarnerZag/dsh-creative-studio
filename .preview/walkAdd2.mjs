@@ -1,0 +1,20 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1000}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+page.on('dialog',d=>d.accept());
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+const made=await page.evaluate(async()=>{
+ const rpc=async(m,a)=>(await (await fetch('/api/creativeStudio/'+m,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:Math.random().toString(36).slice(2),method:'creativeStudio/'+m,payload:{args:a}})})).json()).result;
+ const p=await rpc('createProject',{name:'高亮验证 '+Date.now()});return p.value.id;});
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(700);
+await page.getByRole('button',{name:/高亮验证/}).first().click();await page.waitForTimeout(1200);
+await page.locator('.cs-steps button').nth(1).click();await page.waitForTimeout(700);
+await page.getByRole('button',{name:'添加根节点'}).first().click();await page.waitForTimeout(1500);
+const pressed=await page.locator('button[aria-pressed="true"]').count();
+const cardStyle=await page.evaluate(()=>{const b=document.querySelector('svg foreignObject button[aria-pressed="true"]');if(!b)return null;const cs=getComputedStyle(b);return {border:cs.borderColor,bg:cs.backgroundColor};});
+await page.screenshot({path:'.preview/review/zh100-added-selected.png'});
+const del=await page.evaluate(async({id})=>{const rpc=async(m,a)=>(await (await fetch('/api/creativeStudio/'+m,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:Math.random().toString(36).slice(2),method:'creativeStudio/'+m,payload:{args:a}})})).json()).result;const g=await rpc('getProject',{id});const r=await rpc('deleteProject',{id,expectedProjectRevision:g.value.projectRevision});return r.ok;},{id:made});
+console.log(JSON.stringify({pressed,cardStyle,deleted:del}));
+await ctx.close();

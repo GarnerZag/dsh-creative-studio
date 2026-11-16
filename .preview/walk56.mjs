@@ -1,0 +1,18 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1200}});
+const page=ctx.pages()[0]??await ctx.newPage();
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1600);
+await page.getByRole('button',{name:'创意工坊'}).first().click();
+await page.waitForTimeout(900);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();
+await page.waitForTimeout(1400);
+await page.locator('.cs-steps button').nth(1).click();
+await page.waitForTimeout(1000);
+const a=await page.locator('.cs-toolbar button').allInnerTexts();
+await page.locator('svg foreignObject button[aria-pressed]').first().click();
+await page.waitForTimeout(500);
+const b=await page.locator('.cs-toolbar button').allInnerTexts();
+const btns=await page.locator('.cs-toolbar button').evaluateAll(bs=>bs.map(x=>({t:x.textContent,title:x.getAttribute('title'),disabled:x.disabled})));
+console.log(JSON.stringify({a,b,btns}));
+await ctx.close();

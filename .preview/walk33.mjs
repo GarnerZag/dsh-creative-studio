@@ -1,0 +1,21 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1100}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1600);
+const created=await page.evaluate(async()=>{
+ const call=async(m,a)=>{const r=await fetch('/api/creativeStudio/'+m,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:'w-'+Math.random().toString(36).slice(2),method:'creativeStudio/'+m,payload:{args:a}})});const j=await r.json();if(!j.result?.ok)throw new Error(m+':'+JSON.stringify(j.result?.error).slice(0,120));return j.result.value;};
+ return await call('createProject',{name:'空需求状态巡检（临时）'});
+});
+await page.getByRole('button',{name:'创意工坊'}).first().click();
+await page.waitForTimeout(800);
+await page.getByRole('button',{name:/空需求状态巡检/}).first().click();
+await page.waitForTimeout(1500);
+await page.locator('.cs-steps button').nth(1).click();
+await page.waitForTimeout(800);
+const hint=await page.locator('.cs-empty-start').innerText().catch(()=>'(missing)');
+await page.screenshot({path:'.preview/review/zh28-empty-requirements.png'});
+await page.evaluate(async({id,rev})=>{const r=await fetch('/api/creativeStudio/deleteProject',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:'d-'+Math.random().toString(36).slice(2),method:'creativeStudio/deleteProject',payload:{args:{id,expectedProjectRevision:rev}}})});},{id:created.id,rev:created.projectRevision});
+console.log(JSON.stringify({hint:hint.slice(0,60),errs}));
+await ctx.close();

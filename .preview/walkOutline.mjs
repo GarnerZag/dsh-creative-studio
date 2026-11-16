@@ -1,0 +1,22 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1200}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(800);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();await page.waitForTimeout(1300);
+await page.locator('.cs-steps button').nth(1).click();await page.waitForTimeout(900);
+// switch to outline
+const toggles=page.locator('.cs-segmented button');
+console.log('segments',JSON.stringify(await toggles.allInnerTexts()));
+await toggles.nth(1).click();await page.waitForTimeout(700);
+const rows=page.locator('.cs-tree button');
+const n=await rows.count();
+await rows.nth(2).click();await page.waitForTimeout(600);
+const inspector=await page.locator('.cs-inspector').innerText().catch(()=>'(none)');
+const pressed=await page.locator('.cs-tree button[aria-pressed=true]').count();
+console.log(JSON.stringify({rows:n,pressed,inspector:inspector.slice(0,120).replace(/\n+/g,' | '),errs}));
+await page.screenshot({path:'.preview/review/zh96-outline-select.png'});
+await ctx.close();

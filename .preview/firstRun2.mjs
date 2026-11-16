@@ -1,0 +1,22 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1100}});
+const page=ctx.pages()[0]??await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+page.on('dialog',d=>d.accept());
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1200);
+const name='首轮体验 '+Date.now();
+const created=await page.evaluate(async(nm)=>{
+ const rpc=async(method,args)=>{const r=await fetch('/api/creativeStudio/'+method,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:'x',method:'creativeStudio/'+method,payload:{args}})});return r.json();};
+ const r=await rpc('createProject',{name:nm});return {ok:r.result.ok,id:r.result.value?.id,err:r.result.error};
+},name);
+await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1500);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(800);
+await page.getByRole('button',{name:new RegExp(name)}).first().click();await page.waitForTimeout(1200);
+await page.screenshot({path:'.preview/review/first-idea.png',fullPage:true});
+const idea=await page.evaluate(()=>document.querySelector('.cs-stage-body')?.innerText.slice(0,800));
+await page.locator('.cs-steps button').nth(1).click();await page.waitForTimeout(900);
+await page.screenshot({path:'.preview/review/first-req.png',fullPage:true});
+const req=await page.evaluate(()=>document.querySelector('.cs-stage-body')?.innerText.slice(0,600));
+console.log(JSON.stringify({created,idea,req,errs}));
+await ctx.close();

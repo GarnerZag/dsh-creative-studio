@@ -1,0 +1,11 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1200}});
+const page=ctx.pages()[0]??await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(700);
+await page.getByRole('button',{name:/Structured handoff probe/}).first().click();await page.waitForTimeout(1200);
+await page.locator('.cs-steps button').nth(4).click();await page.waitForTimeout(1000);
+await page.screenshot({path:'.preview/review/stage4.png',fullPage:true});
+console.log(JSON.stringify({errs}));await ctx.close();

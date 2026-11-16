@@ -1,0 +1,12 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1100}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(800);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();await page.waitForTimeout(1400);
+await page.locator('.cs-steps button').nth(2).click();await page.waitForTimeout(1000);
+const out=await page.evaluate(()=>{const hs=[...document.querySelectorAll('p')].filter(p=>p.textContent&&(p.textContent.includes('滚动')||p.textContent.includes('箭头指向')));return hs.map(p=>{const r=p.getBoundingClientRect();return {t:p.textContent.slice(0,24),y:Math.round(r.top),h:Math.round(r.height),vis:r.height>0};});});
+console.log(JSON.stringify(out));
+await ctx.close();

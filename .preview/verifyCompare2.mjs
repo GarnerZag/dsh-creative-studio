@@ -1,0 +1,13 @@
+import {chromium} from 'playwright-core';
+const name=process.argv[2]??'考研市场中台';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1100}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1400);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(700);
+await page.getByRole('button',{name:new RegExp(name)}).first().click();await page.waitForTimeout(1300);
+await page.locator('.cs-steps button').nth(3).click();await page.waitForTimeout(1000);
+const out=await page.evaluate(()=>{const s=document.querySelector('[aria-label="版本与审批"]');return {selects:[...(s?s.querySelectorAll('select'):[])].length,labels:[...(s?s.querySelectorAll('label'):[])].map(l=>l.textContent.slice(0,6)),firstTime:document.body.textContent.includes('这个项目还没有冻结过版本')?1:0};});
+console.log(name,JSON.stringify(out));
+await ctx.close();

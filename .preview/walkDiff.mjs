@@ -1,0 +1,27 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1200}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+const name='版本差异验证 '+Date.now();
+const built=await page.evaluate(async n=>{
+ const call=async(m,a)=>{const r=await fetch('/api/creativeStudio/'+m,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:Math.random().toString(36).slice(2),method:'creativeStudio/'+m,payload:{args:a}})});const j=await r.json();if(!j.result?.ok)throw new Error(m+': '+JSON.stringify(j.result).slice(0,200));return j.result.value;};
+ let p=await call('createProject',{name:n});
+ const node=(id,title)=>({id,parentId:null,title,kind:'goal',description:'',priority:'high',desktopAcceptance:['桌面端可见'],mobileAcceptance:['移动端可见'],dependsOn:[]});
+ p=await call('editRequirements',{id:p.id,expectedProjectRevision:p.projectRevision,expectedContentRevision:p.contentRevision,change:{kind:'add',node:node('req-a','搜索框')}});
+ p=await call('editRequirements',{id:p.id,expectedProjectRevision:p.projectRevision,expectedContentRevision:p.contentRevision,change:{kind:'add',node:node('req-b','结果列表')}});
+ p=await call('approveVersion',{id:p.id,expectedProjectRevision:p.projectRevision,expectedContentRevision:p.contentRevision,label:'v1 基础版',review:{baselineVersionId:null,acknowledgeUnverified:true}});
+ p=await call('editRequirements',{id:p.id,expectedProjectRevision:p.projectRevision,expectedContentRevision:p.contentRevision,change:{kind:'rename',id:'req-a',title:'搜索框（改）'}});
+ p=await call('editRequirements',{id:p.id,expectedProjectRevision:p.projectRevision,expectedContentRevision:p.contentRevision,change:{kind:'add',node:node('req-c','空状态')}});
+ return {id:p.id,rev:p.projectRevision,versions:p.versions.length};
+},name);
+await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1500);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(800);
+await page.getByRole('button',{name:new RegExp(name)}).first().click();await page.waitForTimeout(1300);
+await page.locator('.cs-steps button').nth(3).click();await page.waitForTimeout(1200);
+await page.screenshot({path:'.preview/review/zh72-diff.png',fullPage:true});
+const body=await page.locator('.cs-stage-body').innerText();
+console.log(JSON.stringify({built,head:body.slice(0,420).replace(/\n+/g,' | '),errs}));
+await ctx.close();

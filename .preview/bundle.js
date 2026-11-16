@@ -14743,39 +14743,53 @@
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h3", { children: t2("researchTitle") }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { children: t2("researchScopeNotice") }),
       error51 && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { role: "alert", children: error51 }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("form", { onSubmit: (e) => {
-        e.preventDefault();
-        if (window.confirm(t2("researchConfirm"))) start(referenceId, request, workspaceId, model);
-      }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { children: [
-          t2("researchSource"),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("select", { "aria-label": t2("researchSource"), value: referenceId, onChange: (e) => setReference(e.target.value), disabled: busy || active, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "", children: t2("researchSource") }),
-            project2.references.map((r) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: r.id, children: r.name }, r.id))
-          ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { children: [
-          t2("researchWorkspace"),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("select", { "aria-label": t2("researchWorkspace"), value: workspaceId, onChange: (e) => setWorkspace(e.target.value), disabled: busy || active, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "", children: t2("researchWorkspace") }),
-            workspaces.map((w) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: w.id, children: w.title }, w.id))
-          ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ModelSelect, { value: model, onChange: setModel, disabled: busy || active, t: t2, load: listModels }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { children: [
-          t2("researchQuestion"),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("textarea", { "aria-label": t2("researchQuestion"), placeholder: t2("researchQuestion"), rows: 3, value: request, onChange: (e) => setRequest(e.target.value), disabled: busy || active })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { disabled: busy || active || !request.trim() || !project2.references.some((r) => r.id === referenceId) || !workspaces.some((w) => w.id === workspaceId), children: t2("researchStart") })
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("details", { className: "cs-disclosure", open: active, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("summary", { children: t2("researchToggle") }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("form", { onSubmit: (e) => {
+          e.preventDefault();
+          if (window.confirm(t2("researchConfirm"))) start(referenceId, request, workspaceId, model);
+        }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { children: [
+            t2("researchSource"),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("select", { "aria-label": t2("researchSource"), value: referenceId, onChange: (e) => setReference(e.target.value), disabled: busy || active, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "", children: t2("researchSource") }),
+              project2.references.map((r) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: r.id, children: r.name }, r.id))
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { children: [
+            t2("researchWorkspace"),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("select", { "aria-label": t2("researchWorkspace"), value: workspaceId, onChange: (e) => setWorkspace(e.target.value), disabled: busy || active, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "", children: t2("researchWorkspace") }),
+              workspaces.map((w) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: w.id, children: w.title }, w.id))
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ModelSelect, { value: model, onChange: setModel, disabled: busy || active, t: t2, load: listModels }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { children: [
+            t2("researchQuestion"),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("textarea", { "aria-label": t2("researchQuestion"), placeholder: t2("researchQuestion"), rows: 3, value: request, onChange: (e) => setRequest(e.target.value), disabled: busy || active })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { disabled: busy || active || !request.trim() || !project2.references.some((r) => r.id === referenceId) || !workspaces.some((w) => w.id === workspaceId), children: t2("researchStart") })
+        ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { type: "button", disabled: busy, onClick: refresh, children: t2("researchRefresh") }),
       job && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("p", { children: [
           job.reference.name,
           " \xB7 ",
-          job.status
+          (() => {
+            const k = "job_" + job.status;
+            const v = t2(k);
+            return v === k ? job.status : v;
+          })()
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("small", { children: job.sessionId }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("details", { className: "cs-advanced", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("summary", { children: t2("techDetails") }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("small", { children: [
+            t2("sessionId"),
+            ": ",
+            job.sessionId
+          ] })
+        ] }),
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { children: t2("researchInferenceNotice") }),
         job.conclusion && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_jsx_runtime3.Fragment, { children: [
           /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { style: { whiteSpace: "pre-wrap" }, children: job.conclusion.summary }),
@@ -14789,9 +14803,7 @@
             ")"
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("ul", { children: job.evidence.map((e) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("li", { children: [
-            e.tool,
-            " \xB7 ",
-            e.callId,
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { title: e.callId, children: e.tool }),
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(EvidenceView, { t: t2, read: (offset) => evidence(project2.id, job.id, e.callId, offset) })
           ] }, `${job.id}:${e.callId}`)) })
         ] })
@@ -15312,6 +15324,17 @@ ${preset || t2("defaultAgent")}`)) return;
 
   // ../src/client/handoff.tsx
   var import_jsx_runtime6 = __toESM(require_jsx_runtime());
+  var BLOCKER_KEYS = { ARCHITECTURE_MISSING: "blockerArchitectureMissing", ARCHITECTURE_DETAILS: "blockerArchitectureDetails", CONTRACT_STRUCTURE: "blockerContractStructure", TASK_STRUCTURE: "blockerTaskStructure", TASK_ACCEPTANCE_OWNERSHIP: "blockerTaskAcceptanceOwnership", TASK_COVERAGE: "blockerTaskCoverage", TASK_PLAN_EMPTY: "blockerTaskPlanEmpty", TASK_PLAN_UNCONFIRMED: "blockerTaskPlanUnconfirmed", DESKTOP_ACCEPTANCE: "blockerDesktopAcceptance", MOBILE_ACCEPTANCE: "blockerMobileAcceptance", NO_DEMO: "blockerNoDemo", DEMO_UNCOVERED: "blockerDemoUncovered", EMPTY_SCOPE: "blockerEmptyScope", PROTOTYPE_ONLY: "blockerPrototypeOnly", VERSION_NOT_FOUND: "blockerVersionNotFound" };
+  var BLOCKER_ENTITY_CODES = /* @__PURE__ */ new Set(["TASK_COVERAGE", "ARCHITECTURE_DETAILS", "DEMO_UNCOVERED", "TASK_ACCEPTANCE_OWNERSHIP", "DESKTOP_ACCEPTANCE", "MOBILE_ACCEPTANCE"]);
+  function blockerText(code, id3, t2) {
+    const key = BLOCKER_KEYS[code];
+    const label = key ? t2(key) : "";
+    if (!label) return `${code} \xB7 ${id3}`;
+    return BLOCKER_ENTITY_CODES.has(code) ? `${label}\uFF08${id3}\uFF09` : label;
+  }
+  function formatSize(bytes) {
+    return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : bytes >= 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${bytes} B`;
+  }
   function HandoffPanel({ project: project2, api, t: t2, dispatch, onProject }) {
     const [versionId, setVersionId] = React5.useState(""), [readiness, setReadiness] = React5.useState(), [info, setInfo] = React5.useState(), [busy, setBusy] = React5.useState(false), [error51, setError] = React5.useState("");
     const active = React5.useRef(true);
@@ -15381,27 +15404,47 @@ ${preset || t2("defaultAgent")}`)) return;
       }, children: t2("handoffCheck") }),
       readiness && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: readiness.ready ? t2("handoffReady") : t2("handoffReviewOnly") }),
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("ul", { children: [...readiness.blockers, ...readiness.warnings].map((i, index) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("li", { children: [
-          i.code,
-          " \xB7 ",
-          i.id,
-          ": ",
-          i.message
-        ] }, `${i.code}-${i.id}-${index}`)) })
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("ul", { children: [...readiness.blockers, ...readiness.warnings].map((i, index) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("li", { children: blockerText(i.code, i.id, t2) }, `${i.code}-${i.id}-${index}`)) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { disabled: busy || !versionId, onClick: () => {
         void run(download);
       }, children: busy ? t2("handoffWorking") : t2("handoffDownload") }),
-      info && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("p", { children: [
-        info.handoffId,
-        " \xB7 ",
-        info.ready ? t2("handoffReady") : t2("handoffReviewOnly"),
-        " \xB7 ",
-        info.size,
-        " bytes"
+      info && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("p", { role: "status", children: [
+          t2("handoffExported"),
+          " \xB7 ",
+          info.ready ? t2("handoffReady") : t2("handoffReviewOnly"),
+          " \xB7 ",
+          formatSize(info.size)
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("details", { className: "cs-advanced", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("summary", { children: t2("handoffTechnical") }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("ul", { className: "cs-id-list", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("li", { children: [
+              t2("handoffIdLabel"),
+              " ",
+              info.handoffId
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("li", { children: [
+              t2("handoffArchiveSha"),
+              " ",
+              info.archiveSha256.slice(0, 12),
+              "\u2026"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("li", { children: [
+              t2("handoffManifestDigest"),
+              " ",
+              info.manifestDigest.slice(0, 12),
+              "\u2026"
+            ] })
+          ] })
+        ] })
       ] }),
       error51 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { role: "alert", children: error51 }),
-      dispatch && onProject && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(DispatchPanel, { project: project2, info, api: dispatch, onProject, t: t2 })
+      dispatch && onProject && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("details", { className: "cs-advanced", open: !!info, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("summary", { children: t2("dispatchToggle") }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(DispatchPanel, { project: project2, info, api: dispatch, onProject, t: t2 })
+      ] })
     ] });
   }
 
@@ -15452,11 +15495,27 @@ ${preset || t2("defaultAgent")}`)) return;
     const compare = layout.compare;
     const showRequirementPane = compare && Boolean(requirementStage);
     const showStagePane = !compare || active.id !== "requirements";
-    const blocks = (list) => list.map((block) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("section", { className: "cs-block", "aria-label": block.label, children: block.content }, block.id));
+    const scrollTo = (id3) => {
+      const el = document.getElementById("cs-block-" + id3);
+      if (!el) return;
+      const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+      el.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+    };
+    const blocks = (list, withNav = false) => /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(import_jsx_runtime7.Fragment, { children: [
+      withNav && list.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("nav", { className: "cs-block-nav", "aria-label": t2("blocksNav"), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("span", { className: "cs-block-nav-label", children: [
+          t2("blocksNav"),
+          "\uFF1A"
+        ] }),
+        list.map((block) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", className: "cs-quiet", onClick: () => scrollTo(block.id), children: block.label }, block.id))
+      ] }),
+      list.map((block) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("section", { id: withNav ? `cs-block-${block.id}` : void 0, className: "cs-block", "aria-label": block.label, children: block.content }, block.id))
+    ] });
     return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("section", { className: "cs-workbench", children: [
       /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("ol", { className: "cs-steps", "aria-label": t2("stages"), children: stages.map((item, index) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("button", { type: "button", "aria-current": active.id === item.id ? "step" : void 0, onClick: () => setStage(item.id), children: [
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "cs-step-index", "aria-hidden": "true", children: index + 1 }),
-        item.label
+        item.label,
+        item.badge && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("small", { className: "cs-step-badge", children: item.badge })
       ] }) }, item.id)) }),
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "cs-toolbar", children: [
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", title: t2("layoutExploreHint"), "aria-pressed": !compare, onClick: () => change({ ...layout, compare: false }), children: t2("layoutExplore") }),
@@ -15470,8 +15529,18 @@ ${preset || t2("defaultAgent")}`)) return;
       !compare && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { className: "cs-hint cs-stage-hint", children: active.hint }),
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { ref: grid, className: "cs-grid", style: { gridTemplateColumns: focus || compare ? "minmax(0,1fr)" : `minmax(0,${split}fr) 24px minmax(0,${100 - split}fr)`, gap: 12, marginTop: 12, alignItems: "start" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "cs-stage-body", style: { display: "grid", gridTemplateRows: compare && !focus ? "auto auto" : "auto", gap: 12, minWidth: 0 }, children: [
-          showRequirementPane && requirementStage && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("section", { className: "cs-pane cs-pane-scroll", style: { gridRow: 1 }, "aria-label": requirementStage.label, children: blocks(requirementStage.blocks) }),
-          showStagePane && (!compare ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { style: { gridRow: 1, minWidth: 0 }, children: blocks(active.blocks) }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("section", { className: "cs-pane cs-pane-scroll", style: { gridRow: 2 }, "aria-label": active.label, children: blocks(active.blocks) }))
+          showRequirementPane && requirementStage && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("section", { className: "cs-pane cs-pane-scroll", style: { gridRow: 1 }, "aria-label": requirementStage.label, children: [
+            compare && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { className: "cs-pane-label", children: t2("paneCompareReference") }),
+            blocks(requirementStage.blocks)
+          ] }),
+          showStagePane && (!compare ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { style: { gridRow: 1, minWidth: 0 }, children: blocks(active.blocks, true) }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("section", { className: "cs-pane cs-pane-scroll", style: { gridRow: 2 }, "aria-label": active.label, children: [
+            compare && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("p", { className: "cs-pane-label", children: [
+              t2("paneCurrent"),
+              "\uFF1A",
+              active.label
+            ] }),
+            blocks(active.blocks)
+          ] }))
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
           "div",
@@ -30176,7 +30245,22 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 
   // ../src/client/demo.tsx
   var import_jsx_runtime8 = __toESM(require_jsx_runtime());
-  function Viewport({ scene, width, height }) {
+  function describeSceneError(error51, t2) {
+    const raw = error51 instanceof Error ? error51.message : String(error51);
+    if (raw.includes("REQUIREMENT_NOT_FOUND")) return t2("demoRequirementMissing");
+    if (error51 instanceof SyntaxError) return t2("demoJsonInvalid");
+    if (raw.trim().startsWith("[")) {
+      try {
+        const first = JSON.parse(raw)[0];
+        const path = Array.isArray(first?.path) ? first.path.join(".") : "";
+        return `${t2("demoSchemaInvalid")}${path ? `\uFF08${path}\uFF09` : ""}`;
+      } catch {
+        return t2("demoSchemaInvalid");
+      }
+    }
+    return raw;
+  }
+  function Viewport({ scene, width, height, replay, t: t2 }) {
     const host = React7.useRef(null);
     const [available, setAvailable] = React7.useState(400);
     React7.useEffect(() => {
@@ -30190,13 +30274,12 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     const html = React7.useMemo(() => demoDocument(scene, Array.from(crypto.getRandomValues(new Uint8Array(16)), (n) => n.toString(16).padStart(2, "0")).join("")), [scene]);
     const scale = Math.min(1, available / width);
     return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { ref: host, style: { minWidth: 0, width: "100%" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("small", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("small", { title: t2("viewportUnitHint"), children: [
         width,
         " \xD7 ",
-        height,
-        " CSS px"
+        height
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("div", { style: { height: height * scale, overflow: "hidden", border: "1px solid var(--cs-border)", borderRadius: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("iframe", { title: `${scene.title} ${width}`, sandbox: "allow-scripts", referrerPolicy: "no-referrer", srcDoc: html, style: { width, height, border: 0, transform: `scale(${scale})`, transformOrigin: "top left" } }) })
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("div", { style: { height: height * scale, overflow: "hidden", border: "1px solid var(--cs-border)", borderRadius: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("iframe", { title: `${scene.title} ${width}`, sandbox: "allow-scripts", referrerPolicy: "no-referrer", srcDoc: html, style: { width, height, border: 0, transform: `scale(${scale})`, transformOrigin: "top left" } }, `${scene.title}-${width}-${replay}`) })
     ] });
   }
   function CandidateDemo({ scene, t: t2 }) {
@@ -30206,41 +30289,58 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       open && /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(import_jsx_runtime8.Fragment, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { children: t2("candidateDemoNotice") }),
         /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(0,1fr)", gap: 8 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Viewport, { scene, width: 1440, height: 900 }),
-          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Viewport, { scene, width: 390, height: 844 })
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Viewport, { scene, width: 1440, height: 900, replay: 0, t: t2 }),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Viewport, { scene, width: 390, height: 844, replay: 0, t: t2 })
         ] })
       ] })
     ] });
   }
   function DemoPanel({ project: project2, t: t2, stacked = false, busy, save, selectedRequirement }) {
     const [mode, setMode] = React7.useState("both");
+    const [replay, setReplay] = React7.useState(0);
     const [custom2, setCustom] = React7.useState();
     const [input, setInput] = React7.useState(""), [error51, setError] = React7.useState("");
+    const [autoPlayed, setAutoPlayed] = React7.useState(false);
+    const lastRevision = React7.useRef(project2.contentRevision);
+    React7.useEffect(() => {
+      if (project2.contentRevision === lastRevision.current) return;
+      lastRevision.current = project2.contentRevision;
+      setReplay((v) => v + 1);
+      setAutoPlayed(true);
+      const timer = setTimeout(() => setAutoPlayed(false), 4e3);
+      return () => clearTimeout(timer);
+    }, [project2.contentRevision]);
     const sample = React7.useMemo(() => validateScene({ id: "template-list", title: project2.name, contentRevision: project2.contentRevision, requirementIds: [], state: { query: "", notice: false }, components: [{ id: "search", kind: "input", label: t2("demoSearch"), binding: "query" }, { id: "results", kind: "list", label: t2("demoItems"), binding: "query", rows: project2.nodes.length ? project2.nodes.map((n) => n.title) : [t2("demoSample")] }, { id: "show", kind: "button", label: t2("demoShow"), actionId: "show" }, { id: "notice", kind: "notice", label: t2("demoMock"), binding: "notice" }], actions: [{ id: "show", changes: [{ key: "notice", value: true }] }], steps: [{ componentId: "search", value: project2.nodes[0]?.title ?? "" }, { actionId: "show" }] }), [project2.name, project2.nodes, project2.contentRevision, t2]);
     const scene = custom2 ?? project2.demo ?? sample;
     const selected = project2.nodes.find((n) => n.id === selectedRequirement);
     return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("section", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("h3", { children: t2("demoTitle") }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { children: custom2 || project2.demo ? t2("demoCustom") : t2("demoTemplateNotice") }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("button", { disabled: busy || scene.contentRevision !== project2.contentRevision, onClick: () => save(scene), children: t2("demoSave") }),
-      scene.contentRevision !== project2.contentRevision && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { role: "status", children: t2("demoStale") }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("header", { className: "cs-demo-head", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("h3", { children: t2("demoTitle") }),
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "cs-demo-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("button", { type: "button", className: "cs-quiet", disabled: busy || scene.contentRevision !== project2.contentRevision, onClick: () => save(scene), children: t2("demoSave") }),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("button", { type: "button", className: "cs-quiet", title: t2("demoReplayHint"), onClick: () => setReplay((v) => v + 1), children: t2("demoReplay") })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { className: "cs-hint", children: custom2 || project2.demo ? t2("demoCustom") : t2("demoTemplateNotice") }),
+      scene.contentRevision !== project2.contentRevision && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { role: "status", className: "cs-stale", children: t2("demoStale") }),
       selected && /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("aside", { "aria-label": t2("selectedDemoCoverage"), children: [
         /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("strong", { children: selected.title }),
         /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { children: t2(scene.requirementIds.includes(selected.id) ? "selectedDemoMapped" : "selectedDemoUnmapped") }),
         /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("small", { children: t2("selectedDemoCaution") })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("label", { children: [
+      autoPlayed && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { role: "status", className: "cs-hint", children: t2("demoAutoReplay") }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("div", { className: "cs-demo-controls", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("label", { children: [
         t2("demoViewport"),
         /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("select", { value: mode, onChange: (e) => setMode(e.target.value), children: [
           /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("option", { value: "both", children: t2("demoBoth") }),
           /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("option", { value: "desktop", children: t2("demoDesktop") }),
           /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("option", { value: "mobile", children: t2("demoMobile") })
         ] })
-      ] }),
+      ] }) }),
       /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { style: { display: "grid", gridTemplateColumns: mode === "both" && !stacked ? "minmax(0,2fr) minmax(0,1fr)" : "minmax(0,1fr)", gap: 12 }, children: [
-        mode !== "mobile" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Viewport, { scene, width: 1440, height: 900 }),
+        mode !== "mobile" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Viewport, { scene, width: 1440, height: 900, replay, t: t2 }),
         " ",
-        mode !== "desktop" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Viewport, { scene, width: 390, height: 844 })
+        mode !== "desktop" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Viewport, { scene, width: 390, height: 844, replay, t: t2 })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("details", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("summary", { children: t2("demoSceneEditor") }),
@@ -30256,7 +30356,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
             setCustom(next);
             setError("");
           } catch (e) {
-            setError(String(e));
+            setError(describeSceneError(e, t2));
           }
         }, children: t2("demoApply") }),
         /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("button", { onClick: () => {
@@ -30266,7 +30366,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           setCustom(void 0);
           setError("");
         }, children: t2("demoReset") }),
-        error51 && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { role: "alert", children: error51 })
+        error51 && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { role: "alert", className: "cs-error", children: error51 })
       ] })
     ] });
   }
@@ -30349,7 +30449,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("button", { type: "button", className: "cs-quiet", onClick: () => setOpenId(""), children: t2("collapse") })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("details", { className: "cs-disclosure", open: !editing && !project2.features.length, children: [
+      !!project2.references.length && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("details", { className: "cs-disclosure", open: !editing && !project2.features.length, children: [
         /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("summary", { children: editing ? t2("editFeature") : t2("newFeature") }),
         /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("form", { className: "cs-form cs-form-stack", onSubmit: (e) => {
           e.preventDefault();
@@ -30478,7 +30578,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           ] })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("p", { className: "cs-hint", children: t2("referenceUnverified") })
+      !!project2.references.length && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("p", { className: "cs-hint", children: t2("referenceUnverified") })
     ] });
   }
 
@@ -30499,21 +30599,36 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("dt", { children: label }),
       /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("dd", { children: ordered ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("ol", { className: "cs-brief-list", children: items.map((text, i) => /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("li", { children: text }, i)) }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("ul", { className: "cs-brief-list", children: items.map((text, i) => /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("li", { children: text }, i)) }) })
     ] });
+    const details = brief.goals.length + brief.users.length + brief.scenarios.length + brief.constraints.length + brief.unknowns.length + brief.needs.length > 0;
     return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("section", { className: "cs-brief", "aria-label": t2("briefTitle"), children: [
       /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("h4", { children: [
         t2("briefTitle"),
         /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: `cs-intent cs-intent-${brief.intent}`, children: t2("intent_" + brief.intent) })
       ] }),
+      brief.questions.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("p", { className: "cs-hint", children: [
+        t2("briefPendingPrefix"),
+        brief.questions.length,
+        t2("briefPendingSuffix")
+      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-brief-restated", children: brief.restated }),
-      brief.interpretation && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: brief.interpretation }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("dl", { className: "cs-pairs", children: [
-        list(t2("briefGoals"), brief.goals),
-        list(t2("briefUsers"), brief.users),
-        list(t2("briefScenarios"), brief.scenarios),
-        list(t2("briefConstraints"), brief.constraints),
-        list(t2("briefUnknowns"), brief.unknowns),
-        list(t2("briefNeeds"), brief.needs),
-        list(t2("briefQuestions"), brief.questions, true)
+      brief.interpretation && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("details", { className: "cs-advanced", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("summary", { children: t2("briefInterpretationLabel") }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: brief.interpretation })
+      ] }),
+      brief.questions.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "cs-brief-ask", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-brief-ask-title", children: t2("briefQuestions") }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("ol", { className: "cs-brief-list", children: brief.questions.map((text, i) => /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("li", { children: text }, i)) })
+      ] }),
+      details && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("details", { className: "cs-advanced", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("summary", { children: t2("briefMore") }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("dl", { className: "cs-pairs", children: [
+          list(t2("briefGoals"), brief.goals),
+          list(t2("briefUsers"), brief.users),
+          list(t2("briefScenarios"), brief.scenarios),
+          list(t2("briefConstraints"), brief.constraints),
+          list(t2("briefUnknowns"), brief.unknowns),
+          list(t2("briefNeeds"), brief.needs)
+        ] })
       ] }),
       brief.intent !== "product" && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { role: "status", className: "cs-hint", children: t2("briefNotProduct") })
     ] });
@@ -30583,8 +30698,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           " ",
           t2("jobReplyTruncated")
         ] })
-      ] }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: loading ? t2("jobReplyLoading") : active ? t2("jobReplyWaiting") : `${t2("jobReplyEmpty")}${reply ? `\uFF08${t2("jobReplyRecords")} ${reply.records ?? 0}\uFF09` : ""}` }),
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: loading ? t2("jobReplyLoading") : active && !(reply && !reply.running) ? t2("jobReplyWaiting") : `${t2("jobReplyEmpty")}${reply ? `\uFF08${t2("jobReplyRecords")} ${reply.records ?? 0}\uFF09` : ""}` }),
       reply && (reply.text || reply.running) && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: reply.running ? t2("jobReplyRunning") : t2("jobReplyEnded") }),
+      reply && !reply.text && !reply.running && (reply.records ?? 0) === 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: t2("jobReplyNoRecords") }),
       canEnd && !reply?.running && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "cs-row-actions", children: [
         /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { type: "button", className: "cs-quiet", disabled: loading, onClick: endAttempt, children: t2("jobReplyEndAttempt") }),
         /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("small", { className: "cs-hint", children: t2("jobReplyEndHint") })
@@ -30617,7 +30733,17 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       void listWorkspaces().then((items) => {
         if (live) {
           setWorkspaces(items);
-          setWorkspace((id3) => items.some((w) => w.id === id3) ? id3 : "");
+          setWorkspace((id3) => {
+            if (items.some((w) => w.id === id3)) return id3;
+            let remembered = "";
+            try {
+              remembered = localStorage.getItem("cs.workspaceId") ?? "";
+            } catch {
+              remembered = "";
+            }
+            if (remembered && items.some((w) => w.id === remembered)) return remembered;
+            return items.length === 1 ? items[0].id : "";
+          });
         }
       }).catch((e) => {
         if (live) {
@@ -30632,15 +30758,20 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     }, [listWorkspaces, refreshKey]);
     const job = project2.proposalJob, active = job && !["finished", "failed"].includes(job.status);
     return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("section", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h3", { children: t2("generateTitle") }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { children: t2("generateNotice") }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-lead", children: t2("generateNotice") }),
       /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("form", { onSubmit: (e) => {
         e.preventDefault();
         if (request.trim() && workspace.trim() && window.confirm(t2("generateConfirm"))) generate(request.trim(), workspace.trim(), model);
       }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("label", { children: [
           t2("roughIdea"),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("textarea", { rows: 5, value: request, onChange: (e) => setRequest(e.target.value), placeholder: t2("roughIdeaHint"), disabled: busy || !!active })
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("textarea", { rows: 5, value: request, onChange: (e) => setRequest(e.target.value), placeholder: t2("roughIdeaHint"), disabled: busy || !!active, onKeyDown: (e) => {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault();
+              e.currentTarget.form?.requestSubmit();
+            }
+          } }),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("small", { className: "cs-hint", children: t2("ideaShortcutHint") })
         ] }),
         project2.researchJob?.status === "finished" && project2.researchJob.conclusion && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "cs-row-actions", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { type: "button", className: "cs-quiet", disabled: busy || !!active, onClick: () => {
           if (window.confirm(t2("researchSeedConfirm"))) setRequest(researchSeed(project2.researchJob));
@@ -30650,7 +30781,13 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: t2("generateSettingsHint") }),
           /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("label", { children: [
             t2("workspaceId"),
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("select", { value: workspace, onChange: (e) => setWorkspace(e.target.value), disabled: busy || !!active, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("select", { value: workspace, onChange: (e) => {
+              setWorkspace(e.target.value);
+              try {
+                localStorage.setItem("cs.workspaceId", e.target.value);
+              } catch {
+              }
+            }, disabled: busy || !!active, children: [
               /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("option", { value: "", children: t2("selectWorkspace") }),
               workspaces.map((w) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("option", { value: w.id, children: [
                 w.title,
@@ -30659,14 +30796,21 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
               ] }, w.id))
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { type: "button", className: "cs-quiet", disabled: busy || !!active, onClick: () => setRefreshKey((x) => x + 1), children: t2("refreshWorkspaces") }),
-            workspaceError && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { role: "alert", className: "cs-error", children: workspaceError })
+            workspaceError && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { role: "alert", className: "cs-error", children: workspaceError }),
+            !workspaceError && workspaces.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-hint", children: t2("workspaceEmpty") })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ModelSelect, { value: model, onChange: setModel, disabled: busy || !!active, t: t2, load: listModels })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "cs-row-actions", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { disabled: busy || !!active || !request.trim() || !workspace.trim(), children: t2("generateProposal") }) })
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "cs-row-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { disabled: busy || !!active || !request.trim() || !workspace.trim(), children: t2("generateProposal") }),
+          !request.trim() && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("small", { className: "cs-hint", children: t2("ideaRequired") }),
+          !!request.trim() && !workspace.trim() && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("small", { className: "cs-hint", children: t2("workspaceRequired") }),
+          !!active && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("small", { className: "cs-hint", children: t2("ideaBlockedByActive") })
+        ] })
       ] }),
       job && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { role: "status", className: "cs-job-status", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("p", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("p", { className: "cs-status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-status-dot", "aria-hidden": "true" }),
           t2("jobProgress"),
           "\uFF1A",
           t2("job_" + job.status)
@@ -30687,7 +30831,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           ] })
         ] })
       ] }),
-      job && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(JobReplyBlock, { jobId: job.id, active: !!active, t: t2, load: readReply, refreshKey: project2.projectRevision, canEnd: !!active, endAttempt: () => {
+      job && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(JobReplyBlock, { jobId: job.id, active: !!active, t: t2, load: readReply, refreshKey: project2.projectRevision, canEnd: !!active && !job?.brief, endAttempt: () => {
         if (window.confirm(t2("jobReplyEndConfirm"))) void act(() => abandonJob(job.id));
       } }),
       job?.brief && (editOpen ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(BriefEditor, { brief: job.brief, busy: busy || busyLocal, t: t2, cancel: () => setEditOpen(false), save: (brief) => {
@@ -31097,7 +31241,9 @@ ${r.featureIdeas.join("\n")}` });
           }, children: t2("adoptProposal") }),
           /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { disabled: busy || proposal.status !== "pending", onClick: () => {
             if (window.confirm(t2("confirmReject"))) reject(proposal.id);
-          }, children: t2("rejectProposal") })
+          }, children: t2("rejectProposal") }),
+          proposal.status === "adopted" && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "cs-hint", children: t2("proposalAdoptedHint") }),
+          proposal.status === "rejected" && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "cs-hint", children: t2("proposalRejectedHint") })
         ] }, proposal.id);
       })
     ] });
@@ -31213,7 +31359,7 @@ ${r.featureIdeas.join("\n")}` });
     const ready = preview2 !== null && preview2.content.nodes.length > 0 && !selectionEmpty && (!preview2.needsAcknowledgement || review.acknowledgeUnverified);
     return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("form", { onSubmit: (e) => {
       e.preventDefault();
-      if (ready && label.trim() && window.confirm(`${t2("confirmApproval")} r${project2.contentRevision}`)) approve(label.trim(), review);
+      if (ready && label.trim() && window.confirm(`${t2("confirmApproval")} ${project2.contentRevision}`)) approve(label.trim(), review);
     }, children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("fieldset", { disabled: busy, children: [
       /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("legend", { children: t2("approvalReview") }),
       /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("label", { children: [
@@ -31225,7 +31371,8 @@ ${r.featureIdeas.join("\n")}` });
         }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("option", { value: "", children: t2("emptyBaseline") }),
           project2.versions.map((v) => /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("option", { value: v.id, children: v.label }, v.id))
-        ] })
+        ] }),
+        partial2 && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "cs-hint", children: t2("approvalBaselineHint") })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("label", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("input", { type: "checkbox", checked: partial2, onChange: (e) => {
@@ -31253,7 +31400,7 @@ ${r.featureIdeas.join("\n")}` });
             " \xB7 ",
             c.title,
             " \xB7 ",
-            c.collection
+            t2(c.collection === "nodes" ? "approvalCollectionNodes" : "approvalCollectionArchitecture")
           ] }),
           c.kind === "changed" && c.fields.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("ul", { children: c.fields.map((field) => /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("label", { children: [
             /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("input", { type: "checkbox", checked: picked.includes(field), onChange: (e) => {
@@ -31275,11 +31422,13 @@ ${r.featureIdeas.join("\n")}` });
       selectionEmpty && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { role: "status", children: t2("approvalSelectSomething") }),
       error51 && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { role: "alert", children: selectionError(error51, t2) }),
       preview2 && /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { children: t2("approvalCoverageNotice") }),
-        /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("p", { children: [
-          t2("demoMapped"),
-          ": ",
-          preview2.approval.mappedRequirementIds.length ? preview2.approval.mappedRequirementIds.map((id3) => requirementName(id3)).join("\u3001") : "\u2014"
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "cs-coverage", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "cs-hint", children: t2("approvalCoverageNotice") }),
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("p", { className: "cs-hint", children: [
+            t2("demoMapped"),
+            "\uFF1A",
+            preview2.approval.mappedRequirementIds.length ? preview2.approval.mappedRequirementIds.map((id3) => requirementName(id3)).join("\u3001") : "\u2014"
+          ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("details", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("summary", { children: [
@@ -31314,6 +31463,8 @@ ${r.featureIdeas.join("\n")}` });
         t2("versionLabel"),
         /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("input", { "aria-label": t2("versionLabel"), value: label, onChange: (e) => setLabel(e.target.value), placeholder: t2("versionLabel") })
       ] }),
+      preview2 && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "cs-hint", children: project2.nodes.length === 0 ? t2("approvalNothingToFreeze") : `${t2("approvalWillFreeze")}${project2.nodes.length}${t2("approvalReqUnit")}\u3001${project2.architecture.length}${t2("approvalArchUnit")}${base && changes.length > 0 ? `\uFF0C${t2("approvalBaselineChanges")}${changes.length}${t2("approvalChangesUnit")}` : ""}` }),
+      !label.trim() && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "cs-hint", children: t2("approvalNeedLabel") }),
       /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { disabled: !ready || !label.trim(), children: t2("approveVersion") })
     ] }) });
   }
@@ -31381,69 +31532,24 @@ ${r.featureIdeas.join("\n")}` });
     const before = project2.versions.find((v) => v.id === base);
     const after = target === "draft" ? project2 : project2.versions.find((v) => v.id === target);
     const differences = before && after ? diffContent(before, after) : [];
-    const options = project2.versions.map((v) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("option", { value: v.id, children: [
-      v.label,
-      " \xB7 r",
-      v.contentRevision
-    ] }, v.id));
+    const revisionText = (v) => `${v.label} \xB7 ${t2("contentRevisionPrefix")}${v.contentRevision}${t2("contentRevisionSuffix")}`;
+    const options = project2.versions.map((v) => /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: v.id, children: revisionText(v) }, v.id));
     return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("section", { "aria-label": t2("versions"), children: [
       /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("h3", { children: t2("versions") }),
       /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { children: t2("approvalScope") }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(ApprovalForm, { project: project2, busy, approve, t: t2 }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
-        t2("compareFrom"),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: base, onChange: (e) => setBase(e.target.value), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "", children: t2("selectVersion") }),
-          options
-        ] })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
-        t2("compareTo"),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: target, onChange: (e) => setTarget(e.target.value), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "draft", children: t2("currentDraft") }),
-          options
-        ] })
-      ] }),
-      before && after && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(import_jsx_runtime15.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { children: differences.length === 0 ? t2("noDifferences") : `${t2("differences")}: ${differences.length}` }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("ul", { children: differences.map((change) => {
-          const oldItem = change.collection === "architecture" ? before.architecture.find((item) => item.id === change.id) : void 0;
-          const newItem = change.collection === "architecture" ? after.architecture.find((item) => item.id === change.id) : void 0;
-          const nested = change.collection === "architecture" && (change.fields.includes("contract") || change.fields.includes("task")) ? structuredFieldChanges(oldItem, newItem) : [];
-          return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("li", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("strong", { children: [
-              t2(change.kind),
-              " \xB7 ",
-              change.title
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("span", { children: [
-              " \u2014 ",
-              change.collection === "nodes" ? t2("requirements") : t2("architecture"),
-              " ",
-              change.fields.map((field) => fieldLabel2(field, t2)).join(", ")
-            ] }),
-            nested.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("ul", { children: nested.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("li", { children: [
-              t2(entry.state),
-              " \xB7 ",
-              /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("code", { children: entry.path })
-            ] }, entry.path)) })
-          ] }, `${change.collection}-${change.id}`);
-        }) })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("ol", { children: [...project2.versions].reverse().map((v) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("li", { children: [
-        v.label,
-        " \xB7 r",
-        v.contentRevision,
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "cs-versions-list", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("ol", { children: [...project2.versions].reverse().map((v) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("li", { children: [
+        revisionText(v),
         " \xB7 ",
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("time", { dateTime: v.createdAt, children: v.createdAt }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("time", { dateTime: v.createdAt, children: [
+          t2("versionFrozenAt"),
+          formatWhen(v.createdAt)
+        ] }),
         " \xB7 ",
         v.nodes.length,
-        " ",
-        t2("requirements"),
+        t2("approvalReqUnit"),
         " / ",
         v.architecture.length,
-        " ",
-        t2("architecture"),
+        t2("approvalArchUnit"),
         /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(ApprovalReceipt, { record: v.approval, t: t2 }),
         /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("details", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("summary", { children: t2("taskPlanReview") }),
@@ -31477,8 +31583,63 @@ ${r.featureIdeas.join("\n")}` });
             if (window.confirm(t2("confirmTasksNotice"))) confirmTasks(v.id);
           }, children: v.taskPlanConfirmed ? t2("tasksConfirmed") : t2("confirmTasks") })
         ] })
-      ] }, v.id)) })
+      ] }, v.id)) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
+        t2("compareFrom"),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: base, onChange: (e) => setBase(e.target.value), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "", children: t2("selectVersion") }),
+          options
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
+        t2("compareTo"),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: target, onChange: (e) => setTarget(e.target.value), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "draft", children: t2("currentDraft") }),
+          options
+        ] })
+      ] }),
+      before && after && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(import_jsx_runtime15.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { children: differences.length === 0 ? t2("noDifferences") : `${t2("differences")}: ${differences.length}` }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("ul", { children: differences.map((change) => {
+          const oldItem = change.collection === "architecture" ? before.architecture.find((item) => item.id === change.id) : void 0;
+          const newItem = change.collection === "architecture" ? after.architecture.find((item) => item.id === change.id) : void 0;
+          const oldNode = change.collection === "nodes" ? before.nodes.find((item) => item.id === change.id) : void 0;
+          const newNode = change.collection === "nodes" ? after.nodes.find((item) => item.id === change.id) : void 0;
+          const renamed = oldNode && newNode && oldNode.title !== newNode.title;
+          const nested = change.collection === "architecture" && (change.fields.includes("contract") || change.fields.includes("task")) ? structuredFieldChanges(oldItem, newItem) : [];
+          return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("strong", { children: [
+              t2(change.kind),
+              " \xB7 ",
+              change.title
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("span", { children: [
+              " \u2014 ",
+              t2(change.collection === "nodes" ? "approvalCollectionNodes" : "approvalCollectionArchitecture"),
+              " ",
+              change.fields.map((field) => fieldLabel2(field, t2)).join(", ")
+            ] }),
+            renamed && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("span", { className: "cs-diff-shift", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("del", { children: oldNode.title }),
+              " \u2192 ",
+              /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("ins", { children: newNode.title })
+            ] }),
+            nested.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("ul", { children: nested.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("li", { children: [
+              t2(entry.state),
+              " \xB7 ",
+              /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("code", { children: entry.path })
+            ] }, entry.path)) })
+          ] }, `${change.collection}-${change.id}`);
+        }) })
+      ] }),
+      project2.versions.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { className: "cs-hint", children: t2("approvalFirstTime") }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(ApprovalForm, { project: project2, busy, approve, t: t2 })
     ] });
+  }
+  function formatWhen(iso) {
+    const date5 = new Date(iso);
+    if (Number.isNaN(date5.getTime())) return iso;
+    return new Intl.DateTimeFormat(void 0, { dateStyle: "medium", timeStyle: "short" }).format(date5);
   }
   function fieldLabel2(field, t2) {
     const labels = { title: "architectureTitle", body: "architectureBody", kind: "architectureType", requirementIds: "linkedRequirements", dependsOn: "dependencies", contract: "diffContract", task: "diffTask" };
@@ -31502,8 +31663,20 @@ ${r.featureIdeas.join("\n")}` });
       rows = Math.max(rows, group.length);
       group.forEach((n, row) => positions.set(n.id, { x: 20 + column * 270, y: 48 + row * 108 }));
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { style: { overflow: "auto", maxHeight: 440, marginBlock: 12 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("svg", { width: 1100, height: Math.max(160, rows * 108 + 60), "aria-label": t2("architectureGraph"), role: "group", children: [
+    const [avail, setAvail] = React13.useState(0);
+    const box = React13.useRef(null);
+    React13.useEffect(() => {
+      const el = box.current;
+      if (!el) return;
+      const ro = new ResizeObserver(() => setAvail(el.clientWidth));
+      ro.observe(el);
+      setAvail(el.clientWidth);
+      return () => ro.disconnect();
+    }, []);
+    const width = 1100, height = Math.max(160, rows * 108 + 60);
+    const scale = avail > 0 ? Math.min(1, Math.max(0.75, (avail - 2) / width)) : 1;
+    return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { style: { marginBlock: 12 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { ref: box, style: { overflow: "auto", maxHeight: 440 }, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { style: { width: Math.ceil(width * scale), height: Math.ceil(height * scale) }, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("svg", { width, height, style: { display: "block", transform: `scale(${scale})`, transformOrigin: "top left" }, "aria-label": t2("architectureGraph"), role: "group", children: [
         /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("defs", { children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("marker", { id: marker, viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: "currentColor" }) }) }),
         kinds.map((kind, i) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("text", { x: 20 + i * 270, y: 24, fill: "currentColor", children: t2(`architecture_${kind}`) }, kind)),
         items.flatMap((n) => n.dependsOn.map((id3) => {
@@ -31520,10 +31693,11 @@ ${r.featureIdeas.join("\n")}` });
           const p = positions.get(n.id);
           return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("foreignObject", { x: p.x, y: p.y, width: 228, height: 76, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("button", { disabled: busy, "aria-pressed": selected === n.id, onClick: () => select(n.id), style: { width: "100%", height: "100%", overflow: "hidden", textAlign: "left", padding: 12, borderRadius: 8, border: selected === n.id ? "2px solid var(--cs-accent)" : "1px solid var(--cs-border)", background: selected === n.id ? "var(--cs-soft)" : "var(--cs-surface)", color: "inherit" }, children: [
             n.title,
-            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("small", { style: { display: "block" }, children: n.kind === "contract" ? n.contract ? n.contract.notApplicable ? t2("contractNotApplicable") : n.contract.surface || t2("contractStructure") : t2("architectureBody") : n.kind === "task" && n.task ? `${n.task.outputs.length} ${t2("taskOutputs")} \xB7 ${n.task.acceptanceIds.length} ${t2("taskAcceptance")}` : `${t2("linkedRequirements")}: ${n.requirementIds.length}` })
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("small", { style: { display: "block" }, children: n.kind === "contract" ? n.contract ? n.contract.notApplicable ? t2("contractNotApplicable") : n.contract.surface || t2("contractStructure") : t2("architectureBody") : n.kind === "task" && n.task ? `${n.task.outputs.length} ${t2("taskOutputs")} \xB7 ${n.task.acceptanceIds.length ? `${n.task.acceptanceIds.length} ${t2("taskAcceptShort")}` : t2("taskAcceptanceNone")}` : `${t2("linkedRequirements")}: ${n.requirementIds.length}` })
           ] }) }, n.id);
         })
-      ] }),
+      ] }) }) }),
+      width * scale > avail && avail > 0 && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("p", { className: "cs-hint", children: t2("archScrollHint") }),
       /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("p", { children: t2("architectureGraphNote") })
     ] });
   }
@@ -31542,15 +31716,20 @@ ${r.featureIdeas.join("\n")}` });
     const current = project2.architecture.find((item) => item.id === selected);
     return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("section", { "aria-label": t2("architecture"), children: [
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("h3", { children: t2("architecture") }),
+      project2.architecture.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "cs-hint cs-empty-start", children: t2("architectureEmptyHint") }),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(ArchitectureMap, { items: project2.architecture, selected, busy, select: choose, t: t2 }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("nav", { style: { display: "flex", gap: 8, flexWrap: "wrap" }, children: [
-        project2.architecture.map((item) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("button", { disabled: busy, "aria-pressed": selected === item.id, onClick: () => choose(item.id), children: [
-          t2(`architecture_${item.kind}`),
-          " \xB7 ",
-          item.title
-        ] }, item.id)),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { disabled: busy, onClick: () => choose(newId()), children: t2("addArchitecture") })
-      ] }),
+      project2.architecture.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "cs-hint", children: t2("architecturePickHint") }),
+      ["module", "contract", "decision", "task"].map((kind) => {
+        const items = project2.architecture.filter((item) => item.kind === kind);
+        if (!items.length && kind !== "module") return null;
+        return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "cs-muted cs-arch-kind", children: t2(`architecture_${kind}`) }),
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "cs-row-actions", children: [
+            items.map((item) => /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { type: "button", disabled: busy, "aria-pressed": selected === item.id, onClick: () => choose(item.id), children: item.title || t2("valueNotSet") }, item.id)),
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { type: "button", disabled: busy, onClick: () => choose(newId()), children: t2("addArchitecture") })
+          ] })
+        ] }, kind);
+      }),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(ArchitectureForm, { id: selected, current, project: project2, busy, save, t: t2, dirty: setDirty }, selected),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("ul", { "aria-label": t2("dependencies"), children: project2.architecture.filter((item) => item.dependsOn.length > 0).map((item) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("li", { children: [
         item.title,
@@ -31756,15 +31935,18 @@ ${r.featureIdeas.join("\n")}` });
   function MindMap({ nodes: nodes2, selected, select, disabled, move, t: t2 }) {
     const root2 = React15.useRef(null);
     const dragging = React15.useRef(null);
+    const [dragActive, setDragActive] = React15.useState(false);
     const start = (event, id3) => {
       if (disabled || event.button !== 0) return;
       event.preventDefault();
       dragging.current = { id: id3, pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+      setDragActive(true);
       event.currentTarget.setPointerCapture(event.pointerId);
     };
     const finish = (event) => {
       const drag = dragging.current;
       dragging.current = null;
+      setDragActive(false);
       if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
       if (disabled || !drag || drag.pointerId !== event.pointerId || Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 6) return;
       const target = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-cs-parent]");
@@ -31783,10 +31965,28 @@ ${r.featureIdeas.join("\n")}` });
     visit(null, 0);
     const width = Math.max(480, ...Array.from(positions.values(), (p) => p.x + CARD_WIDTH + OFFSET));
     const height = Math.max(180, row * ROW_GAP + OFFSET * 2);
+    const [avail, setAvail] = React15.useState(0);
+    const box = React15.useRef(null);
+    React15.useEffect(() => {
+      const el = box.current;
+      if (!el) return;
+      const ro = new ResizeObserver(() => setAvail(el.clientWidth));
+      ro.observe(el);
+      setAvail(el.clientWidth);
+      return () => ro.disconnect();
+    }, []);
+    const scale = avail > 0 ? Math.min(1, Math.max(0.75, (avail - 2) / width)) : 1;
+    React15.useEffect(() => {
+      const el = box.current;
+      if (!el || !selected) return;
+      const p = positions.get(selected);
+      if (!p) return;
+      el.scrollTo({ left: Math.max(0, p.x * scale - 40), top: Math.max(0, p.y * scale - 20), behavior: "smooth" });
+    }, [selected, scale]);
     return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { ref: root2, style: { minWidth: 0 }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("p", { className: "cs-hint", children: t2("nodeDragHint") }),
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { role: "note", "data-cs-parent": "", style: { padding: 12, marginBottom: 12, border: "1px dashed var(--cs-border)", borderRadius: 12, background: "var(--cs-surface)", fontSize: "var(--cs-text-sm)", lineHeight: "20px", color: "var(--cs-muted)" }, children: t2("nodeDropRoot") }),
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { style: { overflow: "auto", maxHeight: 560, border: "1px solid var(--cs-border)", borderRadius: 12 }, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("svg", { width, height, style: { display: "block" }, children: [
+      dragActive && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { role: "note", "data-cs-parent": "", style: { padding: 8, marginBottom: 12, border: "1px dashed var(--cs-accent)", borderRadius: 10, background: "var(--cs-soft)", fontSize: "var(--cs-text-sm)", lineHeight: "20px" }, children: t2("nodeDropRoot") }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { ref: box, style: { overflow: "auto", maxHeight: 560, border: "1px solid var(--cs-border)", borderRadius: 12 }, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { style: { width: Math.ceil(width * scale), height: Math.ceil(height * scale) }, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("svg", { width, height, style: { display: "block", transform: `scale(${scale})`, transformOrigin: "top left" }, children: [
         nodes2.map((node) => {
           const p = positions.get(node.id);
           const parent = node.parentId ? positions.get(node.parentId) : void 0;
@@ -31809,7 +32009,8 @@ ${r.featureIdeas.join("\n")}` });
             ] }) })
           ] }, node.id);
         })
-      ] }) })
+      ] }) }) }),
+      height * scale > 560 && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("p", { className: "cs-hint", children: t2("canvasScrollHint") })
     ] });
   }
 
@@ -31831,10 +32032,34 @@ ${r.featureIdeas.join("\n")}` });
     React16.useEffect(() => {
       setEditor((current) => refreshEditor(current, node?.id ?? null, snapshot()));
     }, [node]);
+    const subtreeCount = (id3) => {
+      const seen = /* @__PURE__ */ new Set([id3]);
+      let grew = true;
+      while (grew) {
+        grew = false;
+        for (const item of project2.nodes) {
+          if (item.parentId !== null && seen.has(item.parentId) && !seen.has(item.id)) {
+            seen.add(item.id);
+            grew = true;
+          }
+        }
+      }
+      return seen.size - 1;
+    };
+    const removePrompt = () => {
+      if (!node) return t2("confirmRemove");
+      const kids = subtreeCount(node.id);
+      if (kids === 0) return t2("confirmRemove");
+      return t2("confirmRemoveBranch").replace("{title}", node.title).replace("{children}", String(kids)).replace("{total}", String(kids + 1));
+    };
     const [view, setView] = React16.useState("canvas");
     const [dependencyState, setDependencyState] = React16.useState({ id: null, ids: [] });
     const dependencyDraft = dependencyState.id === (node?.id ?? null) ? dependencyState.ids : node?.dependsOn ?? [];
     const setDependencyDraft = (ids) => setDependencyState({ id: node?.id ?? null, ids });
+    const [priorityState, setPriorityState] = React16.useState({ id: null, value: "normal" });
+    const priority = priorityState.id === (node?.id ?? null) ? priorityState.value : node?.priority ?? "normal";
+    const setPriorityDraft = (value2) => setPriorityState({ id: node?.id ?? null, value: value2 });
+    const priorityChanged = !!node && priority !== node.priority;
     const dependenciesChanged = (() => {
       const a = [...dependencyDraft].sort(), b = [...node?.dependsOn ?? []].sort();
       return JSON.stringify(a) !== JSON.stringify(b);
@@ -31844,7 +32069,7 @@ ${r.featureIdeas.join("\n")}` });
         setSelected(id3);
         return;
       }
-      const dirty = editorDirty(editor) || dependenciesChanged;
+      const dirty = editorDirty(editor) || dependenciesChanged || priorityChanged;
       if (!dirty || window.confirm(t2("discardEdits"))) {
         setDependencyState({ id: null, ids: [] });
         setSelected(id3);
@@ -31865,9 +32090,10 @@ ${r.featureIdeas.join("\n")}` });
     return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("section", { className: `cs-editor ${view === "canvas" ? "cs-editor-canvas" : "cs-editor-outline"}`, children: [
       /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("style", { children: `.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start;margin-top:16px}@container (min-width:820px){.creative-studio-root .cs-editor-canvas{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.creative-studio-root .cs-editor-outline{grid-template-columns:minmax(240px,1fr) minmax(260px,1fr)}}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}.creative-studio-root .cs-segmented{display:flex;gap:4px;margin-left:auto}.creative-studio-root .cs-outline-no{display:inline-block;min-width:32px;text-align:right;margin-right:8px;color:var(--cs-muted);font-size:var(--cs-text-xs);font-variant-numeric:tabular-nums}.creative-studio-root .cs-inspector-title{margin:0 0 8px}@media(max-width:1024px){.creative-studio-root .cs-editor{grid-template-columns:minmax(0,1fr)}}` }),
       /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-canvas-column", children: [
+        project2.nodes.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-empty-start", children: t2("requirementsEmptyHint") }),
         /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-toolbar", children: [
           /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", className: "cs-primary", disabled: busy, onClick: () => save({ kind: "add", node: { id: newId(), parentId: selected, title: t2("newRequirement"), kind: "feature", description: "", priority: "normal", dependsOn: [], desktopAcceptance: [], mobileAcceptance: [] } }), children: selected ? t2("addChild") : t2("addRoot") }),
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", disabled: busy, onClick: () => choose(null), children: t2("selectRoot") }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", disabled: busy, title: t2("selectRootHint"), onClick: () => choose(null), children: selected ? t2("clearSelection") : t2("selectRoot") }),
           /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-segmented", role: "group", "aria-label": t2("requirementView"), children: [
             /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", "aria-pressed": view === "canvas", onClick: () => setView("canvas"), children: t2("canvasView") }),
             /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", "aria-pressed": view === "outline", onClick: () => setView("outline"), children: t2("outlineView") })
@@ -31877,7 +32103,7 @@ ${r.featureIdeas.join("\n")}` });
           /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "cs-outline-no", "aria-hidden": "true", children: row.label }),
           project2.nodes.find((n) => n.id === row.id)?.title
         ] }) }, row.id)) }),
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2(view === "canvas" ? "canvasHint" : "outlineHint") })
+        view === "outline" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2("outlineHint") })
       ] }),
       editor.conflicts.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("p", { role: "alert", children: [
         t2("editorConflict"),
@@ -31904,7 +32130,8 @@ ${r.featureIdeas.join("\n")}` });
               t2("nodeTitle"),
               /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("input", { value: title, onChange: (e) => setTitle(e.target.value) })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { disabled: !title.trim(), children: t2("rename") })
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { disabled: !title.trim() || title.trim() === node.title, children: t2("rename") }),
+            title.trim() !== node.title && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", role: "status", children: t2("renameDirty") })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
             t2("parentNode"),
@@ -31924,8 +32151,16 @@ ${r.featureIdeas.join("\n")}` });
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("form", { onSubmit: (e) => {
             e.preventDefault();
-            save({ kind: "details", id: node.id, description, priority: node.priority, desktopAcceptance: lines(desktop), mobileAcceptance: lines(mobile) });
+            save({ kind: "details", id: node.id, description, priority, desktopAcceptance: lines(desktop), mobileAcceptance: lines(mobile) });
           }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
+              t2("requirementPriority"),
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("select", { value: priority, onChange: (e) => setPriorityDraft(e.target.value), children: [
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("option", { value: "high", children: t2("priorityHigh") }),
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("option", { value: "normal", children: t2("priorityNormal") }),
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("option", { value: "low", children: t2("priorityLow") })
+              ] })
+            ] }),
             /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
               t2("nodeDescription"),
               /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("textarea", { "aria-label": t2("nodeDescription"), rows: 4, value: description, onChange: (e) => setDescription(e.target.value) })
@@ -31938,10 +32173,11 @@ ${r.featureIdeas.join("\n")}` });
               t2("mobileAcceptance"),
               /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("textarea", { "aria-label": t2("mobileAcceptance"), rows: 3, value: mobile, onChange: (e) => setMobile(e.target.value) })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { disabled: busy, children: busy ? t2("working") : t2("saveDetails") })
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { disabled: busy, children: busy ? t2("working") : t2("saveDetails") }),
+            (priorityChanged || description !== node.description || lines(desktop).join("\n") !== node.desktopAcceptance.join("\n") || lines(mobile).join("\n") !== node.mobileAcceptance.join("\n")) && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", role: "status", children: t2("detailsDirty") })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", onClick: () => {
-            if (window.confirm(t2("confirmRemove"))) save({ kind: "remove", id: node.id });
+            if (window.confirm(removePrompt())) save({ kind: "remove", id: node.id });
           }, children: t2("removeNode") })
         ] }) : /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2("selectNode") })
       ] })
@@ -32037,7 +32273,7 @@ ${r.featureIdeas.join("\n")}` });
       });
     };
     const stages = project2 ? [
-      { id: "idea", label: t2("stageIdea"), hint: t2("stageHintIdea"), blocks: [
+      { id: "idea", label: t2("stageIdea"), hint: t2("stageHintIdea"), badge: project2.proposalJob?.status === "submitted" ? t2("badgeAwaitingModel") : project2.proposals.length ? `${project2.proposals.length}${t2("badgeCandidates")}` : void 0, blocks: [
         { id: "generate", label: t2("generateTitle"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(GeneratePanel, { listWorkspaces: api.listWorkspaces, listModels: api.listModels, project: project2, busy, t: t2, generate: (request, workspaceId, model) => {
           void run(() => api.generate(project2, request, workspaceId, model));
         }, refresh: () => {
@@ -32051,7 +32287,7 @@ ${r.featureIdeas.join("\n")}` });
           void run(() => api.adopt(project2, id3), true);
         } }, `proposals-${project2.id}`) }
       ] },
-      { id: "requirements", label: t2("stageRequirements"), hint: t2("stageHintRequirements"), blocks: [
+      { id: "requirements", label: t2("stageRequirements"), hint: t2("stageHintRequirements"), badge: `${project2.nodes.length}${t2("badgeRequirements")}`, blocks: [
         { id: "requirements", label: t2("layoutRequirements"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(RequirementsEditor, { onSelect: setSelectedRequirement, project: project2, busy, t: t2, save: (change) => {
           void run(async () => {
             const next = await api.edit(project2, change);
@@ -32073,9 +32309,10 @@ ${r.featureIdeas.join("\n")}` });
           /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(FeaturePanel, { project: project2, busy, t: t2, save: (change) => {
             void run(() => api.feature(project2, change));
           } }, `features-${project2.id}`)
-        ] }) }
+        ] }) },
+        { id: "research", label: t2("researchTitle"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(ResearchPanel, { evidence: api.evidence, project: project2, busy, t: t2, listWorkspaces: api.listWorkspaces, listModels: api.listModels, start: (referenceId, request, workspaceId, model) => void run(() => api.research(project2, referenceId, request, workspaceId, model)), refresh: () => void run(() => api.get(project2.id)) }) }
       ] },
-      { id: "architecture", label: t2("stageArchitecture"), hint: t2("stageHintArchitecture"), blocks: [
+      { id: "architecture", label: t2("stageArchitecture"), hint: t2("stageHintArchitecture"), badge: `${project2.architecture.length}${t2("badgeArchitecture")}`, blocks: [
         { id: "architecture", label: t2("layoutArchitecture"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(ArchitectureEditor, { project: project2, busy, t: t2, save: (change) => {
           void run(async () => {
             const next = await api.architecture(project2, change);
@@ -32087,15 +32324,14 @@ ${r.featureIdeas.join("\n")}` });
           });
         } }, `architecture-${project2.id}-${editorEpoch}`) }
       ] },
-      { id: "approval", label: t2("stageApproval"), hint: t2("stageHintApproval"), blocks: [
-        { id: "versions", label: t2("versions"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(VersionPanel, { project: project2, busy, t: t2, confirmTasks: (id3) => {
+      { id: "approval", label: t2("stageApproval"), hint: t2("stageHintApproval"), badge: project2.versions.length ? `v${project2.versions.length}` : t2("badgeUnfrozen"), blocks: [
+        { id: "versions", label: t2("versions"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(import_jsx_runtime20.Fragment, { children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(VersionPanel, { project: project2, busy, t: t2, confirmTasks: (id3) => {
           void run(() => api.confirmTasks(project2, id3));
         }, approve: (label, review) => {
           void run(() => api.approve(project2, label, review));
-        } }, `versions-${project2.id}`) },
-        { id: "research", label: t2("researchTitle"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(ResearchPanel, { evidence: api.evidence, project: project2, busy, t: t2, listWorkspaces: api.listWorkspaces, listModels: api.listModels, start: (referenceId, request, workspaceId, model) => void run(() => api.research(project2, referenceId, request, workspaceId, model)), refresh: () => void run(() => api.get(project2.id)) }) }
+        } }, `versions-${project2.id}`) }) }
       ] },
-      { id: "handoff", label: t2("stageHandoff"), hint: t2("stageHintHandoff"), blocks: [
+      { id: "handoff", label: t2("stageHandoff"), hint: t2("stageHintHandoff"), badge: project2.reports.length ? `${project2.reports.length}${t2("badgeReports")}` : void 0, blocks: [
         { id: "handoff", label: t2("handoffTitle"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(HandoffPanel, { project: project2, api: api.handoff, dispatch: api.dispatch, onProject: (next) => setProject((current) => current?.id === next.id && next.projectRevision >= current.projectRevision ? next : current), t: t2 }, `handoff-${project2.id}`) },
         { id: "reports", label: t2("reportsTitle"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(ReportsPanel, { project: project2, busy, t: t2, refresh: () => void run(() => api.get(project2.id)), accept: (id3, value2) => void run(() => api.acceptReport(project2, id3, value2)) }) }
       ] }
@@ -32138,7 +32374,9 @@ ${r.featureIdeas.join("\n")}` });
           p.contentRevision,
           typeof p.requirementCount === "number" ? ` \xB7 ${p.requirementCount} ${t2("chooserRequirements")} \xB7 ${p.architectureCount ?? 0} ${t2("chooserModules")}` : ""
         ] }),
-        p.proposalStatus === "submitted" && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("small", { className: "cs-hint cs-card-flag", children: t2("chooserAwaitingModel") })
+        p.proposalStatus === "submitted" && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("small", { className: "cs-hint cs-card-flag", children: t2("chooserAwaitingModel") }),
+        typeof p.requirementCount === "number" && !p.requirementCount && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("small", { className: "cs-hint", children: t2("chooserNextIdea") }),
+        typeof p.requirementCount === "number" && p.requirementCount > 0 && !p.architectureCount && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("small", { className: "cs-hint", children: t2("chooserNextArch") })
       ] }, p.id)) }),
       !projects.length && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("p", { className: "cs-hint", children: t2("railEmptyHint") })
     ] });
@@ -32149,6 +32387,10 @@ ${r.featureIdeas.join("\n")}` });
           t2("draftRevision"),
           " ",
           project2.contentRevision
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "cs-toolbar cs-history", role: "group", "aria-label": t2("requirementHistory"), title: `${t2("historyScope")}${!historyCurrent ? ` ${t2("historyUnavailable")}` : ""}`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", className: "cs-quiet", disabled: busy || !historyCurrent || !history?.past.length, onClick: () => restore("undo"), children: t2("undoRequirements") }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", className: "cs-quiet", disabled: busy || !historyCurrent || !history?.future.length, onClick: () => restore("redo"), children: t2("redoRequirements") })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("details", { className: "cs-advanced cs-project-menu", children: [
           /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("summary", { children: t2("projectSettings") }),
@@ -32170,11 +32412,6 @@ ${r.featureIdeas.join("\n")}` });
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("p", { className: "cs-hint", children: t2("projectSettingsHint") })
         ] })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "cs-toolbar", "aria-label": t2("requirementHistory"), children: [
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", disabled: busy || !historyCurrent || !history?.past.length, onClick: () => restore("undo"), children: t2("undoRequirements") }),
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", disabled: busy || !historyCurrent || !history?.future.length, onClick: () => restore("redo"), children: t2("redoRequirements") }),
-        !historyCurrent && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("small", { className: "cs-hint", title: t2("historyScope"), children: t2("historyUnavailable") })
       ] }),
       error51 && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("p", { role: "alert", className: "cs-error", children: errorText(error51) }),
       /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
@@ -32348,13 +32585,15 @@ ${r.featureIdeas.join("\n")}` });
 .creative-studio-root .cs-advanced[open]>summary::before{content:'\u25BE'}
 .creative-studio-root .cs-advanced>summary:focus-visible{outline:2px solid var(--cs-accent);outline-offset:2px;border-radius:4px}
 .creative-studio-root .cs-advanced>:not(summary){margin-top:8px}
-.creative-studio-root .cs-job-status{margin-top:12px}
+.creative-studio-root .cs-demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.creative-studio-root .cs-demo-head h3{margin:0}
+.creative-studio-root .cs-demo-actions{display:flex;align-items:center;gap:8px}.creative-studio-root .cs-demo-controls{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:12px 0}.creative-studio-root .cs-stale{margin:8px 0;font-size:var(--cs-text-sm);line-height:20px}.creative-studio-root .cs-job-status{margin-top:12px}.creative-studio-root .cs-job-status .cs-status{display:flex;align-items:center;gap:8px;margin:0;font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted)}.creative-studio-root .cs-status-dot{width:8px;height:8px;border-radius:50%;background:var(--cs-muted);flex:none}
 .creative-studio-root .cs-id-list{max-height:200px;overflow:auto;margin-top:8px;padding-left:20px}
 .creative-studio-root .cs-onboarding{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0 20px;padding:0;list-style:none}
 .creative-studio-root .cs-onboarding li{display:grid;gap:4px;padding:12px;border:1px solid var(--cs-border);border-radius:10px;background:var(--cs-surface)}
 .creative-studio-root .cs-onboarding strong{font-size:var(--cs-text-md);font-weight:600}
 .creative-studio-root .cs-onboarding span{font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted)}
 @media (max-width:900px){.creative-studio-root .cs-onboarding{grid-template-columns:minmax(0,1fr)}}
+.creative-studio-root .cs-pane-label{margin:0 0 8px;font-size:var(--cs-text-xs);letter-spacing:.02em;color:var(--cs-muted)}
 .creative-studio-root .cs-card-flag{color:var(--cs-accent-text,var(--cs-muted));font-weight:500}
 .creative-studio-root .cs-id-list li{display:flex;gap:8px;align-items:baseline;padding:4px 0;font-size:var(--cs-text-sm)}
 .creative-studio-root .cs-id-list small{color:var(--cs-muted);font-size:var(--cs-text-xs)}
@@ -32402,14 +32641,26 @@ ${r.featureIdeas.join("\n")}` });
 .creative-studio-root .cs-grid{display:grid}
 .creative-studio-root .cs-inline-field{display:inline-flex;align-items:center;gap:8px;margin:0;min-height:32px;color:var(--cs-muted)}
 .creative-studio-root .cs-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.creative-studio-root .cs-coverage{margin:8px 0 12px;padding:8px 12px;border-radius:10px;background:var(--cs-surface)}.creative-studio-root .cs-coverage p{margin:0 0 4px}.creative-studio-root .cs-coverage p:last-child{margin-bottom:0}
+.creative-studio-root .cs-history{display:flex;gap:4px;margin:0}.creative-studio-root .cs-history .cs-quiet{min-height:24px;padding:2px 8px;color:var(--cs-muted)}
+.creative-studio-root .cs-block-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;font-size:var(--cs-text-sm);color:var(--cs-muted)}.creative-studio-root .cs-block-nav-label{font-size:var(--cs-text-xs);letter-spacing:.02em}.creative-studio-root .cs-block-nav .cs-quiet{padding:2px 8px;min-height:24px;border:1px solid var(--cs-border);border-radius:999px;background:var(--cs-surface);color:inherit}
 .creative-studio-root .cs-pane{min-width:0;padding:12px;border:1px solid var(--cs-border);border-radius:12px;background:var(--cs-surface)}
 .creative-studio-root .cs-split{position:relative;align-self:stretch;min-height:240px;cursor:col-resize;touch-action:none;background:transparent}
 .creative-studio-root .cs-split::before{content:'';position:absolute;inset:0 6px;background:var(--cs-border);border-radius:8px}
 .creative-studio-root .cs-split:focus-visible{outline:2px solid var(--cs-accent);outline-offset:2px}
 .creative-studio-root .cs-demo-pane{min-width:0}
 .creative-studio-root .cs-steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 0 12px;padding:0}
-.creative-studio-root .cs-steps button{display:inline-flex;align-items:center;gap:8px;min-height:32px}
+.creative-studio-root .cs-steps button{display:inline-flex;align-items:center;gap:8px;min-height:32px;white-space:nowrap}
 .creative-studio-root .cs-steps button[aria-current='step']{border-color:var(--cs-accent);background:var(--cs-soft);font-weight:600}
+.creative-studio-root .cs-empty-start{margin:8px 0 0;padding:12px;max-width:64ch;border:1px dashed var(--cs-border);border-radius:10px;background:var(--cs-surface)}
+.creative-studio-root .cs-demo-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0}
+.creative-studio-root .cs-brief-ask{margin:12px 0;padding:12px;border:1px solid var(--cs-border);border-radius:10px;background:var(--cs-surface)}
+.creative-studio-root .cs-brief-ask-title{margin:0 0 8px;font-weight:600}
+.creative-studio-root .cs-brief-ask .cs-brief-list{margin:0}
+.creative-studio-root .cs-diff-shift{display:block;margin-top:4px;font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted)}
+.creative-studio-root .cs-diff-shift del{text-decoration:line-through;opacity:.7}
+.creative-studio-root .cs-diff-shift ins{text-decoration:none;color:var(--cs-fg)}
+.creative-studio-root .cs-step-badge{margin-left:8px;color:var(--cs-muted);font-size:12px;line-height:16px;font-weight:400;font-variant-numeric:tabular-nums}
 .creative-studio-root .cs-step-index{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:10px;background:var(--cs-surface-2);font-size:12px;line-height:16px;color:var(--cs-muted)}
 .creative-studio-root .cs-steps button[aria-current='step'] .cs-step-index{background:var(--cs-accent-strong);color:#fff}
 .creative-studio-root .cs-stage-body{container-type:inline-size}
@@ -32427,6 +32678,7 @@ ${r.featureIdeas.join("\n")}` });
 .creative-studio-root:has(.cs-projects article) .cs-header{padding-bottom:16px}
 @media(max-width:900px){.creative-studio-root .cs-grid{grid-template-columns:minmax(0,1fr)!important}.creative-studio-root .cs-split{display:none}.creative-studio-root .cs-demo-pane{position:static!important}.creative-studio-root .cs-inline-field{display:none}}
 @media(max-width:900px){.creative-studio-root{padding:20px 16px 16px}.creative-studio-root .cs-flow{grid-template-columns:repeat(3,1fr)}.creative-studio-root .cs-welcome{margin:32px 0 24px}}
+.creative-studio-root .cs-arch-kind{margin:12px 0 4px;font-size:13px;letter-spacing:.02em}
 @media(prefers-reduced-motion:reduce){.creative-studio-root *{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 `;
 
@@ -32720,6 +32972,7 @@ ${r.featureIdeas.join("\n")}` });
     researchSource: "\u9009\u62E9\u53C2\u8003\u6765\u6E90",
     researchWorkspace: "\u9009\u62E9\u7814\u7A76\u5DE5\u4F5C\u533A",
     researchQuestion: "\u5E0C\u671B\u68B3\u7406\u54EA\u4E9B\u529F\u80FD\u548C\u5B9E\u73B0\uFF1F",
+    researchToggle: "\u53D1\u8D77\u4E00\u6B21\u53C2\u8003\u7814\u7A76\uFF08\u4F1A\u8BA9 AI \u8BFB\u7ADE\u54C1\u5B9E\u73B0\uFF0C\u53EF\u80FD\u4EA7\u751F\u8D39\u7528\uFF09",
     researchStart: "\u5F00\u59CB\u53EA\u8BFB\u7814\u7A76",
     researchRefresh: "\u5237\u65B0\u7814\u7A76\u7ED3\u679C",
     researchEvidence: "\u5B9E\u9645\u5DE5\u5177\u8C03\u7528",
@@ -32744,6 +32997,11 @@ ${r.featureIdeas.join("\n")}` });
     generateTitle: "\u4ECE\u6A21\u7CCA\u60F3\u6CD5\u63A8\u5BFC\u65B9\u6848",
     generateConfirm: "\u786E\u8BA4\u521B\u5EFA\u63A8\u5BFC\u4F1A\u8BDD\u5E76\u8C03\u7528\u6A21\u578B\uFF1F\u8FD9\u4E0D\u4F1A\u5F00\u59CB\u4EA7\u54C1\u5F00\u53D1\u3002",
     workspaceId: "Harness \u5DE5\u4F5C\u533A ID",
+    workspaceEmpty: "\u6CA1\u6709\u627E\u5230\u53EF\u7528\u7684\u5DE5\u4F5C\u533A\u3002\u5148\u5728 DSH \u91CC\u521B\u5EFA\u6216\u6253\u5F00\u4E00\u4E2A\uFF0C\u518D\u70B9\u300C\u5237\u65B0\u300D\u3002",
+    workspaceRequired: "\u8FD8\u5DEE\u4E00\u4E2A\u5DE5\u4F5C\u533A\uFF1A\u5C55\u5F00\u300C\u751F\u6210\u8BBE\u7F6E\u300D\u9009\u4E00\u4E2A\uFF0C\u5C31\u80FD\u5F00\u59CB\u3002",
+    ideaRequired: "\u5148\u5728\u4E0A\u9762\u5199\u4E00\u53E5\u4F60\u60F3\u89E3\u51B3\u7684\u95EE\u9898\uFF08\u4E00\u53E5\u4E5F\u884C\uFF09\uFF0C\u6309\u94AE\u624D\u80FD\u70B9\u3002",
+    ideaShortcutHint: "\u5199\u5B8C\u6309 Ctrl/\u2318 + Enter \u76F4\u63A5\u63D0\u4EA4\u3002",
+    ideaBlockedByActive: "\u8FD9\u4E00\u8F6E\u8FD8\u6CA1\u7ED3\u675F\uFF0C\u6682\u65F6\u4E0D\u80FD\u63D0\u4EA4\u65B0\u7684\u60F3\u6CD5\u3002\u53EF\u4EE5\u7B49\u5B83\u8FD4\u56DE\uFF0C\u6216\u70B9\u4E0B\u9762\u7684\u300C\u7ED3\u675F\u8FD9\u6B21\u63A8\u5BFC\u300D\u91CD\u65B0\u5F00\u59CB\u3002",
     allProjects: "\u5168\u90E8\u9879\u76EE",
     projectSettings: "\u9879\u76EE\u8BBE\u7F6E",
     projectSettingsHint: "\u91CD\u547D\u540D\u53EA\u6539\u6807\u9898\u3002\u5220\u9664\u9879\u76EE\u4F1A\u540C\u65F6\u6E05\u6389\u5B83\u7684\u7248\u672C\u3001\u4EA4\u63A5\u5305\u548C\u8BB0\u5F55\uFF0C\u4E0D\u80FD\u64A4\u9500\u3002",
@@ -32751,7 +33009,14 @@ ${r.featureIdeas.join("\n")}` });
     layoutCompareHint: "\u4E0A\u65B9\u7F16\u8F91\uFF0C\u4E0B\u65B9\u5E76\u6392\u5BF9\u7167 Demo \u4E0E\u5DEE\u5F02\u3002",
     layoutWidthHint: "\u62D6\u52A8\u8C03\u6574\u5DE6\u4FA7\u4E0E\u53F3\u4FA7 Demo \u7684\u5BBD\u5EA6\u6BD4\u4F8B\u3002",
     layoutFocusHint: "\u6682\u65F6\u6536\u8D77\u53F3\u4FA7 Demo\uFF0C\u4E13\u5FC3\u7F16\u8F91\u3002",
+    paneCompareReference: "\u5BF9\u7167\u53C2\u8003\uFF1A\u9700\u6C42",
+    paneCurrent: "\u5F53\u524D\u9636\u6BB5",
     chooserHint: "\u9009\u62E9\u4E00\u4E2A\u9879\u76EE\u7EE7\u7EED\uFF0C\u6216\u65B0\u5EFA\u4E00\u4E2A\u3002",
+    chooserRequirements: "\u6761\u9700\u6C42",
+    chooserModules: "\u4E2A\u6A21\u5757",
+    chooserAwaitingModel: "\u5019\u9009\u63A8\u5BFC\u4E2D",
+    chooserNextIdea: "\u4E0B\u4E00\u6B65\uFF1A\u53BB\u300C\u60F3\u6CD5\u300D\u5199\u4E0B\u8981\u89E3\u51B3\u7684\u95EE\u9898\uFF0C\u6216\u76F4\u63A5\u8FDB\u300C\u9700\u6C42\u300D\u624B\u5199\u3002",
+    chooserNextArch: "\u4E0B\u4E00\u6B65\uFF1A\u9700\u6C42\u6709\u4E86\uFF0C\u53BB\u300C\u67B6\u6784\u300D\u8865\u6A21\u5757\u548C\u4EFB\u52A1\u3002",
     chooserSteps: "\u4F7F\u7528\u6B65\u9AA4",
     chooserStep1Title: "\u2460 \u5199\u4E0B\u6A21\u7CCA\u60F3\u6CD5",
     chooserStep1Body: "\u4E00\u53E5\u8BDD\u4E5F\u884C\uFF0C\u4E0D\u7528\u5148\u5199\u6210\u9700\u6C42\u6587\u6863\u3002",
@@ -32783,16 +33048,19 @@ ${r.featureIdeas.join("\n")}` });
     jobStatus: "\u4F5C\u4E1A\u72B6\u6001",
     sessionId: "\u4F1A\u8BDD ID",
     job_queued: "\u51C6\u5907\u6D3E\u53D1",
-    job_submitted: "\u5DF2\u63D0\u4EA4\uFF0C\u7B49\u5F85\u6A21\u578B\u56DE\u5E94",
+    job_submitted: "\u5DF2\u63D0\u4EA4\u7ED9\u6A21\u578B\uFF0C\u5C1A\u672A\u6536\u5230\u7ED3\u679C",
     job_finished: "\u5019\u9009\u5DF2\u8FD4\u56DE",
-    generateNotice: "\u5199\u4E0B\u4F60\u60F3\u89E3\u51B3\u7684\u95EE\u9898\u3002\u6211\u4F1A\u5148\u590D\u8FF0\u6211\u7684\u7406\u89E3\u3001\u5217\u51FA\u8FD8\u7F3A\u7684\u4FE1\u606F\uFF0C\u4F60\u786E\u8BA4\u540E\u624D\u751F\u6210\u5019\u9009\u65B9\u6848\uFF1B\u5019\u9009\u4E5F\u8981\u4F60\u91C7\u7EB3\u624D\u4F1A\u8FDB\u8349\u7A3F\u3002",
+    generateNotice: "\u5148\u5199\u4E00\u53E5\u4F60\u60F3\u89E3\u51B3\u7684\u95EE\u9898\uFF1B\u6211\u4F1A\u590D\u8FF0\u7406\u89E3\u3001\u5217\u51FA\u7F3A\u53E3\uFF0C\u4F60\u786E\u8BA4\u540E\u624D\u51FA\u5019\u9009\uFF0C\u5019\u9009\u4E5F\u8981\u4F60\u91C7\u7EB3\u624D\u8FDB\u8349\u7A3F\u3002",
     historyUnavailable: "\u64A4\u9500/\u91CD\u505A\u53EA\u5728\u672C\u6B21\u9875\u9762\u5185\u4FDD\u7559\uFF0C\u5237\u65B0\u540E\u5931\u6548\u3002",
     jobElapsed: "\u5DF2\u7B49\u5F85",
     jobMinutes: "\u5206\u949F",
     job_failed: "\u5931\u8D25",
     job_unknown: "\u7ED3\u679C\u5F85\u786E\u8BA4",
     unknownJob: "\u6D3E\u53D1\u7ED3\u679C\u4E0D\u660E\u786E\uFF0C\u4E0D\u4F1A\u81EA\u52A8\u91CD\u8BD5\u3002\u8BF7\u901A\u8FC7\u5BF9\u5E94\u4F1A\u8BDD\u68C0\u67E5\u6267\u884C\u72B6\u6001\u3002",
+    briefPendingPrefix: "\u8FD8\u6709 ",
+    briefPendingSuffix: " \u4E2A\u95EE\u9898\u9700\u8981\u4F60\u56DE\u7B54\uFF08\u89C1\u4E0B\u9762\u300C\u9700\u8981\u4F60\u786E\u8BA4\u300D\uFF09\uFF0C\u7B54\u5B8C\u70B9\u4E0B\u9762\u7684\u6309\u94AE\u7EE7\u7EED\u3002",
     briefTitle: "\u8FD9\u6B21\u8F93\u5165\u6211\u7406\u89E3\u5230\u7684\u662F",
+    briefMore: "\u66F4\u591A\u5224\u65AD\u4F9D\u636E\uFF08\u76EE\u6807\u3001\u4F7F\u7528\u8005\u3001\u573A\u666F\u3001\u7EA6\u675F\u3001\u672A\u77E5\u3001\u9700\u8981\uFF09",
     intent_product: "\u4EA7\u54C1\u9700\u6C42",
     intent_operation: "\u64CD\u4F5C\u6307\u4EE4",
     intent_unclear: "\u610F\u56FE\u4E0D\u660E\u786E",
@@ -32818,6 +33086,7 @@ ${r.featureIdeas.join("\n")}` });
     jobReplyRefresh: "\u5237\u65B0\u4F1A\u8BDD\u56DE\u590D",
     jobReplyEmpty: "\u8FD9\u4E00\u8F6E\u6A21\u578B\u6CA1\u6709\u5199\u51FA\u53EF\u89C1\u7684\u6587\u5B57\u56DE\u590D\u3002\u53EF\u4EE5\u770B\u4E0B\u65B9\u5019\u9009\u65B9\u6848\uFF1B\u5982\u679C\u6CA1\u6709\u5019\u9009\uFF0C\u70B9\u300C\u7ED3\u675F\u8FD9\u6B21\u63A8\u5BFC\u300D\u91CD\u65B0\u5F00\u59CB\u3002",
     jobReplyRecords: "\u8BFB\u53D6\u5230\u5386\u53F2\u8BB0\u5F55",
+    jobReplyNoRecords: "\u6CA1\u6709\u8BFB\u5230\u8FD9\u4E2A\u4F1A\u8BDD\u7684\u4EFB\u4F55\u8BB0\u5F55\u3002\u5982\u679C\u521A\u66F4\u65B0\u8FC7\u63D2\u4EF6\uFF0C\u9700\u8981\u5728\u5BBF\u4E3B\u673A\u91CD\u542F\u4E00\u6B21 Web \u670D\u52A1\u540E\uFF0C\u518D\u70B9\u300C\u5237\u65B0\u4F1A\u8BDD\u56DE\u590D\u300D\uFF1B\u91CD\u542F\u524D\u8FD9\u91CC\u4F1A\u4E00\u76F4\u663E\u793A 0 \u6761\u3002",
     jobReplyEndAttempt: "\u7ED3\u675F\u8FD9\u6B21\u63A8\u5BFC",
     jobReplyEndHint: "\u5982\u679C\u8FD9\u4E00\u8F6E\u4E00\u76F4\u6CA1\u7ED9\u51FA\u5019\u9009\uFF0C\u53EF\u4EE5\u7ED3\u675F\u5B83\uFF0C\u8865\u5145\u4FE1\u606F\u540E\u91CD\u65B0\u5F00\u59CB\u3002",
     jobReplyEndConfirm: "\u7ED3\u675F\u8FD9\u6B21\u63A8\u5BFC\uFF1F\u8FD9\u4E00\u8F6E\u7684\u4F1A\u8BDD\u8BB0\u5F55\u4F1A\u4FDD\u7559\uFF0C\u4F46\u4E0D\u4F1A\u518D\u751F\u6210\u5019\u9009\u3002",
@@ -32899,13 +33168,21 @@ ${r.featureIdeas.join("\n")}` });
     layoutVersions: "\u7248\u672C\u5BF9\u6BD4",
     stages: "\u9636\u6BB5",
     stageIdea: "\u60F3\u6CD5",
+    badgeRequirements: " \u6761",
+    badgeArchitecture: " \u4E2A",
+    badgeUnfrozen: "\u672A\u51BB\u7ED3",
+    badgeAwaitingModel: "\u7B49\u5F85\u6A21\u578B",
+    badgeCandidates: " \u4E2A\u5019\u9009",
+    badgeReports: " \u4EFD\u62A5\u544A",
     stageRequirements: "\u9700\u6C42",
     stageArchitecture: "\u67B6\u6784",
     stageApproval: "\u5BA1\u6279",
     stageHandoff: "\u4EA4\u63A5",
+    blocksNav: "\u672C\u9636\u6BB5\u5185\u5BB9",
     stageHintIdea: "\u5148\u628A\u6A21\u7CCA\u60F3\u6CD5\u5199\u6210\u5019\u9009\u65B9\u6848\uFF0C\u518D\u51B3\u5B9A\u91C7\u7EB3\u54EA\u4E00\u7248\u8FDB\u8349\u7A3F\u3002",
     stageHintRequirements: "\u7528\u5BFC\u56FE\u6574\u7406\u9700\u6C42\u5C42\u7EA7\u4E0E\u4F9D\u8D56\uFF0C\u5E76\u5BF9\u7167\u53C2\u8003\u4EA7\u54C1\u6807\u6CE8\u53EF\u501F\u9274\u7684\u529F\u80FD\u3002",
     stageHintArchitecture: "\u628A\u9700\u6C42\u843D\u6210\u6A21\u5757\u3001\u5951\u7EA6\u3001\u51B3\u7B56\u4E0E\u4EFB\u52A1\uFF0C\u5E76\u6807\u51FA\u4F9D\u8D56\u5173\u7CFB\u3002",
+    approvalResearchPointer: "\u60F3\u5148\u8BA9 AI \u8BFB\u4E00\u904D\u7ADE\u54C1\u5B9E\u73B0\uFF1F\u5230\u300C\u9700\u6C42\u300D\u9636\u6BB5\u7684\u300C\u53C2\u8003\u5B9E\u73B0\u7814\u7A76\u300D\u91CC\u53D1\u8D77\uFF0C\u7814\u7A76\u7ED3\u8BBA\u4F1A\u6302\u5728\u5BF9\u5E94\u53C2\u8003\u6765\u6E90\u4E0A\u3002",
     stageHintApproval: "\u5BF9\u6BD4\u7248\u672C\u5DEE\u5F02\uFF0C\u9009\u62E9\u8981\u51BB\u7ED3\u7684\u8303\u56F4\uFF1B\u51BB\u7ED3\u540E\u624D\u53EF\u80FD\u4EA4\u63A5\u3002",
     stageHintHandoff: "\u5BFC\u51FA\u5C31\u7EEA\u7684\u4EA4\u63A5\u5305\uFF0C\u6216\u6D3E\u53D1\u7ED9\u5F00\u53D1\u4F1A\u8BDD\uFF08\u9700\u518D\u6B21\u786E\u8BA4\uFF09\u3002",
     railEmptyTitle: "\u5148\u9009\u4E00\u4E2A\u9879\u76EE",
@@ -32916,6 +33193,7 @@ ${r.featureIdeas.join("\n")}` });
     targetSubdirectory: "\u5DE5\u4F5C\u533A\u5185\u73B0\u6709\u5B50\u76EE\u5F55\uFF08. \u8868\u793A\u6839\u76EE\u5F55\uFF09",
     agentPreset: "\u5DF2\u914D\u7F6E\u7684 Agent preset ID\uFF08\u53EF\u7559\u7A7A\uFF09",
     defaultAgent: "\u4F7F\u7528\u5F53\u524D\u9ED8\u8BA4 Agent",
+    dispatchToggle: "\u542F\u52A8\u5F00\u53D1\u9009\u9879\uFF08\u5BFC\u51FA\u5C31\u7EEA\u7684\u4EA4\u63A5\u5305\u540E\u53EF\u65B0\u5EFA\u5F00\u53D1\u4F1A\u8BDD\uFF09",
     dispatchStart: "\u786E\u8BA4\u5E76\u542F\u52A8\u5F00\u53D1",
     selectWorkspace: "\u9009\u62E9\u73B0\u6709\u5DE5\u4F5C\u533A",
     refreshWorkspaces: "\u5237\u65B0\u5DE5\u4F5C\u533A",
@@ -32924,6 +33202,11 @@ ${r.featureIdeas.join("\n")}` });
     handoffVersion: "\u9009\u62E9\u5BA1\u6279\u7248\u672C",
     handoffSelectPlaceholder: "\u8BF7\u9009\u62E9\u4E00\u4E2A\u5DF2\u51BB\u7ED3\u7684\u7248\u672C",
     handoffNoVersion: "\u8FD8\u6CA1\u6709\u51BB\u7ED3\u8FC7\u5BA1\u6279\u7248\u672C\u3002\u8BF7\u5148\u5230\u300C\u5BA1\u6279\u300D\u9636\u6BB5\u6279\u51C6\u5E76\u51BB\u7ED3\u4E00\u7248\uFF0C\u518D\u56DE\u6765\u5BFC\u51FA\u4EA4\u63A5\u5305\u3002",
+    handoffExported: "\u5DF2\u5BFC\u51FA\u4EA4\u63A5\u5305",
+    handoffTechnical: "\u6280\u672F\u4FE1\u606F\uFF08\u4FBF\u4E8E\u6838\u5BF9\uFF0C\u4E0D\u5FC5\u8BB0\u4F4F\uFF09",
+    handoffIdLabel: "\u4EA4\u63A5\u5305 ID",
+    handoffArchiveSha: "ZIP \u6821\u9A8C\u503C",
+    handoffManifestDigest: "\u6E05\u5355\u6821\u9A8C\u503C",
     handoffCheck: "\u68C0\u67E5\u5C31\u7EEA\u72B6\u6001",
     handoffReady: "\u53EF\u4EA4\u63A5\uFF08\u542F\u52A8\u5F00\u53D1\u4ECD\u9700\u786E\u8BA4\uFF09",
     handoffReviewOnly: "\u4EC5\u4F9B\u8BC4\u5BA1\uFF0C\u4E0D\u53EF\u76F4\u63A5\u5B9E\u65BD",
@@ -32939,7 +33222,11 @@ ${r.featureIdeas.join("\n")}` });
     demoTemplateNotice: "\u901A\u7528\u5217\u8868\u4EA4\u4E92\u793A\u4F8B\uFF1A\u4EE5\u9700\u6C42\u6807\u9898\u4F5C\u6837\u672C\u6570\u636E\uFF0C\u4E0D\u8868\u793A\u5DF2\u5B9E\u73B0\u8FD9\u4E9B\u9700\u6C42\u3002",
     demoCustom: "\u81EA\u5B9A\u4E49\u58F0\u660E\u5F0F\u573A\u666F\uFF08\u6A21\u62DF\u6570\u636E\uFF09",
     demoStale: "\u6B64\u9884\u89C8\u57FA\u4E8E\u8F83\u65E7\u7684\u9700\u6C42\u4FEE\u8BA2\uFF0C\u8BF7\u6838\u5BF9\u8986\u76D6\u8303\u56F4\u3002",
+    viewportUnitHint: "\u8FD9\u91CC\u7684\u6570\u5B57\u662F\u8BBE\u8BA1\u7A3F\u50CF\u7D20\uFF08CSS \u50CF\u7D20\uFF09\uFF0C\u4E0D\u662F\u624B\u673A\u7684\u771F\u5B9E\u5206\u8FA8\u7387\u3002",
     demoViewport: "\u4EA7\u54C1\u89C6\u53E3",
+    demoAutoReplay: "\u9700\u6C42\u6216\u67B6\u6784\u521A\u53D8\u8FC7\uFF0CDemo \u5DF2\u81EA\u52A8\u91CD\u64AD\u4E00\u904D\u52A8\u753B\u3002",
+    demoReplay: "\u91CD\u65B0\u64AD\u653E\u6F14\u793A",
+    demoReplayHint: "\u6F14\u793A\u6253\u5F00\u65F6\u4F1A\u81EA\u52A8\u6309\u6B65\u9AA4\u64AD\u653E\u4E00\u904D\uFF1B\u60F3\u518D\u770B\u4E00\u6B21\u52A8\u753B\u5C31\u70B9\u8FD9\u91CC\u3002",
     demoBoth: "\u684C\u9762\u4E0E\u624B\u673A",
     demoDesktop: "\u684C\u9762",
     demoMobile: "\u624B\u673A",
@@ -32953,8 +33240,13 @@ ${r.featureIdeas.join("\n")}` });
     demoApply: "\u5E94\u7528\u573A\u666F",
     demoLoad: "\u8F7D\u5165\u5F53\u524D\u573A\u666F",
     demoReset: "\u8FD4\u56DE\u901A\u7528\u793A\u4F8B",
+    demoJsonInvalid: "\u573A\u666F JSON \u6709\u8BED\u6CD5\u9519\u8BEF\uFF1A\u8BF7\u68C0\u67E5\u62EC\u53F7\u3001\u5F15\u53F7\u548C\u9017\u53F7\u662F\u5426\u914D\u5BF9\u3002",
+    demoRequirementMissing: "\u573A\u666F\u91CC\u5F15\u7528\u4E86\u4E0D\u5B58\u5728\u7684\u9700\u6C42 ID\u3002\u8BF7\u5148\u5230\u300C\u9700\u6C42\u300D\u9636\u6BB5\u590D\u5236\u6B63\u786E\u7684 ID\uFF0C\u518D\u7C98\u8D34\u56DE\u6765\u3002",
+    demoSchemaInvalid: "\u573A\u666F\u7ED3\u6784\u4E0D\u7B26\u5408\u8981\u6C42\uFF0C\u8BF7\u5BF9\u7167\u300C\u8F7D\u5165\u5F53\u524D\u573A\u666F\u300D\u7684\u793A\u4F8B\u683C\u5F0F\u68C0\u67E5",
     proposals: "\u5019\u9009\u65B9\u6848",
     proposalRule: "\u5019\u9009\u4E0E\u8349\u7A3F\u9694\u79BB\uFF1B\u91C7\u7EB3\u4EC5\u66F4\u65B0\u8349\u7A3F\uFF0C\u4E0D\u7B49\u4E8E\u5BA1\u6279\u3002",
+    proposalAdoptedHint: "\u8FD9\u4EFD\u5019\u9009\u5DF2\u7ECF\u5E76\u5165\u8349\u7A3F\u3002\u60F3\u64A4\u56DE\u7684\u8BDD\uFF0C\u7528\u9700\u6C42\u9636\u6BB5\u7684\u300C\u64A4\u9500\u9700\u6C42\u4FEE\u6539\u300D\u9000\u56DE\uFF0C\u6216\u76F4\u63A5\u5220\u6389\u5B83\u5E26\u6765\u7684\u9700\u6C42\u8282\u70B9\uFF1B\u5019\u9009\u672C\u8EAB\u4F1A\u7559\u5728\u8FD9\u91CC\u4F5C\u4E3A\u8BB0\u5F55\u3002",
+    proposalRejectedHint: "\u8FD9\u4EFD\u5019\u9009\u5DF2\u5F03\u7528\uFF0C\u4E0D\u4F1A\u5F71\u54CD\u8349\u7A3F\uFF1B\u9700\u8981\u7684\u8BDD\u53EF\u4EE5\u91CD\u65B0\u751F\u6210\u4E00\u4EFD\u3002",
     noProposals: "\u6682\u65E0\u5019\u9009\u65B9\u6848\uFF0C\u53EF\u901A\u8FC7\u4E0A\u65B9\u5165\u53E3\u751F\u6210\u3002",
     proposalBase: "\u57FA\u4E8E\u4FEE\u8BA2",
     proposal_pending: "\u5F85\u5BA1\u9605",
@@ -32976,8 +33268,9 @@ ${r.featureIdeas.join("\n")}` });
     limitationsNotAcknowledged: "\u6B64\u8BB0\u5F55\u6CA1\u6709\u672A\u9A8C\u8BC1\u9879\u786E\u8BA4\u6807\u8BB0\u3002",
     legacyApprovalReceipt: "\u5386\u53F2\u7248\u672C\u6CA1\u6709\u7ED3\u6784\u5316\u786E\u8BA4\u8BB0\u5F55\uFF0C\u4E0D\u8FFD\u6EAF\u63A8\u5B9A\u5DF2\u7ECF\u786E\u8BA4\u3002",
     approvalReview: "\u5BA1\u6279\u8303\u56F4\u4E0E\u9A8C\u8BC1\u8BF4\u660E",
-    approvalBaseline: "\u5BA1\u6279\u5408\u5E76\u57FA\u7EBF",
-    emptyBaseline: "\u7A7A\u57FA\u7EBF\uFF08\u9996\u6B21\u6216\u91CD\u65B0\u9009\u62E9\uFF09",
+    approvalBaseline: "\u5408\u5E76\u5230\u54EA\u4E00\u7248",
+    emptyBaseline: "\u7A7A\u57FA\u7EBF\uFF08\u628A\u5F53\u524D\u8349\u7A3F\u6574\u4EFD\u51BB\u7ED3\uFF09",
+    approvalBaselineHint: "\u53EA\u6709\u300C\u4EC5\u6279\u51C6\u52FE\u9009\u7684\u53D8\u5316\u300D\u65F6\u624D\u7528\uFF1A\u88AB\u52FE\u9009\u7684\u53D8\u5316\u4F1A\u5408\u5E76\u8FDB\u8FD9\u4E00\u7248\uFF0C\u5176\u4F59\u5185\u5BB9\u4FDD\u6301\u57FA\u7EBF\u4E0D\u53D8\u3002",
     partialApproval: "\u4EC5\u6279\u51C6\u52FE\u9009\u53D8\u5316\uFF0C\u4FDD\u7559\u57FA\u7EBF\u7684\u5176\u4ED6\u5185\u5BB9",
     approvalCoverageNotice: "Demo \u6620\u5C04\u4EC5\u8868\u793A\u58F0\u660E\u8986\u76D6\uFF0C\u4E0D\u662F\u9A8C\u6536\u901A\u8FC7\u3002\u5C40\u90E8\u7248\u672C\u4E0D\u6CBF\u7528\u4E0D\u5339\u914D\u7684\u8349\u7A3F Demo\u3002",
     demoMapped: "Demo \u5DF2\u6620\u5C04\u9700\u6C42",
@@ -32987,8 +33280,31 @@ ${r.featureIdeas.join("\n")}` });
     unverifiedAcceptance: "\u5C1A\u672A\u9A8C\u8BC1\u7684\u9A8C\u6536\u9879",
     ackUnverified: "\u6211\u7406\u89E3\u4E0A\u8FF0\u672A\u8986\u76D6/\u672A\u9A8C\u8BC1\u9879\uFF0C\u5E76\u540C\u610F\u5E26\u7740\u8FD9\u4E9B\u9650\u5236\u51BB\u7ED3\u6B64\u7248\u672C\uFF1B\u8FD9\u4E0D\u8868\u793A\u9A8C\u6536\u901A\u8FC7\u3002",
     versions: "\u7248\u672C\u4E0E\u5BA1\u6279",
+    blockerArchitectureMissing: "\u8FD8\u6CA1\u6709\u4EFB\u4F55\u67B6\u6784\u6761\u76EE",
+    blockerArchitectureDetails: "\u67B6\u6784\u6761\u76EE\u7F3A\u5C11\u8BBE\u8BA1\u8BF4\u660E\u6216\u7ED3\u6784\u5316\u5951\u7EA6",
+    blockerContractStructure: "\u5951\u7EA6\u7F3A\u5C11\u6216\u672A\u586B\u7ED3\u6784\u5316\u5B57\u6BB5\uFF08\u8F93\u5165/\u8F93\u51FA/\u9519\u8BEF/\u6743\u9650\uFF09",
+    blockerTaskStructure: "\u5F00\u53D1\u4EFB\u52A1\u7F3A\u5C11\u7ED3\u6784\u5316\u7684\u4EA7\u51FA\u4E0E\u9A8C\u8BC1\u8981\u6C42",
+    blockerTaskAcceptanceOwnership: "\u6709\u5F00\u53D1\u4EFB\u52A1\u7684\u9A8C\u6536\u7F16\u53F7\u4E0D\u5C5E\u4E8E\u5B83\u5173\u8054\u7684\u9700\u6C42",
+    blockerTaskCoverage: "\u6709\u9700\u6C42\u6CA1\u6709\u88AB\u4EFB\u4F55\u5F00\u53D1\u4EFB\u52A1\u8986\u76D6",
+    blockerTaskPlanEmpty: "\u8FD9\u4E2A\u7248\u672C\u8FD8\u6CA1\u6709\u4EFB\u52A1\u8BA1\u5212",
+    blockerTaskPlanUnconfirmed: "\u4EFB\u52A1\u8BA1\u5212\u8FD8\u6CA1\u6709\u786E\u8BA4",
+    blockerDesktopAcceptance: "\u7F3A\u5C11\u684C\u9762\u7AEF\u9A8C\u6536",
+    blockerMobileAcceptance: "\u7F3A\u5C11\u624B\u673A\u7AEF\u9A8C\u6536",
+    blockerNoDemo: "\u8FD8\u6CA1\u6709 Demo \u573A\u666F\uFF0C\u4EA4\u63A5\u5305\u91CC\u4E0D\u4F1A\u6709\u79BB\u7EBF\u6F14\u793A",
+    blockerDemoUncovered: "\u6709\u9700\u6C42\u6CA1\u6709\u51FA\u73B0\u5728 Demo \u573A\u666F\u91CC",
+    blockerEmptyScope: "\u8FD9\u4E2A\u7248\u672C\u6CA1\u6709\u4EFB\u4F55\u9700\u6C42",
+    blockerPrototypeOnly: "\u8FD9\u4E00\u7248\u53EA\u662F\u539F\u578B\u8349\u7A3F\uFF0C\u4E0D\u80FD\u76F4\u63A5\u5B9E\u65BD",
+    blockerVersionNotFound: "\u627E\u4E0D\u5230\u8FD9\u4E2A\u7248\u672C",
+    approvalNothingToFreeze: "\u8FD8\u6CA1\u6709\u53EF\u51BB\u7ED3\u7684\u9700\u6C42\u3002\u5148\u5230\u300C\u9700\u6C42\u300D\u9636\u6BB5\u5199\u6E05\u8981\u505A\u4EC0\u4E48\uFF0C\u518D\u56DE\u6765\u5BA1\u6279\u3002",
+    approvalWillFreeze: "\u5C06\u51BB\u7ED3\uFF1A",
+    approvalReqUnit: " \u6761\u9700\u6C42",
+    approvalArchUnit: " \u4E2A\u67B6\u6784\u6761\u76EE",
+    approvalBaselineChanges: "\u76F8\u5BF9\u6240\u9009\u57FA\u7EBF\u6709",
+    approvalChangesUnit: "\u5904\u53D8\u5316",
+    approvalNeedLabel: "\u5148\u7ED9\u8FD9\u4E00\u7248\u8D77\u4E2A\u540D\u5B57\uFF08\u4F8B\u5982\u300Cv1 \u641C\u7D22\u300D\uFF09\uFF0C\u4E0B\u9762\u7684\u6309\u94AE\u624D\u80FD\u70B9\u3002",
     approvalScope: "\u6279\u51C6\u5168\u90E8\u5DF2\u4FDD\u5B58\u9700\u6C42\u4E0E\u67B6\u6784\uFF0C\u6216\u9009\u62E9\u76F8\u5BF9\u57FA\u7EBF\u7684\u90E8\u5206\u53D8\u5316\u3002\u672A\u4FDD\u5B58\u7684\u8868\u5355\u8F93\u5165\u4E0D\u5305\u542B\u5728\u5185\uFF1B\u8FD9\u4E0D\u662F\u5F00\u53D1\u6D3E\u53D1\uFF0C\u4E5F\u4E0D\u4EE3\u8868\u6D4B\u8BD5\u9A8C\u6536\u901A\u8FC7\u3002",
-    confirmApproval: "\u786E\u8BA4\u51BB\u7ED3\u6B64\u5DF2\u4FDD\u5B58\u7248\u672C\uFF1F\u5185\u5BB9\u4FEE\u8BA2",
+    approvalFirstTime: "\u8FD9\u4E2A\u9879\u76EE\u8FD8\u6CA1\u6709\u51BB\u7ED3\u8FC7\u7248\u672C\u3002\u7B2C\u4E00\u6B21\u8BF7\u5148\u628A\u5F53\u524D\u8349\u7A3F\u6574\u4EFD\u51BB\u7ED3\u6210 v1\uFF1B\u6709\u4E86 v1\uFF0C\u4E4B\u540E\u624D\u80FD\u9010\u6761\u5BF9\u6BD4\u548C\u53EA\u6279\u51C6\u52FE\u9009\u7684\u53D8\u5316\u3002",
+    confirmApproval: "\u786E\u8BA4\u51BB\u7ED3\u6B64\u5DF2\u4FDD\u5B58\u7248\u672C\uFF1F\u5F53\u524D\u5185\u5BB9\u4FEE\u8BA2\u53F7\uFF1A",
     versionLabel: "\u7248\u672C\u540D\u79F0",
     approveVersion: "\u6279\u51C6\u5E76\u51BB\u7ED3",
     compareFrom: "\u5BF9\u6BD4\u57FA\u7EBF",
@@ -33000,6 +33316,8 @@ ${r.featureIdeas.join("\n")}` });
     added: "\u65B0\u589E",
     removed: "\u5220\u9664",
     changed: "\u4FEE\u6539",
+    architecturePickHint: "\u5148\u6309\u7C7B\u522B\u9009\u4E2D\u4E00\u6761\uFF08\u6216\u70B9\u300C\u6DFB\u52A0\u300D\u65B0\u5EFA\uFF09\uFF0C\u518D\u5728\u4E0B\u9762\u7684\u8868\u5355\u91CC\u6539\u6807\u9898\u3001\u6B63\u6587\u3001\u5173\u8054\u9700\u6C42\u548C\u4F9D\u8D56\u3002",
+    architectureEmptyHint: "\u8FD8\u6CA1\u6709\u67B6\u6784\u6761\u76EE\u3002\u5148\u52A0\u4E00\u4E2A\u6A21\u5757\uFF08\u4F8B\u5982\u300C\u641C\u7D22\u300D\uFF09\uFF0C\u518D\u8865\u5B83\u7684\u63A5\u53E3\u5951\u7EA6\uFF1A\u8F93\u5165\u3001\u8F93\u51FA\u3001\u9519\u8BEF\u3001\u6743\u9650\uFF1B\u9A8C\u6536 ID \u53EF\u4EE5\u4ECE\u9700\u6C42\u91CC\u52FE\u9009\u3002",
     architectureType: "\u7C7B\u578B",
     architectureTitle: "\u540D\u79F0",
     architectureBody: "\u8BBE\u8BA1\u8BF4\u660E",
@@ -33035,6 +33353,8 @@ ${r.featureIdeas.join("\n")}` });
     hint_taskInputs: "\u6BCF\u884C\u4E00\u9879\uFF0C\u4F8B\u5982 \u5DF2\u6279\u51C6\u7684\u63A5\u53E3\u5951\u7EA6 currentVersion",
     taskOutputs: "\u9884\u671F\u4EA7\u7269",
     hint_taskOutputs: "\u6BCF\u884C\u4E00\u9879\uFF0C\u4F8B\u5982 src/client/filters.ts \u4E0E\u5355\u6D4B",
+    taskAcceptShort: "\u6761\u9A8C\u6536",
+    taskAcceptanceNone: "\u672A\u5173\u8054\u9A8C\u6536",
     taskAcceptance: "\u5173\u8054\u9A8C\u6536\u70B9\uFF08\u6765\u81EA\u9700\u6C42\uFF09",
     taskAcceptanceEmpty: "\u8BF7\u5148\u5728\u9700\u6C42\u4E2D\u8865\u5145\u9A8C\u6536\u6761\u4EF6\uFF0C\u4EFB\u52A1\u65E0\u6CD5\u51ED\u7A7A\u58F0\u660E\u9A8C\u6536\u3002",
     discardEdits: "\u5C1A\u6709\u672A\u4FDD\u5B58\u7684\u7F16\u8F91\uFF0C\u653E\u5F03\u5E76\u5207\u6362\u8282\u70B9\uFF1F",
@@ -33057,6 +33377,8 @@ ${r.featureIdeas.join("\n")}` });
     newRequirement: "\u65B0\u9700\u6C42",
     addChild: "\u6DFB\u52A0\u5B50\u8282\u70B9",
     addRoot: "\u6DFB\u52A0\u6839\u8282\u70B9",
+    selectRootHint: "\u53D6\u6D88\u5F53\u524D\u9009\u4E2D\uFF0C\u4E4B\u540E\u300C\u6DFB\u52A0\u300D\u4F1A\u65B0\u5EFA\u4E00\u4E2A\u6839\u9700\u6C42\uFF08\u4E0D\u6302\u5728\u4EFB\u4F55\u4EBA\u4E0B\u9762\uFF09\u3002",
+    clearSelection: "\u53D6\u6D88\u9009\u62E9",
     selectRoot: "\u9879\u76EE\u6839",
     nodeTitle: "\u9700\u6C42\u540D\u79F0",
     rename: "\u91CD\u547D\u540D",
@@ -33067,14 +33389,25 @@ ${r.featureIdeas.join("\n")}` });
     saveDetails: "\u4FDD\u5B58\u8BE6\u60C5",
     requirementDependencies: "\u9700\u6C42\u4F9D\u8D56\uFF08\u5148\u51B3\u6761\u4EF6\uFF09",
     saveRequirementDependencies: "\u4FDD\u5B58\u4F9D\u8D56",
+    renameDirty: "\u6539\u4E86\u8FD8\u6CA1\u4FDD\u5B58\uFF0C\u70B9\u53F3\u8FB9\u7684\u300C\u91CD\u547D\u540D\u300D\u624D\u751F\u6548\u3002",
+    detailsDirty: "\u6709\u6539\u52A8\u8FD8\u6CA1\u4FDD\u5B58\uFF0C\u70B9\u300C\u4FDD\u5B58\u8BE6\u60C5\u300D\u624D\u4F1A\u5199\u8FDB\u9879\u76EE\u3002",
     requirementDependencyHint: "\u4F9D\u8D56\u5173\u7CFB\u72EC\u7ACB\u4E8E\u7236\u5B50\u5C42\u7EA7\uFF0C\u53EA\u8868\u793A\u201C\u5148\u5B8C\u6210\u54EA\u4E2A\u9700\u6C42\u201D\u3002\u7F3A\u5931\u76EE\u6807\u3001\u91CD\u590D\u4F9D\u8D56\u6216\u6210\u73AF\u90FD\u4F1A\u88AB\u62D2\u7EDD\uFF0C\u5E76\u6307\u51FA\u76F8\u5173\u8282\u70B9\u3002",
     requirementOrder: "\u540C\u7EA7\u987A\u5E8F",
     requirementPriority: "\u4F18\u5148\u7EA7",
+    priorityHigh: "\u4F18\u5148\u505A",
+    priorityNormal: "\u6B63\u5E38",
+    priorityLow: "\u53EF\u4EE5\u540E\u505A",
+    approvalCollectionNodes: "\u9700\u6C42",
+    approvalCollectionArchitecture: "\u67B6\u6784",
+    contentRevisionPrefix: "\u5185\u5BB9\u7B2C",
+    contentRevisionSuffix: "\u6B21\u53D8\u66F4",
+    versionFrozenAt: "\u51BB\u7ED3\u4E8E",
     approvalFieldSelectionEmpty: "\u81F3\u5C11\u8981\u9009\u62E9\u4E00\u4E2A\u5B57\u6BB5",
     approvalFieldSelectionUnavailable: "\u65B0\u589E\u6216\u5220\u9664\u7684\u6761\u76EE\u4E0D\u80FD\u6309\u5B57\u6BB5\u90E8\u5206\u6279\u51C6",
     approvalFieldNotChanged: "\u8BE5\u5B57\u6BB5\u4E0E\u57FA\u7EBF\u76F8\u540C\uFF0C\u65E0\u6CD5\u5355\u72EC\u6279\u51C6",
     approvalSelectSomething: "\u8BF7\u81F3\u5C11\u9009\u62E9\u4E00\u6761\u53D8\u66F4\u6216\u4E00\u4E2A\u5B57\u6BB5\u518D\u6279\u51C6",
     confirmRemove: "\u5220\u9664\u8BE5\u9700\u6C42\u53CA\u5176\u5168\u90E8\u5B50\u8282\u70B9\uFF1F",
+    confirmRemoveBranch: "\u5220\u9664\u300C{title}\u300D\u4F1A\u8FDE\u540C\u5B83\u4E0B\u9762\u7684 {children} \u4E2A\u5B50\u9700\u6C42\u4E00\u8D77\u5220\u9664\uFF08\u5171 {total} \u6761\uFF09\uFF0C\u4E0D\u80FD\u64A4\u9500\u3002\u786E\u5B9A\u5417\uFF1F",
     removeNode: "\u5220\u9664\u8282\u70B9",
     selectNode: "\u9009\u62E9\u4E00\u4E2A\u9700\u6C42\u8282\u70B9\u8FDB\u884C\u7F16\u8F91\u3002",
     nodeDetails: "\u9700\u6C42\u8BE6\u60C5",
@@ -33087,6 +33420,8 @@ ${r.featureIdeas.join("\n")}` });
     selectParent: "\u9009\u4E2D\u5176\u7236\u8282\u70B9",
     dragAlternativeHint: "\u4E5F\u53EF\u4EE5\u4E0D\u7528\u62D6\u52A8\uFF1A\u7528\u201C\u540C\u7EA7\u4E0A\u79FB/\u4E0B\u79FB\u201D\u8C03\u6574\u987A\u5E8F\uFF0C\u6216\u7528\u4E0B\u65B9\u201C\u7236\u8282\u70B9\u201D\u4E0B\u62C9\u76F4\u63A5\u6539\u7236\u7EA7\u3002",
     working: "\u5904\u7406\u4E2D\u2026",
+    canvasScrollHint: "\u753B\u5E03\u53EF\u4EE5\u6EDA\u52A8\u67E5\u770B\u5B8C\u6574\u7ED3\u6784\uFF1B\u70B9\u9009\u5361\u7247\u65F6\u4F1A\u81EA\u52A8\u6EDA\u5230\u5B83\u3002",
+    archScrollHint: "\u67B6\u6784\u56FE\u53EF\u5DE6\u53F3\u6EDA\u52A8\u67E5\u770B\u5168\u90E8\u56DB\u5217\uFF1B\u70B9\u9009\u5361\u7247\u53EF\u805A\u7126\u5B83\u7684\u4F9D\u8D56\u3002",
     errorContractStructure: "\u5951\u7EA6\u9879\u9700\u8981\u586B\u5199\u63A5\u53E3/\u5B9E\u4F53\u540D\u79F0\uFF0C\u6216\u660E\u786E\u6807\u8BB0\u201C\u4E0D\u9002\u7528\u201D\u3002",
     errorTaskStructure: "\u4EFB\u52A1\u9700\u8981\u586B\u5199\u9884\u671F\u4EA7\u7269\u5E76\u81F3\u5C11\u5173\u8054\u4E00\u4E2A\u9A8C\u6536\u70B9\u3002",
     errorArchitecturePayloadKind: "\u5951\u7EA6/\u4EFB\u52A1\u7ED3\u6784\u53EA\u80FD\u7528\u5728\u5BF9\u5E94\u7C7B\u578B\u7684\u67B6\u6784\u9879\u4E0A\u3002",
@@ -33104,6 +33439,7 @@ ${r.featureIdeas.join("\n")}` });
     newProject: "\u65B0\u5EFA\u9879\u76EE",
     draftRevision: "\u8349\u7A3F\u4FEE\u8BA2",
     emptyRequirements: "\u5C1A\u65E0\u9700\u6C42\u8282\u70B9\u3002",
+    requirementsEmptyHint: "\u8FD8\u6CA1\u6709\u9700\u6C42\u3002\u53EF\u4EE5\u76F4\u63A5\u70B9\u300C\u6DFB\u52A0\u6839\u8282\u70B9\u300D\u624B\u5199\uFF0C\u6216\u56DE\u5230\u300C\u60F3\u6CD5\u300D\u9636\u6BB5\u5199\u4E0B\u8981\u89E3\u51B3\u7684\u95EE\u9898\uFF0C\u8BA9 AI \u5148\u7ED9\u5019\u9009\u65B9\u6848\uFF0C\u91C7\u7EB3\u540E\u4F1A\u81EA\u52A8\u51FA\u73B0\u5728\u8FD9\u91CC\u3002",
     title: "\u521B\u610F\u5DE5\u574A",
     eyebrow: "\u628A\u60F3\u6CD5\u6253\u78E8\u6210\u53EF\u4EE5\u5F00\u53D1\u7684\u4EA7\u54C1",
     headline: "\u4ECE\u4E00\u4E2A\u60F3\u6CD5\uFF0C\u5230\u4E00\u4EFD\u6E05\u6670\u7684\u5F00\u53D1\u8D77\u70B9\u3002",

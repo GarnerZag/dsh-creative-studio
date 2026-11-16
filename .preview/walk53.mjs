@@ -1,0 +1,11 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1200}});
+const page=ctx.pages()[0]??await ctx.newPage();
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1600);
+await page.getByRole('button',{name:'创意工坊'}).first().click();
+await page.waitForTimeout(1200);
+const text=await page.locator('.cs-chooser').innerText();
+await page.screenshot({path:'.preview/review/zh46-chooser.png',fullPage:true});
+console.log(JSON.stringify({len:text.length,body:text.replace(/\n+/g,' | ').slice(0,900)}));
+await ctx.close();

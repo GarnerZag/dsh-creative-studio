@@ -1,0 +1,13 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1100}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1400);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(700);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();await page.waitForTimeout(1300);
+await page.locator('.cs-steps button').nth(2).click();await page.waitForTimeout(1200);
+console.log(JSON.stringify(await page.evaluate(()=>{const box=document.querySelector('foreignObject').closest('div[style*=overflow]');const b=box.getBoundingClientRect();
+ const rows=[...box.querySelectorAll('foreignObject')].map(f=>{const r=f.getBoundingClientRect();return {t:Math.round(r.top-b.top),bot:Math.round(r.bottom-b.top),txt:f.textContent.slice(0,8)};});
+ return {boxH:Math.round(b.height),scrollTop:Math.round(box.scrollTop),rows:rows.filter(r=>r.bot>r.t)};})));
+await ctx.close();

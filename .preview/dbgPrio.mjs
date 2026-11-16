@@ -1,0 +1,14 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1300}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+page.on('dialog',d=>d.accept());
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(800);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();await page.waitForTimeout(1400);
+await page.locator('.cs-steps button').nth(1).click();await page.waitForTimeout(1000);
+await page.locator('svg foreignObject button[aria-pressed]').first().click();await page.waitForTimeout(700);
+const html=await page.locator('.cs-inspector').innerHTML();
+console.log(JSON.stringify({selects:await page.locator('.cs-inspector select').count(),hasPrio:html.includes('优先级'),tail:html.slice(html.indexOf('优先级')-60,html.indexOf('优先级')+220)}));
+await ctx.close();

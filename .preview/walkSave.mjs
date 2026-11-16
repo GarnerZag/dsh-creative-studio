@@ -1,0 +1,23 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1100}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+page.on('dialog',d=>d.accept());
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+const id=await page.evaluate(async()=>{
+ const rpc=async(m,a)=>(await (await fetch('/api/creativeStudio/'+m,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:Math.random().toString(36).slice(2),method:'creativeStudio/'+m,payload:{args:a}})})).json()).result;
+ const p=await rpc('createProject',{name:'保存反馈 '+Date.now()});return p.value.id;});
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(700);
+await page.getByRole('button',{name:/保存反馈/}).first().click();await page.waitForTimeout(1200);
+await page.locator('.cs-steps button').nth(1).click();await page.waitForTimeout(700);
+await page.getByRole('button',{name:'添加根节点'}).first().click();await page.waitForTimeout(1300);
+const desc=page.locator('.cs-inspector textarea').first();
+await desc.fill('描述被修改了');await page.waitForTimeout(400);
+const beforeSave=await page.locator('.cs-inspector').innerText();
+await page.getByRole('button',{name:'保存详情'}).first().click();await page.waitForTimeout(1200);
+const afterSave=await page.locator('.cs-inspector').innerText();
+const bodyText=await page.locator('.cs-stage-body').innerText();
+const del=await page.evaluate(async({id})=>{const rpc=async(m,a)=>(await (await fetch('/api/creativeStudio/'+m,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:Math.random().toString(36).slice(2),method:'creativeStudio/'+m,payload:{args:a}})})).json()).result;const g=await rpc('getProject',{id});return (await rpc('deleteProject',{id,expectedProjectRevision:g.value.projectRevision})).ok;},{id});
+console.log(JSON.stringify({dirtyBefore:beforeSave.includes('还没保存'),dirtyAfter:afterSave.includes('还没保存'),savedPhrase:/已保存|保存成功/.test(bodyText),deleted:del}));
+await ctx.close();

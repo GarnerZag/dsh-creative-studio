@@ -1,0 +1,23 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1000}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+const created=await page.evaluate(async()=>{
+ const call=async(m,a)=>{const res=await fetch('/api/creativeStudio/'+m,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:'x'+Math.random().toString(36).slice(2),method:'creativeStudio/'+m,payload:{args:a}})});const j=await res.json();if(!j.result?.ok)throw new Error(m+':'+String(j.result?.error?.message).slice(0,150));return j.result.value;};
+ const snap=await call('createProject',{name:'想法必填提示巡检'});
+ return {id:snap.id,rev:snap.projectRevision};
+});
+await page.reload({waitUntil:'domcontentloaded'});
+await page.waitForTimeout(1600);
+await page.getByRole('button',{name:'创意工坊'}).first().click();
+await page.waitForTimeout(800);
+await page.getByRole('button',{name:/想法必填提示巡检/}).first().click();
+await page.waitForTimeout(1500);
+const hint=await page.getByText('先在上面写一句你想解决的问题').count();
+const btnDisabled=await page.getByRole('button',{name:'生成候选方案'}).isDisabled();
+await page.screenshot({path:'.preview/review/zh33-idea-required.png'});
+const rest=await page.evaluate(async({id,rev})=>{const res=await fetch('/api/creativeStudio/deleteProject',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:'d'+Math.random().toString(36).slice(2),method:'creativeStudio/deleteProject',payload:{args:{id,expectedProjectRevision:rev}}})});const j=await res.json();return j.result?.ok?j.result.value.map(p=>p.name):String(j.result?.error?.message).slice(0,120);},{id:created.id,rev:created.rev});
+console.log(JSON.stringify({hint,btnDisabled,rest,errs}));
+await ctx.close();

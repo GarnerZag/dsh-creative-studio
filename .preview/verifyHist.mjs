@@ -1,0 +1,15 @@
+import {chromium} from 'playwright';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,executablePath:'/dsh-home/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome',viewport:{width:1440,height:1100}});
+const page=await ctx.newPage();
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded'});
+await page.getByRole('button',{name:'Creative Studio'}).click({timeout:60000});
+await page.waitForTimeout(1200);
+const items=await page.locator('.cs-project-card').allTextContents();
+const pick=items.find(n=>n.includes('考研市场中台'))?items.findIndex(n=>n.includes('考研市场中台')):0;
+await page.locator('.cs-project-card').nth(pick).click();
+await page.waitForTimeout(1500);
+const hist=await page.locator('.cs-history').count();
+await page.screenshot({path:'review/hist-idea.png',clip:{x:240,y:80,width:1200,height:360}});
+console.log(JSON.stringify({historyVisible:hist,errs}));
+await ctx.close();

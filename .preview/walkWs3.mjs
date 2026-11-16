@@ -1,0 +1,28 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1280,height:1000}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+const name='工作区记忆 '+Date.now();
+const created=await page.evaluate(async n=>{
+ const call=async(m,a)=>{const r=await fetch('/api/creativeStudio/'+m,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:Math.random().toString(36).slice(2),method:'creativeStudio/'+m,payload:{args:a}})});const j=await r.json();return j.result?.value;};
+ const c=await call('createProject',{name:n});return {id:c.id,rev:c.projectRevision};
+},name);
+await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1500);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(700);
+await page.getByRole('button',{name:new RegExp(name)}).first().click();await page.waitForTimeout(1200);
+await page.getByText('生成设置').first().click();await page.waitForTimeout(400);
+const sel=page.locator('select:visible').first();
+await sel.selectOption({index:2});await page.waitForTimeout(400);
+const chosen=await sel.inputValue();
+await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1600);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(700);
+await page.getByRole('button',{name:new RegExp(name)}).first().click();await page.waitForTimeout(1300);
+await page.getByText('生成设置').first().click();await page.waitForTimeout(400);
+const after=await page.locator('select:visible').first().inputValue();
+const del=await page.evaluate(async({id,rev})=>{const r=await fetch('/api/creativeStudio/deleteProject',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:Math.random().toString(36).slice(2),method:'creativeStudio/deleteProject',payload:{args:{id,expectedProjectRevision:rev}}})});const j=await r.json();return j.result?.ok??false;},{id:created.id,rev:created.rev});
+await page.evaluate(()=>localStorage.removeItem('cs.workspaceId'));
+console.log(JSON.stringify({chosen,after,same:chosen===after,deleted:del,errs}));
+await ctx.close();

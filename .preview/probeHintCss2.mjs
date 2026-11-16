@@ -1,0 +1,11 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1366,height:900}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(700);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();await page.waitForTimeout(1200);
+console.log(JSON.stringify(await page.evaluate(()=>{const el=document.querySelector('.cs-narrow-hint');const p=el.parentElement;const cs=getComputedStyle(p);
+ return {parent:p.className,display:cs.display,wrap:cs.flexWrap,width:Math.round(p.getBoundingClientRect().width),children:[...p.children].map(c=>c.tagName+':'+Math.round(c.getBoundingClientRect().width))};})));
+await ctx.close();

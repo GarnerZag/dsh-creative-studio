@@ -1,0 +1,16 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1100}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1500);
+await page.getByRole('button',{name:'创意工坊'}).first().click();await page.waitForTimeout(800);
+await page.getByRole('button',{name:/版本差异验证/}).first().click();await page.waitForTimeout(1300);
+await page.locator('.cs-steps button').nth(3).click();await page.waitForTimeout(1200);
+const shifts=await page.locator('.cs-diff-shift').allInnerTexts();
+const del=await page.locator('.cs-diff-shift del').allInnerTexts();
+const ins=await page.locator('.cs-diff-shift ins').allInnerTexts();
+await page.screenshot({path:'.preview/review/zh73-diff-shift.png'});
+console.log(JSON.stringify({shifts,del,ins,errs}));
+await ctx.close();
