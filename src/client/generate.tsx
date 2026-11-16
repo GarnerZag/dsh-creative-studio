@@ -51,7 +51,7 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
  const [workspaces,setWorkspaces]=React.useState<WorkspaceOption[]>([]),[workspaceError,setWorkspaceError]=React.useState(''),[refreshKey,setRefreshKey]=React.useState(0);
  const [answers,setAnswers]=React.useState(''),[lastProject,setLastProject]=React.useState<ProjectSnapshot>(project),[busyLocal,setBusyLocal]=React.useState(false),[error,setError]=React.useState(''),[editOpen,setEditOpen]=React.useState(false);
  if(project.projectRevision!==lastProject.projectRevision){setLastProject(project);setError('');}
- const act=async(operation:()=>Promise<ProjectSnapshot>):Promise<void>=>{setBusyLocal(true);setError('');try{setLastProject(await operation());}catch(e){setError(e instanceof Error?e.message:t('briefContinueStale'));}finally{setBusyLocal(false);}};
+ const act=async(operation:()=>Promise<ProjectSnapshot>):Promise<void>=>{setBusyLocal(true);setError('');try{setLastProject(await operation());refresh();}catch(e){setError(e instanceof Error?e.message:t('briefContinueStale'));}finally{setBusyLocal(false);}};
  React.useEffect(()=>{let live=true;setWorkspaceError('');void listWorkspaces().then(items=>{if(live){setWorkspaces(items);setWorkspace(id=>items.some(w=>w.id===id)?id:'');}}).catch(e=>{if(live){setWorkspaceError(String(e));setWorkspaces([]);setWorkspace('');}});return()=>{live=false;};},[listWorkspaces,refreshKey]);
  const job=project.proposalJob,active=job&&!['finished','failed'].includes(job.status);
  return <section><h3>{t('generateTitle')}</h3><p>{t('generateNotice')}</p>
