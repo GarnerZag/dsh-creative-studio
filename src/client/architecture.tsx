@@ -12,7 +12,11 @@ export function ArchitectureEditor({project,busy,save,t}:{project:ProjectSnapsho
     <h3>{t('architecture')}</h3>
     {project.architecture.length===0&&<p className="cs-hint cs-empty-start">{t('architectureEmptyHint')}</p>}
     <ArchitectureMap items={project.architecture} selected={selected} busy={busy} select={choose} t={t}/>
-    <nav style={{display:'flex',gap:8,flexWrap:'wrap'}}>{project.architecture.map(item=><button key={item.id} disabled={busy} aria-pressed={selected===item.id} onClick={()=>choose(item.id)}>{t(`architecture_${item.kind}`)} · {item.title}</button>)}<button disabled={busy} onClick={()=>choose(newId())}>{t('addArchitecture')}</button></nav>
+    {project.architecture.length>0&&<p className="cs-hint">{t('architecturePickHint')}</p>}
+    {(['module','contract','decision','task'] as const).map(kind=>{const items=project.architecture.filter(item=>item.kind===kind);
+      if(!items.length&&kind!=='module')return null;
+      return <div key={kind}><p className="cs-muted cs-arch-kind">{t(`architecture_${kind}`)}</p>
+        <div className="cs-row-actions">{items.map(item=><button key={item.id} type="button" disabled={busy} aria-pressed={selected===item.id} onClick={()=>choose(item.id)}>{item.title||t('valueNotSet')}</button>)}<button type="button" disabled={busy} onClick={()=>choose(newId())}>{t('addArchitecture')}</button></div></div>;})}
     <ArchitectureForm key={selected} id={selected} current={current} project={project} busy={busy} save={save} t={t} dirty={setDirty}/>
     <ul aria-label={t('dependencies')}>{project.architecture.filter(item=>item.dependsOn.length>0).map(item=><li key={item.id}>{item.title} → {item.dependsOn.map(id=>project.architecture.find(other=>other.id===id)?.title ?? id).join(' · ')}</li>)}</ul>
   </section>;
