@@ -1,0 +1,24 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1200}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1800);
+await page.getByRole('button',{name:'创意工坊'}).first().click();
+await page.waitForTimeout(900);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();
+await page.waitForTimeout(1500);
+await page.locator('.cs-steps button').nth(1).click();
+await page.waitForTimeout(900);
+const info=await page.evaluate(()=>{
+ const b=document.querySelector('svg foreignObject button') as HTMLElement|null;
+ if(!b) return {found:false};
+ const r=b.getBoundingClientRect();
+ b.click();
+ return {found:true,label:b.textContent,rect:{x:r.x,y:r.y,w:r.width,h:r.height}};
+});
+await page.waitForTimeout(700);
+const pressed=await page.locator('svg foreignObject button[aria-pressed=true]').count();
+const insp=await page.locator('.cs-inspector').innerText().catch(()=>'');
+console.log(JSON.stringify({info,pressed,insp:insp.replace(/\n+/g,' | ').slice(0,100),errs}));
+await ctx.close();
