@@ -18,6 +18,8 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   const field=(key:keyof stringFields,value:string)=>setEditor(current=>({...current,values:{...current.values,[key]:value}}));
   const setTitle=(v:string)=>field('title',v),setDescription=(v:string)=>field('description',v),setDesktop=(v:string)=>field('desktop',v),setMobile=(v:string)=>field('mobile',v);
   React.useEffect(()=>{setEditor(current=>refreshEditor(current,node?.id??null,snapshot()));},[node]);
+  const subtreeCount=(id:string)=>{const seen=new Set([id]);let grew=true;while(grew){grew=false;for(const item of project.nodes){if(item.parentId!==null&&seen.has(item.parentId)&&!seen.has(item.id)){seen.add(item.id);grew=true;}}}return seen.size-1;};
+  const removePrompt=()=>{if(!node)return t('confirmRemove');const kids=subtreeCount(node.id);if(kids===0)return t('confirmRemove');return t('confirmRemoveBranch').replace('{title}',node.title).replace('{children}',String(kids)).replace('{total}',String(kids+1));};
   const [view,setView]=React.useState<'canvas'|'outline'>('canvas');
   const [dependencyState,setDependencyState]=React.useState<{id:string|null;ids:string[]}>({id:null,ids:[]});
   const dependencyDraft=dependencyState.id===(node?.id??null)?dependencyState.ids:(node?.dependsOn??[]);
@@ -84,7 +86,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
         <button disabled={busy}>{busy ? t('working') : t('saveDetails')}</button>
         {(priorityChanged||description!==node.description||lines(desktop).join('\n')!==node.desktopAcceptance.join('\n')||lines(mobile).join('\n')!==node.mobileAcceptance.join('\n'))&&<p className="cs-hint" role="status">{t('detailsDirty')}</p>}
       </form>
-      <button type="button" onClick={() => { if (window.confirm(t('confirmRemove'))) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button>
+      <button type="button" onClick={() => { if (window.confirm(removePrompt())) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button>
     </fieldset> : <p className="cs-hint">{t('selectNode')}</p>}
     </div>
   </section>;
