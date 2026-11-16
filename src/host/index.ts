@@ -212,7 +212,9 @@ export default class CreativeStudio extends TypertRemoteService {
     if(!job||job.id!==jobId) throw new Error('JOB_SCOPE_MISMATCH');
     type Page=(request:{address:{kind:'session';sessionId:string};maxMessages?:number},signal:AbortSignal)=>Promise<{records:readonly {type?:string;seq?:number;data?:unknown}[];hasMore?:boolean}>;
     const sessions=this.ctx.get('sessionController') as {events?:Page;page?:Page}|undefined;
-    const readPage=sessions?.events??sessions?.page;
+    // Bind to the service: its history reader dereferences `this.historyController` internally.
+    const readPage=typeof sessions?.events==='function'?sessions.events.bind(sessions)
+      :typeof sessions?.page==='function'?sessions.page.bind(sessions):undefined;
     if(!readPage) throw new Error('SESSION_SERVICE_UNAVAILABLE');
     // Passive, cold-safe history read: no wait, no activation, no state change on the job session.
     const page=await readPage({address:{kind:'session',sessionId:job.sessionId},maxMessages:6},new AbortController().signal);
