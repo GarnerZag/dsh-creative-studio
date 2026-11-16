@@ -76,13 +76,13 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   const visibleRows = needle ? rows.filter(row => keep.has(row.id)) : rows;
   const matchCount = needle ? project.nodes.filter(n => n.title.includes(needle)).length : 0;
   const lines = (text: string) => text.split('\n').map(s => s.trim()).filter(Boolean);
-  return <section className={`cs-editor ${view === 'canvas' ? 'cs-editor-canvas' : 'cs-editor-outline'}`}>
+  return <section className={`cs-editor ${node ? (view === 'canvas' ? 'cs-editor-canvas' : 'cs-editor-outline') : ''}`}>
     <style>{`.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start;margin-top:16px}@container (min-width:820px){.creative-studio-root .cs-editor-canvas{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.creative-studio-root .cs-editor-outline{grid-template-columns:minmax(240px,1fr) minmax(260px,1fr)}}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}.creative-studio-root .cs-segmented{display:flex;gap:4px;margin-left:auto}.creative-studio-root .cs-outline-no{display:inline-block;min-width:32px;text-align:right;margin-right:8px;color:var(--cs-muted);font-size:var(--cs-text-xs);font-variant-numeric:tabular-nums}.creative-studio-root .cs-inspector-title{margin:0 0 8px}.creative-studio-root .cs-tree-search{width:100%;margin-bottom:8px}@media(max-width:1024px){.creative-studio-root .cs-editor{grid-template-columns:minmax(0,1fr)}}`}</style>
     <div className="cs-canvas-column">
       {project.nodes.length===0&&<p className="cs-empty-start">{t('requirementsEmptyHint')}</p>}
       <div className="cs-toolbar">
         <button type="button" className="cs-primary" disabled={busy} onClick={() => addNode(selected)}>{selected ? t('addChild') : t('addRoot')}</button>
-        <button type="button" disabled={busy} title={t('selectRootHint')} onClick={() => choose(null)}>{selected ? t('clearSelection') : t('selectRoot')}</button>
+        <button type="button" disabled={busy||!selected} title={selected ? t('selectRootHint') : t('selectNode')} onClick={() => choose(null)}>{selected ? t('clearSelection') : t('selectRoot')}</button>
         <div className="cs-segmented" role="group" aria-label={t('requirementView')}>
           <button type="button" aria-pressed={view === 'canvas'} onClick={() => setView('canvas')}>{t('canvasView')}</button>
           <button type="button" aria-pressed={view === 'outline'} onClick={() => setView('outline')}>{t('outlineView')}</button>
@@ -96,12 +96,13 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
             {needle && visibleRows.length === 0 && <p className="cs-hint">{t('filterNoMatch')}</p>}
             {visibleRows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 24 }}><button type="button" disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}><span className="cs-outline-no" aria-hidden="true">{row.label}</span>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>}
       {view === 'outline'&&<p className="cs-hint">{t('outlineHint')}</p>}
+      {!node&&<p className="cs-hint">{t('inspectorEmptyHint')}</p>}
     </div>
     {editor.conflicts.length>0&&<p role="alert">{t('editorConflict')} <button type="button" disabled={busy} onClick={()=>{if(window.confirm(t('discardEdits')))setEditor(openEditor(node?.id??null,snapshot()));}}>{t('editorReload')}</button></p>}
-    <div className="cs-inspector">
+    {node && <div className="cs-inspector">
       <h4 className="cs-inspector-title">{t('inspectorTitle')}</h4>
       {savedRev!==null&&<p role="status" className="cs-hint">{t('savedNotice').replace('{rev}',String(savedRev))}</p>}
-    {node ? <fieldset disabled={busy||editor.conflicts.length>0} style={{ border: 0, padding: 0, minWidth: 0 }}>
+    <fieldset disabled={busy||editor.conflicts.length>0} style={{ border: 0, padding: 0, minWidth: 0 }}>
       <legend className="cs-visually-hidden">{t('nodeDetails')}</legend>
       <div className="cs-toolbar"><button type="button" disabled={position<=0} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position-1]!.id})}>{t('moveEarlier')}</button><button type="button" disabled={position<0||position>=siblings.length-1} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position+2]?.id??null})}>{t('moveLater')}</button><button type="button" disabled={busy} onClick={()=>choose(node.parentId)}>{t('selectParent')}</button></div>
       <p className="cs-hint">{t('dragAlternativeHint')}</p>
@@ -122,7 +123,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
         {(priorityChanged||description!==node.description||lines(desktop).join('\n')!==node.desktopAcceptance.join('\n')||lines(mobile).join('\n')!==node.mobileAcceptance.join('\n'))&&<p className="cs-hint" role="status">{t('detailsDirty')}</p>}
       </form>
       <button type="button" onClick={() => { if (window.confirm(removePrompt())) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button>
-    </fieldset> : <p className="cs-hint">{t('selectNode')}</p>}
-    </div>
+    </fieldset>
+    </div>}
   </section>;
 }
