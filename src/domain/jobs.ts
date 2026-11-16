@@ -18,6 +18,16 @@ export function submitJobBrief(current:Project,sessionId:string,jobId:string,bri
  next.projectRevision++;
  return validateProject(next);
 }
+/** User-side correction of the structured understanding, before requirements exist. */
+export function editJobBrief(current:Project,jobId:string,brief:Brief):Project {
+ const job=current.proposalJob;
+ if(!job || job.id!==jobId) throw new Error('JOB_SCOPE_MISMATCH');
+ if(!['queued','submitted','unknown'].includes(job.status)) throw new Error('JOB_NOT_ACTIVE');
+ const next=structuredClone(current);
+ next.proposalJob!.brief=brief;
+ next.projectRevision++;
+ return validateProject(next);
+}
 /** User-side stop for a job the session will not turn into requirements. */
 export function abandonProposalJob(current:Project,jobId:string):Project {
  const job=current.proposalJob;

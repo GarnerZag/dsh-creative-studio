@@ -23,10 +23,33 @@ function BriefCard({brief,t}:{brief:BriefInfo;t:(key:string)=>string}):React.Rea
   {brief.intent!=='product'&&<p role="status" className="cs-hint">{t('briefNotProduct')}</p>}
  </section>;
 }
-export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels,continueJob,abandonJob}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void;continueJob:(jobId:string,answers:string)=>Promise<ProjectSnapshot>;abandonJob:(jobId:string)=>Promise<ProjectSnapshot>}):React.ReactElement {
+const listFields=['goals','users','scenarios','constraints','unknowns','needs','questions'] as const;
+type ListField=typeof listFields[number];
+function BriefEditor({brief,busy,t,save,cancel}:{brief:BriefInfo;busy:boolean;t:(key:string)=>string;save:(brief:BriefInfo)=>void;cancel:()=>void}):React.ReactElement {
+ const [intent,setIntent]=React.useState(brief.intent);
+ const [restated,setRestated]=React.useState(brief.restated);
+ const [interpretation,setInterpretation]=React.useState(brief.interpretation);
+ const [lines,setLines]=React.useState<Record<ListField,string>>(()=>Object.fromEntries(listFields.map(k=>[k,brief[k].join('\n')])) as Record<ListField,string>);
+ const split=(text:string)=>text.split('\n').map(line=>line.trim()).filter(Boolean);
+ return <section className="cs-brief" aria-label={t('briefEdit')}>
+  <h4>{t('briefEdit')}</h4>
+  <p className="cs-hint">{t('briefEditHint')}</p>
+  <form className="cs-brief-form" onSubmit={e=>{e.preventDefault();if(restated.trim())save({...brief,intent,restated:restated.trim(),interpretation,...Object.fromEntries(listFields.map(k=>[k,split(lines[k])])) as Record<ListField,string[]>});}}>
+   <label>{t('briefIntentLabel')}<select value={intent} disabled={busy} onChange={e=>setIntent(e.target.value as BriefInfo['intent'])}>{(['product','operation','unclear'] as const).map(k=><option key={k} value={k}>{t('intent_'+k)}</option>)}</select></label>
+   <label>{t('briefRestatedLabel')}<textarea rows={3} value={restated} disabled={busy} onChange={e=>setRestated(e.target.value)}/></label>
+   <label>{t('briefInterpretationLabel')}<textarea rows={2} value={interpretation} disabled={busy} onChange={e=>setInterpretation(e.target.value)}/></label>
+   {listFields.map(k=><label key={k}>{t('brief'+k.charAt(0).toUpperCase()+k.slice(1))}<textarea rows={2} value={lines[k]} placeholder={t('briefListHint')} disabled={busy} onChange={e=>setLines(current=>({...current,[k]:e.target.value}))}/></label>)}
+   <div className="cs-row-actions">
+    <button disabled={busy||!restated.trim()}>{t('briefSave')}</button>
+    <button type="button" className="cs-quiet" disabled={busy} onClick={cancel}>{t('briefCancel')}</button>
+   </div>
+  </form>
+ </section>;
+}
+export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels,continueJob,abandonJob,editBrief}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void;continueJob:(jobId:string,answers:string)=>Promise<ProjectSnapshot>;abandonJob:(jobId:string)=>Promise<ProjectSnapshot>;editBrief:(jobId:string,brief:BriefInfo)=>Promise<ProjectSnapshot>}):React.ReactElement {
  const [request,setRequest]=React.useState(''),[workspace,setWorkspace]=React.useState(''),[model,setModel]=React.useState<ModelChoice|undefined>(undefined);
  const [workspaces,setWorkspaces]=React.useState<WorkspaceOption[]>([]),[workspaceError,setWorkspaceError]=React.useState(''),[refreshKey,setRefreshKey]=React.useState(0);
- const [answers,setAnswers]=React.useState(''),[lastProject,setLastProject]=React.useState<ProjectSnapshot>(project),[busyLocal,setBusyLocal]=React.useState(false),[error,setError]=React.useState('');
+ const [answers,setAnswers]=React.useState(''),[lastProject,setLastProject]=React.useState<ProjectSnapshot>(project),[busyLocal,setBusyLocal]=React.useState(false),[error,setError]=React.useState(''),[editOpen,setEditOpen]=React.useState(false);
  if(project.projectRevision!==lastProject.projectRevision){setLastProject(project);setError('');}
  const act=async(operation:()=>Promise<ProjectSnapshot>):Promise<void>=>{setBusyLocal(true);setError('');try{setLastProject(await operation());}catch(e){setError(e instanceof Error?e.message:t('briefContinueStale'));}finally{setBusyLocal(false);}};
  React.useEffect(()=>{let live=true;setWorkspaceError('');void listWorkspaces().then(items=>{if(live){setWorkspaces(items);setWorkspace(id=>items.some(w=>w.id===id)?id:'');}}).catch(e=>{if(live){setWorkspaceError(String(e));setWorkspaces([]);setWorkspace('');}});return()=>{live=false;};},[listWorkspaces,refreshKey]);
@@ -39,7 +62,10 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
   <label>{t('roughIdea')}<textarea rows={4} value={request} onChange={e=>setRequest(e.target.value)} disabled={busy||!!active}/></label>
  <button disabled={busy||!!active||!request.trim()||!workspace.trim()}>{t('generateProposal')}</button>
  </form>{job&&<div role="status"><p>{t('jobStatus')}: {t('job_'+job.status)}</p><small>{t('sessionId')}: {job.sessionId}</small>{job.status==='unknown'&&<p>{t('unknownJob')}</p>}</div>}
- {job?.brief&&<BriefCard brief={job.brief} t={t}/>}
+ {job?.brief&&(editOpen?<BriefEditor brief={job.brief} busy={busy||busyLocal} t={t} cancel={()=>setEditOpen(false)} save={brief=>{void (async()=>{await act(()=>editBrief(job.id,brief));setEditOpen(false);})();}}/>:<>
+  <BriefCard brief={job.brief} t={t}/>
+  {active&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={busy||busyLocal} onClick={()=>setEditOpen(true)}>{t('briefEdit')}</button></div>}
+ </>)}
  {job&&active&&job.brief&&job.brief.intent!=='product'&&<div className="cs-brief-actions">
   <label>{t('briefAnswers')}<textarea rows={3} value={answers} onChange={e=>setAnswers(e.target.value)} placeholder={t('briefAnswersHint')} disabled={busy||busyLocal}/></label>
   <div className="cs-row-actions">

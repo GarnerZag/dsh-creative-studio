@@ -9,7 +9,7 @@ import {saveFeatureNote,removeFeatureNote} from '../domain/research.js';
 import type {FeatureNote} from '../domain/project.js';
 import {editReference,type ReferenceEdit} from '../domain/references.js';
 import { randomUUID } from 'node:crypto';
-import { abandonProposalJob, beginProposalJob, submitJobBrief, submitJobProposal } from '../domain/jobs.js';
+import { abandonProposalJob, beginProposalJob, editJobBrief, submitJobBrief, submitJobProposal } from '../domain/jobs.js';
 import { saveProposal, adoptProposal, rejectProposal } from '../domain/proposals.js';
 import type { Brief, ProposalInput } from '../domain/project.js';
 import { approveReviewedVersion, type ApprovalReview } from '../domain/approval-review.js';
@@ -106,6 +106,12 @@ export class ProjectStore {
   }
   async submitJobBrief(id: string, sessionId: string, jobId: string, brief: Brief): Promise<Project> {
     return validateProject(await this.table.update(id,current=>submitJobBrief(current,sessionId,jobId,brief)));
+  }
+  async editJobBrief(id: string, expectedProjectRevision: number, jobId: string, brief: Brief): Promise<Project> {
+    return validateProject(await this.table.update(id,current=>{
+      if(current.projectRevision!==expectedProjectRevision) throw new Error('CONFLICT');
+      return editJobBrief(current,jobId,brief);
+    }));
   }
   async abandonProposalJob(id: string, expectedProjectRevision: number, jobId: string): Promise<Project> {
     return validateProject(await this.table.update(id,current=>{

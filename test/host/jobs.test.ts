@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createProject} from '../../src/domain/project.js';
-import {abandonProposalJob,beginProposalJob,submitJobBrief,submitJobProposal} from '../../src/domain/jobs.js';
+import {abandonProposalJob,beginProposalJob,editJobBrief,submitJobBrief,submitJobProposal} from '../../src/domain/jobs.js';
 const brief=(intent:'product'|'operation'|'unclear')=>({intent,restated:'整理需求',interpretation:'判断依据',goals:[],users:[],scenarios:[],constraints:[],unknowns:[],questions:[],needs:[],createdAt:new Date().toISOString()});
 test('job output binds to exact session and original draft, not model-supplied scope',()=>{
  const p=beginProposalJob(createProject('p','产品'),'job','session','整理需求');
@@ -41,4 +41,19 @@ test('a job the session cannot answer is abandoned by the user, not retried',()=
  assert.equal(abandoned.proposalJob!.brief!.intent,'operation');
  assert.throws(()=>abandonProposalJob(abandoned,'job'),/JOB_NOT_ACTIVE/);
  assert.doesNotThrow(()=>beginProposalJob(abandoned,'job2','session2','改写后的需求'));
+});
+
+test('the user can correct the understanding before requirements exist',()=>{
+ const p=beginProposalJob(createProject('p','产品'),'job','session','读取另一个会话的进度');
+ const operation=submitJobBrief(p,'session','job',brief('operation'));
+ const corrected=editJobBrief(operation,'job',{...brief('operation'),restated:'把另一个会话已完成的搜索过滤成果接回本项目',questions:['结论能否导出？']});
+ assert.equal(corrected.proposalJob!.brief!.restated,'把另一个会话已完成的搜索过滤成果接回本项目');
+ assert.equal(corrected.proposalJob!.brief!.intent,'operation');
+ assert.equal(corrected.contentRevision,operation.contentRevision);
+ // A user correction may reclassify the input; requirements still need a product intent.
+ const product=editJobBrief(corrected,'job',{...corrected.proposalJob!.brief!,intent:'product'});
+ assert.equal(product.proposalJob!.brief!.intent,'product');
+ assert.throws(()=>editJobBrief(product,'other',brief('product')),/JOB_SCOPE_MISMATCH/);
+ const abandoned=abandonProposalJob(product,'job');
+ assert.throws(()=>editJobBrief(abandoned,'job',brief('product')),/JOB_NOT_ACTIVE/);
 });

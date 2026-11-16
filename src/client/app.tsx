@@ -155,6 +155,12 @@ const styles = `
 .creative-studio-root .cs-brief-restated{margin:0 0 8px;font-size:var(--cs-text-md);line-height:24px}
 .creative-studio-root .cs-brief-list{margin:0;padding-left:20px;font-size:var(--cs-text-sm);line-height:20px}
 .creative-studio-root .cs-brief-list li+li{margin-top:4px}
+.creative-studio-root .cs-brief-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:8px 0 0}
+.creative-studio-root .cs-brief-form label{display:grid;gap:4px;margin:0;min-width:0;font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted);font-weight:500}
+.creative-studio-root .cs-brief-form label:nth-child(-n+3){grid-column:1/-1}
+.creative-studio-root .cs-brief-form textarea{min-height:72px}
+.creative-studio-root .cs-brief-form .cs-row-actions{grid-column:1/-1;margin-top:4px}
+@media(max-width:900px){.creative-studio-root .cs-brief-form{grid-template-columns:minmax(0,1fr)}}
 .creative-studio-root .cs-brief-actions{margin:12px 0 16px;padding:16px;border:1px dashed var(--cs-border);border-radius:12px}
 .creative-studio-root .cs-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:0 0 16px}
 .creative-studio-root .cs-field{display:grid;gap:4px;min-width:0}

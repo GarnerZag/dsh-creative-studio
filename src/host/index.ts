@@ -13,7 +13,7 @@ import { requireUserAuthority } from './authority.js';
 
 import {HandoffStore,StoredHandoffSchema,type StoredHandoff} from './handoff-store.js';
 import {checkHandoff} from '../domain/handoff.js';
-import type { ModelCatalogView, ModelChoice, WorkspaceOption,HandoffInfo,HandoffChunk,HandoffReadinessResult,DemoSceneData, StudioHealth, ProjectHead, ProjectSnapshot, RequirementChange, ArchitectureChange, ProposalInput, ReferenceChange, FeatureChange } from '../types.js';
+import type { BriefInfo, ModelCatalogView, ModelChoice, WorkspaceOption,HandoffInfo,HandoffChunk,HandoffReadinessResult,DemoSceneData, StudioHealth, ProjectHead, ProjectSnapshot, RequirementChange, ArchitectureChange, ProposalInput, ReferenceChange, FeatureChange } from '../types.js';
 import { defineDomain, domainTable } from '@deepseek-ai/dsh-storage-domain';
 import { ProjectSchema, type Project } from '../domain/project.js';
 import { ProjectStore } from './store.js';
@@ -203,6 +203,11 @@ export default class CreativeStudio extends TypertRemoteService {
     if(!sessions) throw new Error('SESSION_SERVICE_UNAVAILABLE');
     await startProposal(store,sessions,{projectId:id,expectedProjectRevision,request,workspaceId,...(model?{model}:{})},signal);
     return store.get(id);
+  }
+
+  @Remote
+  async editProposalBrief(id:string, expectedProjectRevision:number, jobId:string, brief:BriefInfo):Promise<ProjectSnapshot> {
+    return this.userStore().editJobBrief(id,expectedProjectRevision,jobId,brief);
   }
 
   @Remote
