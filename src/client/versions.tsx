@@ -9,7 +9,8 @@ export function VersionPanel({project,busy,approve,t,confirmTasks}:{confirmTasks
   const before=project.versions.find(v=>v.id===base);
   const after=target==='draft'?project:project.versions.find(v=>v.id===target);
   const differences=before&&after?diffContent(before,after):[];
-  const options=project.versions.map(v=><option key={v.id} value={v.id}>{v.label} · r{v.contentRevision}</option>);
+  const revisionText=(v:ProjectSnapshot['versions'][number]):string=>`${v.label} · ${t('contentRevisionPrefix')}${v.contentRevision}${t('contentRevisionSuffix')}`;
+  const options=project.versions.map(v=><option key={v.id} value={v.id}>{revisionText(v)}</option>);
   return <section aria-label={t('versions')}><h3>{t('versions')}</h3>
     <p>{t('approvalScope')}</p>
     <ApprovalForm project={project} busy={busy} approve={approve} t={t}/>
@@ -19,13 +20,16 @@ export function VersionPanel({project,busy,approve,t,confirmTasks}:{confirmTasks
       const oldItem=change.collection==='architecture'?before.architecture.find(item=>item.id===change.id):undefined;
       const newItem=change.collection==='architecture'?after.architecture.find(item=>item.id===change.id):undefined;
       const nested=(change.collection==='architecture'&&(change.fields.includes('contract')||change.fields.includes('task')))?structuredFieldChanges(oldItem,newItem):[];
-      return <li key={`${change.collection}-${change.id}`}><strong>{t(change.kind)} · {change.title}</strong><span> — {change.collection==='nodes'?t('requirements'):t('architecture')} {change.fields.map(field=>fieldLabel(field,t)).join(', ')}</span>
+      return <li key={`${change.collection}-${change.id}`}><strong>{t(change.kind)} · {change.title}</strong><span> — {t(change.collection==='nodes'?'approvalCollectionNodes':'approvalCollectionArchitecture')} {change.fields.map(field=>fieldLabel(field,t)).join(', ')}</span>
         {nested.length>0&&<ul>{nested.map(entry=><li key={entry.path}>{t(entry.state)} · <code>{entry.path}</code></li>)}</ul>}
       </li>;
     })}</ul></>}
-    <ol>{[...project.versions].reverse().map(v=><li key={v.id}>{v.label} · r{v.contentRevision} · <time dateTime={v.createdAt}>{v.createdAt}</time> · {v.nodes.length} {t('requirements')} / {v.architecture.length} {t('architecture')}<ApprovalReceipt record={v.approval} t={t}/><details><summary>{t('taskPlanReview')}</summary><ol>{v.architecture.filter(a=>a.kind==='task').map(a=><li key={a.id}><strong>{a.title}</strong><pre style={{whiteSpace:'pre-wrap'}}>{a.body}</pre>{a.task&&<ul><li>{t('taskInputs')}: {a.task.inputs.join(' / ')||'—'}</li><li>{t('taskOutputs')}: {a.task.outputs.join(' / ')||'—'}</li><li>{t('taskAcceptance')}: {a.task.acceptanceIds.join(' / ')||'—'}</li></ul>}<small>{a.requirementIds.join(', ')} · {a.dependsOn.join(', ')}</small></li>)}</ol><button disabled={busy||v.taskPlanConfirmed||!v.architecture.some(a=>a.kind==='task')} onClick={()=>{if(window.confirm(t('confirmTasksNotice')))confirmTasks(v.id);}}>{v.taskPlanConfirmed?t('tasksConfirmed'):t('confirmTasks')}</button></details></li>)}</ol>
+    <ol>{[...project.versions].reverse().map(v=><li key={v.id}>{revisionText(v)} · <time dateTime={v.createdAt}>{t('versionFrozenAt')}{formatWhen(v.createdAt)}</time> · {v.nodes.length}{t('approvalReqUnit')} / {v.architecture.length}{t('approvalArchUnit')}<ApprovalReceipt record={v.approval} t={t}/><details><summary>{t('taskPlanReview')}</summary><ol>{v.architecture.filter(a=>a.kind==='task').map(a=><li key={a.id}><strong>{a.title}</strong><pre style={{whiteSpace:'pre-wrap'}}>{a.body}</pre>{a.task&&<ul><li>{t('taskInputs')}: {a.task.inputs.join(' / ')||'—'}</li><li>{t('taskOutputs')}: {a.task.outputs.join(' / ')||'—'}</li><li>{t('taskAcceptance')}: {a.task.acceptanceIds.join(' / ')||'—'}</li></ul>}<small>{a.requirementIds.join(', ')} · {a.dependsOn.join(', ')}</small></li>)}</ol><button disabled={busy||v.taskPlanConfirmed||!v.architecture.some(a=>a.kind==='task')} onClick={()=>{if(window.confirm(t('confirmTasksNotice')))confirmTasks(v.id);}}>{v.taskPlanConfirmed?t('tasksConfirmed'):t('confirmTasks')}</button></details></li>)}</ol>
   </section>;
 }
+
+/** Frozen-at timestamps are stored as ISO strings; show them in the reader's own locale and format. */
+function formatWhen(iso:string):string{const date=new Date(iso);if(Number.isNaN(date.getTime()))return iso;return new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'short'}).format(date);}
 
 function fieldLabel(field:string,t:(key:string)=>string):string{
   const labels:Record<string,string>={title:'architectureTitle',body:'architectureBody',kind:'architectureType',requirementIds:'linkedRequirements',dependsOn:'dependencies',contract:'diffContract',task:'diffTask'};
