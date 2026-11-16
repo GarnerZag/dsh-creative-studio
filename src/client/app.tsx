@@ -118,7 +118,9 @@ const styles = `
 .creative-studio-root .cs-project-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
 .creative-studio-root .cs-project-card{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:8px 12px;min-height:48px;background:var(--cs-surface);border-color:var(--cs-border)}
 .creative-studio-root .cs-project-card:hover:not(:disabled){background:var(--cs-soft);border-color:var(--cs-accent)}
-.creative-studio-root .cs-project-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0 0 8px}
+.creative-studio-root .cs-project-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 12px;margin:0 0 8px}
+.creative-studio-root .cs-project-head .cs-project-title{grid-column:1}
+.creative-studio-root .cs-project-head>.cs-hint{grid-column:1}
 .creative-studio-root .cs-project-head .cs-toolbar{margin:0}
 .creative-studio-root .cs-project-title{margin:0}
 .creative-studio-root .cs-table-wrap{overflow-x:auto;border:1px solid var(--cs-border);border-radius:12px;margin:0 0 16px}
@@ -150,7 +152,7 @@ const styles = `
 .creative-studio-root .cs-card-flag{color:var(--cs-accent-text,var(--cs-muted));font-weight:500}
 .creative-studio-root .cs-id-list li{display:flex;gap:8px;align-items:baseline;padding:4px 0;font-size:var(--cs-text-sm)}
 .creative-studio-root .cs-id-list small{color:var(--cs-muted);font-size:var(--cs-text-xs)}
-.creative-studio-root .cs-project-menu{margin-left:auto;border-top:none;padding-top:0;margin-top:0}
+.creative-studio-root .cs-project-menu{grid-column:2;grid-row:1/-1;align-self:start;border-top:none;padding-top:0;margin-top:0}
 .creative-studio-root .cs-table .cs-row-actions{margin-top:0}
 .creative-studio-root .cs-chip{display:inline-flex;flex-direction:column;align-items:flex-start;gap:0;text-align:left;padding:4px 8px;min-height:32px;margin:0 4px 4px 0;background:var(--cs-surface);border-color:var(--cs-border)}
 .creative-studio-root .cs-chip small{color:var(--cs-muted);font-size:var(--cs-text-xs);line-height:16px}
