@@ -1,0 +1,15 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1100}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1800);
+await page.getByRole('button',{name:'创意工坊'}).first().click();
+await page.waitForTimeout(900);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();
+await page.waitForTimeout(1500);
+const locked=await page.locator('.cs-stage-body .cs-hint').allInnerTexts().catch(()=>[]);
+const endBtn=await page.getByRole('button',{name:'结束这次推导'}).count();
+await page.screenshot({path:'.preview/review/zh20-locked-idea.png'});
+console.log(JSON.stringify({locked:locked.slice(0,6),endBtn,errs}));
+await ctx.close();
