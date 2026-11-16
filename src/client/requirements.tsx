@@ -94,7 +94,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
         </div>
       </div>
       {view === 'canvas'
-        ? <MindMap t={t} move={(id,parentId)=>save({kind:'move',id,parentId})} nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>
+        ? (project.nodes.length===0 ? null : <MindMap t={t} move={(id,parentId)=>save({kind:'move',id,parentId})} nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>)
         : <div className="cs-tree" aria-label={t('requirements')}>
             <input className="cs-tree-search" aria-label={t('filterRequirements')} placeholder={t('filterRequirements')} value={search} onChange={e => setSearch(e.target.value)} />
             {needle && matchCount > 0 && <p className="cs-hint">{t('filterMatches').replace('{n}', String(matchCount))}</p>}
@@ -102,7 +102,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
             {visibleRows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 24 }}><button type="button" disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}><span className="cs-outline-no" aria-hidden="true">{row.label}</span>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>}
       {view === 'outline'&&<p className="cs-hint">{t('outlineHint')}</p>}
       {(()=>{const missing=project.nodes.filter(n=>n.desktopAcceptance.length===0||n.mobileAcceptance.length===0);if(!missing.length)return null;return <p className="cs-hint">{t('acceptanceMissingHint').replace('{n}',String(missing.length))}</p>;})()}
-      {!node&&<p className="cs-hint">{t('inspectorEmptyHint')}</p>}
+      {!node&&project.nodes.length>0&&<p className="cs-hint">{t('inspectorEmptyHint')}</p>}
     </div>
     {editor.conflicts.length>0&&<p role="alert">{t('editorConflict')} <button type="button" disabled={busy} onClick={()=>{if(window.confirm(t('discardEdits')))setEditor(openEditor(node?.id??null,snapshot()));}}>{t('editorReload')}</button></p>}
     {node && <div className="cs-inspector">
