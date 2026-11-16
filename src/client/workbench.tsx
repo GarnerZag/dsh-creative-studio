@@ -22,10 +22,10 @@ export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Sta
   return <section className="cs-workbench">
     <ol className="cs-steps" aria-label={t('stages')}>{stages.map((item,index)=><li key={item.id}><button type="button" aria-current={active.id===item.id?'step':undefined} onClick={()=>setStage(item.id)}><span className="cs-step-index" aria-hidden="true">{index+1}</span>{item.label}</button></li>)}</ol>
     <div className="cs-toolbar">
-      <button type="button" aria-pressed={!compare} onClick={()=>change({...layout,compare:false})}>{t('layoutExplore')}</button>
-      <button type="button" aria-pressed={compare} onClick={()=>change({...layout,compare:true})}>{t('layoutCompare')}</button>
-      <label className="cs-inline-field"><span>{t('layoutWidth')}</span><input type="range" min="30" max="70" value={split} onChange={e=>change({...layout,split:Number(e.target.value)})}/></label>
-      <button type="button" aria-pressed={focus} onClick={()=>setFocus(!focus)}>{t('layoutFocus')}</button>
+      <button type="button" title={t('layoutExploreHint')} aria-pressed={!compare} onClick={()=>change({...layout,compare:false})}>{t('layoutExplore')}</button>
+      <button type="button" title={t('layoutCompareHint')} aria-pressed={compare} onClick={()=>change({...layout,compare:true})}>{t('layoutCompare')}</button>
+      <label className="cs-inline-field" title={t('layoutWidthHint')}><span>{t('layoutWidth')}</span><input type="range" min="30" max="70" value={split} onChange={e=>change({...layout,split:Number(e.target.value)})}/></label>
+      <button type="button" title={t('layoutFocusHint')} aria-pressed={focus} onClick={()=>setFocus(!focus)}>{t('layoutFocus')}</button>
     </div>
     {!compare&&<p className="cs-hint cs-stage-hint">{active.hint}</p>}
     <div ref={grid} className="cs-grid" style={{gridTemplateColumns:focus?'minmax(0,1fr)':`minmax(0,${split}fr) 24px minmax(0,${100-split}fr)`,gap:12,marginTop:12,alignItems:'start'}}>

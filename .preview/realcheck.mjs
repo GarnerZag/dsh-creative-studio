@@ -1,0 +1,11 @@
+import {chromium} from 'playwright-core';
+const b=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,viewport:{width:1440,height:1000}});
+const p=b.pages()[0] ?? await b.newPage();
+await p.goto('http://192.168.31.188:3080/',{waitUntil:'networkidle'});
+await p.waitForTimeout(1500);
+await p.getByText('Creative Studio',{exact:true}).first().click().catch(()=>{});
+await p.waitForTimeout(1500);
+const steps=await p.locator('.cs-steps button').allInnerTexts().catch(()=>[]);
+const rail=await p.locator('.cs-rail-list button').count().catch(()=>0);
+console.log(JSON.stringify({steps,rail}));
+await b.close();

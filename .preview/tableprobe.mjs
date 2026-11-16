@@ -1,0 +1,12 @@
+import {chromium} from 'playwright-core';
+const b=await chromium.launch();
+const p=await b.newPage({viewport:{width:1440,height:1200}});
+await p.goto('http://127.0.0.1:8765/light-workspace.html',{waitUntil:'networkidle'});
+await p.waitForTimeout(800);
+const buttons=await p.$$('.cs-steps button');
+await buttons[1].click();
+await p.waitForTimeout(600);
+const r=await p.evaluate(()=>({refs:document.querySelectorAll('.cs-table-refs tbody tr').length,matrix:document.querySelectorAll('.cs-table-matrix tbody tr').length,chips:document.querySelectorAll('.cs-chip').length,details:document.querySelectorAll('.cs-disclosure').length,ov:Array.from(document.querySelectorAll('.cs-table-wrap')).map(w=>[w.scrollWidth,w.clientWidth])}));
+console.log(JSON.stringify(r));
+await p.screenshot({path:'shots/matrix-light.png',fullPage:true});
+await b.close();

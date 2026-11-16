@@ -1,0 +1,20 @@
+import {chromium} from 'playwright-core';
+const rid=()=>'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&3|8)).toString(16);});
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true});
+const page=ctx.pages()[0]??await ctx.newPage();
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(2000);
+const j=await page.evaluate(async({rid})=>{
+ const r=await fetch('/api/creativeStudio/listModels',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId:rid,method:'creativeStudio/listModels',payload:{args:{}}})});
+ return (await r.json()).result;
+},{rid:rid()});
+const v=j.value;
+console.log('DEFAULT',JSON.stringify(v.default));
+const providers=[...new Set(v.options.map(o=>o.provider))];
+console.log('PROVIDERS',JSON.stringify(providers));
+const withEffort=v.options.filter(o=>o.reasoningEfforts?.length);
+console.log('WITH_EFFORT',withEffort.length);
+console.log(JSON.stringify(withEffort.slice(0,3).map(o=>({p:o.provider,m:o.model,e:o.reasoningEfforts,d:o.defaultEffort}))));
+const dflt=v.options.find(o=>o.provider===v.default.provider&&o.model===v.default.model);
+console.log('DEFAULT_OPTION',JSON.stringify(dflt));
+await ctx.close();

@@ -48,6 +48,11 @@ export interface ProjectHead {
   projectRevision: number;
   contentRevision: number;
 }
+export interface ProjectSummary extends ProjectHead {
+  requirementCount:number;
+  architectureCount:number;
+  proposalStatus:'queued'|'submitted'|'finished'|'failed'|'unknown'|null;
+}
 export interface ApprovalReviewInput {baselineVersionId:string|null;selection?:Array<{collection:'nodes'|'architecture';id:string;fields?:string[]}>;acknowledgeUnverified:boolean}
 export interface ApprovalRecord {baselineVersionId:string|null;operator:'owner';changes:Array<{collection:'nodes'|'architecture';id:string;fields?:string[]}>;sceneId:string|null;mappedRequirementIds:string[];uncoveredRequirementIds:string[];unverifiedAcceptanceIds:string[];acknowledged:boolean}
 export interface ApprovedVersion {
@@ -80,7 +85,7 @@ export interface DevelopmentDispatchInfo {id:string;handoffId:string;versionId:s
 export interface ImplementationReportInfo{id:string;dispatchId:string;handoffId:string;taskId:string;acceptanceIds:string[];summary:string;changedFiles:string[];testEvidence:string[];unfinished:string[];userAccepted:boolean}
 export interface ResearchJobInfo {id:string;sessionId:string;reference:ProductReference;request:string;status:'queued'|'submitted'|'finished'|'failed'|'unknown';evidence:{callId:string;tool:string}[];conclusion:{summary:string;evidenceCallIds:string[];limitations:string[]}|null}
 /** Last visible answer of a job session, so a stopped session is never a blank screen. */
-export interface JobReply { text:string; truncated:boolean; running:boolean; reason:'idle'|'input-required'|'timeout' }
+export interface JobReply {text:string;truncated:boolean;running:boolean;reason:'idle'|'input-required'|'timeout';records?:number}
 /** Structured restatement of the user's raw input, produced before any requirements. */
 export interface BriefInfo {
   intent:'product'|'operation'|'unclear';

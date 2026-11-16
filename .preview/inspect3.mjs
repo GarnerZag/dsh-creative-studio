@@ -1,0 +1,23 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,viewport:{width:1500,height:1300}});
+const page=ctx.pages()[0]??await ctx.newPage();
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(2500);
+await page.getByText('Creative Studio',{exact:true}).first().click();
+await page.waitForTimeout(2000);
+await page.locator('.cs-project-card',{hasText:'考研'}).first().click();
+await page.waitForTimeout(2500);
+await page.locator('.cs-steps button').nth(0).click();
+await page.waitForTimeout(1200);
+const info=await page.evaluate(()=>{
+  const root=document.querySelector('.creative-studio-root');
+  const alerts=[...root.querySelectorAll('[role=alert]')].map(a=>a.textContent);
+  const status=[...root.querySelectorAll('[role=status]')].map(a=>a.textContent.slice(0,120));
+  const buttons=[...root.querySelectorAll('button')].map(b=>({t:b.textContent.trim().slice(0,26),disabled:b.disabled})).filter(b=>b.t);
+  const brief=root.querySelector('.cs-brief');
+  const actions=root.querySelector('.cs-brief-actions');
+  return {alerts,status,buttons,briefPresent:!!brief,briefText:brief?brief.textContent.slice(0,160):null,actionsPresent:!!actions,actionsText:actions?actions.textContent.slice(0,160):null};
+});
+console.log(JSON.stringify(info,null,1));
+await page.screenshot({path:'.preview/shots/real-idea-stuck.png',fullPage:false});
+await ctx.close();

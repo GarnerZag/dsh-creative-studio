@@ -1,0 +1,10 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{viewport:{width:2000,height:1200},headless:true});
+const p=ctx.pages()[0]??await ctx.newPage();
+await p.goto('http://192.168.31.188:3080/dsh/',{waitUntil:'domcontentloaded'});
+await p.waitForTimeout(3000);
+console.log('url',p.url());
+const labels=await p.evaluate(()=>Array.from(document.querySelectorAll('button,a')).map(x=>(x.textContent||'').trim().slice(0,30)).filter(Boolean).slice(0,40));
+console.log(JSON.stringify(labels));
+await p.screenshot({path:'shots/real-gui-home.png',fullPage:false});
+await ctx.close();

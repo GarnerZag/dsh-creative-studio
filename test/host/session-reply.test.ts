@@ -22,3 +22,18 @@ test('a long reply is cut at the limit and reported as truncated',()=>{
  assert.equal(reply.text.length,20);
  assert.equal(reply.truncated,true);
 });
+
+const wire=(seq:number,text:string)=>({type:'event',event:{type:'assistant/message',seq,data:{message:{role:'assistant',content:[{type:'reasoning',text:'内部推理'},{type:'text',text}]}}}});
+test('the host history page wraps every entry in an event envelope',()=>{
+ const records=[wire(7,'较早的页面回复'),wire(9,'页面里最新的一条')];
+ assert.equal(extractReply(records,false).text,'页面里最新的一条');
+ assert.equal(extractReply([wire(3,'只有这一条')],false).text,'只有这一条');
+});
+test('the event type field name is not assumed: stype envelopes still resolve',()=>{
+ const records=[{type:'event',event:{stype:'assistant/message',seq:5,data:{message:{role:'assistant',content:[{type:'text',text:'换了字段名也能读到'}]}}}}];
+ assert.equal(extractReply(records,false).text,'换了字段名也能读到');
+});
+test('records without a seq keep the later message of the page',()=>{
+ const bare=(text:string)=>({data:{message:{role:'assistant',content:[{type:'text',text}]}}});
+ assert.equal(extractReply([bare('前一条'),bare('后一条')],false).text,'后一条');
+});

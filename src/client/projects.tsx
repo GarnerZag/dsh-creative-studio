@@ -12,7 +12,7 @@ import type {ReferenceChange} from '../types.js';
 import { GeneratePanel } from './generate.js';
 import { ProposalPanel } from './proposals.js';
 import { VersionPanel } from './versions.js';
-import type { ProjectHead, ProjectSnapshot, RequirementChange } from '../types.js';
+import type { ProjectHead, ProjectSummary, ProjectSnapshot, RequirementChange } from '../types.js';
 import { ArchitectureEditor } from './architecture.js';
 import type { ArchitectureChange } from '../types.js';
 import { RequirementsEditor } from './requirements.js';
@@ -36,8 +36,8 @@ export interface ProjectActions {
   abandonProposal(project:ProjectSnapshot,jobId:string):Promise<ProjectSnapshot>;
   editBrief(project:ProjectSnapshot,jobId:string,brief:import('../types.js').BriefInfo):Promise<ProjectSnapshot>;
   jobReply(project:ProjectSnapshot,jobId:string):Promise<import('../types.js').JobReply>;
-  list(): Promise<ProjectHead[]>;
-  remove(project:ProjectSnapshot):Promise<ProjectHead[]>;
+  list(): Promise<ProjectSummary[]>;
+  remove(project:ProjectSnapshot):Promise<ProjectSummary[]>;
   adopt(project: ProjectSnapshot, proposalId: string): Promise<ProjectSnapshot>;
   approve(project: ProjectSnapshot, label: string,review:import('../types.js').ApprovalReviewInput): Promise<ProjectSnapshot>;
   create(name: string): Promise<ProjectSnapshot>;
@@ -47,7 +47,7 @@ export interface ProjectActions {
 }
 
 export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: string) => string }): React.ReactElement {
-  const [projects, setProjects] = React.useState<ProjectHead[]>([]);
+  const [projects, setProjects] = React.useState<ProjectSummary[]>([]);
   const [project, setProject] = React.useState<ProjectSnapshot>();
   const [name, setName] = React.useState('');
   const [error, setError] = React.useState('');
@@ -154,21 +154,30 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
       <button disabled={busy || !name.trim()} type="submit">{busy ? t('working') : t('newProject')}</button>
     </form>
     {error && <p role="alert" className="cs-error">{errorText(error)}</p>}
-    <nav className="cs-project-list" aria-label={t('projects')}>{projects.map(p => <button type="button" className="cs-project-card" key={p.id} disabled={busy} onClick={() => void run(() => api.get(p.id))}><strong>{p.name}</strong><small className="cs-hint">{t('draftRevision')} {p.contentRevision}</small></button>)}</nav>
+    <ol className="cs-onboarding" aria-label={t('chooserSteps')}>
+      <li><strong>{t('chooserStep1Title')}</strong><span>{t('chooserStep1Body')}</span></li>
+      <li><strong>{t('chooserStep2Title')}</strong><span>{t('chooserStep2Body')}</span></li>
+      <li><strong>{t('chooserStep3Title')}</strong><span>{t('chooserStep3Body')}</span></li>
+    </ol>
+    <nav className="cs-project-list" aria-label={t('projects')}>{projects.map(p => <button type="button" className="cs-project-card" key={p.id} disabled={busy} onClick={() => void run(() => api.get(p.id))}><strong>{p.name}</strong><small className="cs-hint">{t('draftRevision')} {p.contentRevision}{typeof p.requirementCount==='number'?` · ${p.requirementCount} ${t('chooserRequirements')} · ${p.architectureCount??0} ${t('chooserModules')}`:''}</small>{p.proposalStatus==='submitted'&&<small className="cs-hint cs-card-flag">{t('chooserAwaitingModel')}</small>}</button>)}</nav>
     {!projects.length && <p className="cs-hint">{t('railEmptyHint')}</p>}
   </section>;
   return <section className="cs-projects" aria-label={t('projects')}>
     <article>
       <div className="cs-project-head">
         <h2 className="cs-project-title">{project.name}</h2>
-        <div className="cs-toolbar">
-          <button type="button" className="cs-quiet" disabled={busy} onClick={() => { if(window.confirm(t('confirmProjectChange'))) { setProject(undefined); setHistory(undefined); setSelectedRequirement(null); } }}>{t('allProjects')}</button>
-          <button type="button" disabled={busy} onClick={()=>{const next=window.prompt(t('renameProject'),project.name);if(next?.trim()&&next.trim()!==project.name)void run(()=>api.rename(project,next.trim()));}}>{t('renameProject')}</button>
-          <button type="button" className="cs-danger" disabled={busy} onClick={()=>{void removeProject();}}>{t('deleteProject')}</button>
-        </div>
         <small className="cs-hint">{t('draftRevision')} {project.contentRevision}</small>
+        <details className="cs-advanced cs-project-menu">
+          <summary>{t('projectSettings')}</summary>
+          <div className="cs-row-actions">
+            <button type="button" className="cs-quiet" disabled={busy} onClick={() => { if(window.confirm(t('confirmProjectChange'))) { setProject(undefined); setHistory(undefined); setSelectedRequirement(null); } }}>{t('allProjects')}</button>
+            <button type="button" className="cs-quiet" disabled={busy} onClick={()=>{const next=window.prompt(t('renameProject'),project.name);if(next?.trim()&&next.trim()!==project.name)void run(()=>api.rename(project,next.trim()));}}>{t('renameProject')}</button>
+            <button type="button" className="cs-danger" disabled={busy} onClick={()=>{void removeProject();}}>{t('deleteProject')}</button>
+          </div>
+          <p className="cs-hint">{t('projectSettingsHint')}</p>
+        </details>
       </div>
-      <div className="cs-toolbar" aria-label={t('requirementHistory')}><button type="button" disabled={busy||!historyCurrent||!history?.past.length} onClick={()=>restore('undo')}>{t('undoRequirements')}</button><button type="button" disabled={busy||!historyCurrent||!history?.future.length} onClick={()=>restore('redo')}>{t('redoRequirements')}</button><small className="cs-hint">{t('historyScope')}</small></div>
+      <div className="cs-toolbar" aria-label={t('requirementHistory')}><button type="button" disabled={busy||!historyCurrent||!history?.past.length} onClick={()=>restore('undo')}>{t('undoRequirements')}</button><button type="button" disabled={busy||!historyCurrent||!history?.future.length} onClick={()=>restore('redo')}>{t('redoRequirements')}</button>{!historyCurrent&&<small className="cs-hint" title={t('historyScope')}>{t('historyUnavailable')}</small>}</div>
       {error && <p role="alert" className="cs-error">{errorText(error)}</p>}
       <Workbench key={project.id} projectId={project.id} t={t} stages={stages}
         demo={compare=><DemoPanel selectedRequirement={selectedRequirement} key={`demo-${project.id}-${editorEpoch}`} project={project} t={t} stacked={compare} busy={busy} save={scene=>{void run(()=>api.demo(project,scene));}}/>}

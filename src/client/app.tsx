@@ -133,6 +133,24 @@ const styles = `
 .creative-studio-root .cs-table-matrix td{min-width:140px}
 .creative-studio-root .cs-code-clip{display:block;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .creative-studio-root .cs-row-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.creative-studio-root .cs-advanced{border-top:1px solid var(--cs-border);padding-top:8px;margin-top:12px}
+.creative-studio-root .cs-advanced>summary{cursor:pointer;list-style:none;min-height:24px;display:flex;align-items:center;gap:8px;font-size:var(--cs-text-sm);color:var(--cs-muted)}
+.creative-studio-root .cs-advanced>summary::-webkit-details-marker{display:none}
+.creative-studio-root .cs-advanced>summary::before{content:'▸';font-size:12px;line-height:20px}
+.creative-studio-root .cs-advanced[open]>summary::before{content:'▾'}
+.creative-studio-root .cs-advanced>summary:focus-visible{outline:2px solid var(--cs-accent);outline-offset:2px;border-radius:4px}
+.creative-studio-root .cs-advanced>:not(summary){margin-top:8px}
+.creative-studio-root .cs-job-status{margin-top:12px}
+.creative-studio-root .cs-id-list{max-height:200px;overflow:auto;margin-top:8px;padding-left:20px}
+.creative-studio-root .cs-onboarding{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0 20px;padding:0;list-style:none}
+.creative-studio-root .cs-onboarding li{display:grid;gap:4px;padding:12px;border:1px solid var(--cs-border);border-radius:10px;background:var(--cs-surface)}
+.creative-studio-root .cs-onboarding strong{font-size:var(--cs-text-md);font-weight:600}
+.creative-studio-root .cs-onboarding span{font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted)}
+@media (max-width:900px){.creative-studio-root .cs-onboarding{grid-template-columns:minmax(0,1fr)}}
+.creative-studio-root .cs-card-flag{color:var(--cs-accent-text,var(--cs-muted));font-weight:500}
+.creative-studio-root .cs-id-list li{display:flex;gap:8px;align-items:baseline;padding:4px 0;font-size:var(--cs-text-sm)}
+.creative-studio-root .cs-id-list small{color:var(--cs-muted);font-size:var(--cs-text-xs)}
+.creative-studio-root .cs-project-menu{margin-left:auto;border-top:none;padding-top:0;margin-top:0}
 .creative-studio-root .cs-table .cs-row-actions{margin-top:0}
 .creative-studio-root .cs-chip{display:inline-flex;flex-direction:column;align-items:flex-start;gap:0;text-align:left;padding:4px 8px;min-height:32px;margin:0 4px 4px 0;background:var(--cs-surface);border-color:var(--cs-border)}
 .creative-studio-root .cs-chip small{color:var(--cs-muted);font-size:var(--cs-text-xs);line-height:16px}

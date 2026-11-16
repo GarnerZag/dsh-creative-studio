@@ -13,7 +13,7 @@ import { requireUserAuthority } from './authority.js';
 
 import {HandoffStore,StoredHandoffSchema,type StoredHandoff} from './handoff-store.js';
 import {checkHandoff} from '../domain/handoff.js';
-import type { BriefInfo, JobReply, ModelCatalogView, ModelChoice, WorkspaceOption,HandoffInfo,HandoffChunk,HandoffReadinessResult,DemoSceneData, StudioHealth, ProjectHead, ProjectSnapshot, RequirementChange, ArchitectureChange, ProposalInput, ReferenceChange, FeatureChange } from '../types.js';
+import type { BriefInfo, JobReply, ModelCatalogView, ModelChoice, WorkspaceOption,HandoffInfo,HandoffChunk,HandoffReadinessResult,DemoSceneData, StudioHealth, ProjectHead, ProjectSummary, ProjectSnapshot, RequirementChange, ArchitectureChange, ProposalInput, ReferenceChange, FeatureChange } from '../types.js';
 import { defineDomain, domainTable } from '@deepseek-ai/dsh-storage-domain';
 import { ProjectSchema, type Project } from '../domain/project.js';
 import { ProjectStore } from './store.js';
@@ -105,7 +105,10 @@ export default class CreativeStudio extends TypertRemoteService {
   saveDemo(id:string,expectedProjectRevision:number,expectedContentRevision:number,scene:DemoSceneData):Promise<ProjectSnapshot>{return this.userStore().demo(id,expectedProjectRevision,expectedContentRevision,scene);}
 
   @Remote
-  listProjects(): ProjectHead[] { return this.userStore().list(); }
+  listProjects(): ProjectSummary[] {
+    const store=this.userStore();
+    return store.list().map(head=>{const project=store.get(head.id);return {...head,requirementCount:project.nodes.length,architectureCount:project.architecture.length,proposalStatus:project.proposalJob?.status??null};});
+  }
 
   @Remote
   createProject(name: string): Promise<ProjectSnapshot> { return this.userStore().create(name); }
@@ -120,11 +123,11 @@ export default class CreativeStudio extends TypertRemoteService {
   readResearchEvidence(id:string,jobId:string,callId:string,offset:number):ResearchEvidencePage{return evidencePage(this.userStore().get(id),jobId,callId,offset);}
 
   @Remote
-  async deleteProject(id:string,expectedProjectRevision:number):Promise<ProjectHead[]>{
+  async deleteProject(id:string,expectedProjectRevision:number):Promise<ProjectSummary[]>{
     const store=this.userStore();
     await store.remove(id,expectedProjectRevision);
     if(this.handoffs)await this.handoffs.purge(id);
-    return store.list();
+    return this.listProjects();
   }
 
   @Remote
@@ -219,7 +222,7 @@ export default class CreativeStudio extends TypertRemoteService {
     // Passive, cold-safe history read: no wait, no activation, no state change on the job session.
     const page=await readPage({address:{kind:'session',sessionId:job.sessionId},maxMessages:6},new AbortController().signal);
     const reply=extractReply(page.records,false);
-    return {text:reply.text,truncated:reply.truncated,running:false,reason:'idle'};
+    return {text:reply.text,truncated:reply.truncated,running:false,reason:'idle',records:Array.isArray(page.records)?page.records.length:0};
   }
 
   @Remote

@@ -1,0 +1,21 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,locale:'zh-CN',viewport:{width:1440,height:1200}});
+const page=ctx.pages()[0]??await ctx.newPage();
+const errs=[];page.on('pageerror',e=>errs.push(String(e)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1800);
+await page.getByRole('button',{name:'创意工坊'}).first().click();
+await page.waitForTimeout(1000);
+await page.screenshot({path:'.preview/review/zh4-01-chooser.png'});
+await page.getByRole('button',{name:/考研市场中台/}).first().click();
+await page.waitForTimeout(1500);
+await page.locator('.cs-steps button').nth(3).click();
+await page.waitForTimeout(1200);
+const details=page.locator('.cs-stage-body details');
+const n=await details.count();
+for(let i=0;i<n;i++){const s=details.nth(i).locator('summary');if(await s.count())await s.first().click().catch(()=>{});}
+await page.waitForTimeout(500);
+await page.screenshot({path:'.preview/review/zh4-02-approve.png',fullPage:true});
+const txt=await page.locator('.cs-stage-body').innerText();
+console.log(JSON.stringify({details:n,heads:await details.locator('summary').allInnerTexts().catch(()=>[]),sample:txt.slice(0,300),errs}));
+await ctx.close();

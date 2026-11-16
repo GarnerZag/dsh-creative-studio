@@ -1,0 +1,11 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true});
+const page=ctx.pages()[0]??await ctx.newPage();
+const seen=[];
+page.on('response',r=>{const u=r.url();if(/creative|studio|plugin/i.test(u))seen.push(r.status()+' '+u);});
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(2000);
+await page.getByText('Creative Studio',{exact:true}).first().click();
+await page.waitForTimeout(2500);
+console.log(seen.slice(0,15).join('\n'));
+await ctx.close();

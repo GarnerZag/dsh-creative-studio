@@ -46,15 +46,15 @@ function BriefEditor({brief,busy,t,save,cancel}:{brief:BriefInfo;busy:boolean;t:
   </form>
  </section>;
 }
-function JobReplyBlock({jobId,t,load,refreshKey}:{jobId:string;t:(key:string)=>string;load:(jobId:string)=>Promise<JobReply>;refreshKey:number}):React.ReactElement {
+function JobReplyBlock({jobId,active,t,load,refreshKey}:{jobId:string;active:boolean;t:(key:string)=>string;load:(jobId:string)=>Promise<JobReply>;refreshKey:number}):React.ReactElement {
  const [reply,setReply]=React.useState<JobReply|null>(null),[error,setError]=React.useState(''),[unavailable,setUnavailable]=React.useState(false),[loading,setLoading]=React.useState(false);
  // An older Host process answers 404 for this method: say so plainly instead of showing a transport stack.
  const fetchReply=React.useCallback(()=>{setLoading(true);setError('');void load(jobId).then(value=>{setReply(value);setUnavailable(false);}).catch(e=>{const message=e instanceof Error?e.message:String(e);if(/HTTP 404|not found|unknown method/i.test(message))setUnavailable(true);else setError(message);}).finally(()=>setLoading(false));},[jobId,load]);
  React.useEffect(()=>{fetchReply();},[fetchReply,refreshKey]);
  return <section className="cs-reply" aria-label={t('jobReply')}>
   <h4>{t('jobReply')}<button type="button" className="cs-quiet" disabled={loading} onClick={fetchReply}>{t('jobReplyRefresh')}</button></h4>
-  {unavailable?<p className="cs-hint">{t('jobReplyNeedsRestart')}</p>:error?<p role="alert" className="cs-error">{error}</p>:reply?.text?<div className="cs-reply-text">{reply.text}{reply.truncated&&<span className="cs-hint"> {t('jobReplyTruncated')}</span>}</div>:<p className="cs-hint">{loading?t('jobReplyRunning'):t('jobReplyEmpty')}</p>}
-  {reply&&<p className="cs-hint">{reply.running?t('jobReplyRunning'):t('jobReplyEnded')}</p>}
+  {unavailable?<p className="cs-hint">{t('jobReplyNeedsRestart')}</p>:error?<p role="alert" className="cs-error">{error}</p>:reply?.text?<div className="cs-reply-text">{reply.text}{reply.truncated&&<span className="cs-hint"> {t('jobReplyTruncated')}</span>}</div>:<p className="cs-hint">{loading?t('jobReplyLoading'):active?t('jobReplyWaiting'):`${t('jobReplyEmpty')}${reply?`（${t('jobReplyRecords')} ${reply.records??0}）`:''}`}</p>}
+  {reply&&<p className="cs-hint">{reply.running||active?t('jobReplyRunning'):t('jobReplyEnded')}</p>}
  </section>;
 }
 export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels,continueJob,abandonJob,editBrief,readReply}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void;continueJob:(jobId:string,answers:string,confirmed:boolean)=>Promise<ProjectSnapshot>;abandonJob:(jobId:string)=>Promise<ProjectSnapshot>;editBrief:(jobId:string,brief:BriefInfo)=>Promise<ProjectSnapshot>;readReply:(jobId:string)=>Promise<JobReply>}):React.ReactElement {
@@ -67,13 +67,15 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
  const job=project.proposalJob,active=job&&!['finished','failed'].includes(job.status);
  return <section><h3>{t('generateTitle')}</h3><p>{t('generateNotice')}</p>
  <form onSubmit={e=>{e.preventDefault();if(request.trim()&&workspace.trim()&&window.confirm(t('generateConfirm')))generate(request.trim(),workspace.trim(),model);}}>
- <label>{t('workspaceId')}<select value={workspace} onChange={e=>setWorkspace(e.target.value)} disabled={busy||!!active}><option value="">{t('selectWorkspace')}</option>{workspaces.map(w=><option key={w.id} value={w.id}>{w.title} · {w.path}</option>)}</select><button type="button" disabled={busy||!!active} onClick={()=>setRefreshKey(x=>x+1)}>{t('refreshWorkspaces')}</button>{workspaceError&&<span role="alert">{workspaceError}</span>}</label>
- <ModelSelect value={model} onChange={setModel} disabled={busy||!!active} t={t} load={listModels}/>
- {project.researchJob?.status==='finished'&&project.researchJob.conclusion&&<button type="button" disabled={busy||!!active} onClick={()=>{if(window.confirm(t('researchSeedConfirm')))setRequest(researchSeed(project.researchJob));}}>{t('researchSeed')}</button>}
-  <label>{t('roughIdea')}<textarea rows={4} value={request} onChange={e=>setRequest(e.target.value)} disabled={busy||!!active}/></label>
- <button disabled={busy||!!active||!request.trim()||!workspace.trim()}>{t('generateProposal')}</button>
- </form>{job&&<div role="status"><p>{t('jobStatus')}: {t('job_'+job.status)}</p><small>{t('sessionId')}: {job.sessionId}</small>{job.status==='unknown'&&<p>{t('unknownJob')}</p>}</div>}
- {job&&<JobReplyBlock jobId={job.id} t={t} load={readReply} refreshKey={project.projectRevision}/>}
+ <label>{t('roughIdea')}<textarea rows={5} value={request} onChange={e=>setRequest(e.target.value)} placeholder={t('roughIdeaHint')} disabled={busy||!!active}/></label>
+ {project.researchJob?.status==='finished'&&project.researchJob.conclusion&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={busy||!!active} onClick={()=>{if(window.confirm(t('researchSeedConfirm')))setRequest(researchSeed(project.researchJob));}}>{t('researchSeed')}</button></div>}
+ <details className="cs-advanced"><summary>{t('generateSettings')}</summary><p className="cs-hint">{t('generateSettingsHint')}</p>
+  <label>{t('workspaceId')}<select value={workspace} onChange={e=>setWorkspace(e.target.value)} disabled={busy||!!active}><option value="">{t('selectWorkspace')}</option>{workspaces.map(w=><option key={w.id} value={w.id}>{w.title} · {w.path}</option>)}</select><button type="button" className="cs-quiet" disabled={busy||!!active} onClick={()=>setRefreshKey(x=>x+1)}>{t('refreshWorkspaces')}</button>{workspaceError&&<span role="alert" className="cs-error">{workspaceError}</span>}</label>
+  <ModelSelect value={model} onChange={setModel} disabled={busy||!!active} t={t} load={listModels}/>
+ </details>
+ <div className="cs-row-actions"><button disabled={busy||!!active||!request.trim()||!workspace.trim()}>{t('generateProposal')}</button></div>
+ </form>{job&&<div role="status" className="cs-job-status"><p>{t('jobProgress')}：{t('job_'+job.status)}</p>{job.status==='unknown'&&<p className="cs-hint">{t('unknownJob')}</p>}<details className="cs-advanced"><summary>{t('techDetails')}</summary><small>{t('sessionId')}：{job.sessionId}</small><br/><small>{t('jobIdLabel')}：{job.id}</small></details></div>}
+ {job&&<JobReplyBlock jobId={job.id} active={!!active} t={t} load={readReply} refreshKey={project.projectRevision}/>}
  {job?.brief&&(editOpen?<BriefEditor brief={job.brief} busy={busy||busyLocal} t={t} cancel={()=>setEditOpen(false)} save={brief=>{void (async()=>{await act(()=>editBrief(job.id,brief));setEditOpen(false);})();}}/>:<>
   <BriefCard brief={job.brief} t={t}/>
   {active&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={busy||busyLocal} onClick={()=>setEditOpen(true)}>{t('briefEdit')}</button></div>}

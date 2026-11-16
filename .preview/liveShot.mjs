@@ -1,0 +1,13 @@
+import {chromium} from 'playwright-core';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,viewport:{width:1440,height:1000}});
+const page=ctx.pages()[0]??await ctx.newPage();
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(2000);
+await page.getByRole('button',{name:'Creative Studio'}).first().click();
+await page.waitForTimeout(1200);
+await page.getByRole('button',{name:/考研市场中台/}).first().click();
+await page.waitForTimeout(1500);
+const box=await page.locator('.cs-reply').boundingBox();
+await page.screenshot({path:'.preview/shots/live-reply-fallback.png',clip:{x:box.x-24,y:Math.max(box.y-40,0),width:Math.min(box.width+48,1400),height:Math.min(box.height+120,900)}});
+console.log('shot',JSON.stringify(box));
+await ctx.close();

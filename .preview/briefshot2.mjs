@@ -1,0 +1,11 @@
+import {chromium} from 'playwright-core';
+const browser=await chromium.launch({headless:true});
+const page=await browser.newPage({viewport:{width:1440,height:1000}});
+await page.goto('http://127.0.0.1:8765/light-workspace.html',{waitUntil:'networkidle'});
+await page.waitForTimeout(500);
+const el=page.locator('.cs-brief');
+await el.scrollIntoViewIfNeeded();
+await page.waitForTimeout(300);
+await page.screenshot({path:'.preview/shots/brief-light.png'});
+console.log('shot ok',JSON.stringify(await page.evaluate(()=>({status:document.querySelector('[role=status] p')?.textContent,disabled:document.querySelectorAll('form button:disabled').length}))));
+await browser.close();

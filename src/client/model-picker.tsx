@@ -11,7 +11,13 @@ export function ModelSelect({value,onChange,disabled,t,load}:{value:ModelChoice|
  const groups=new Map<string,{name:string;items:ModelCatalogView['options']}>();
  for(const option of catalog?.options??[]){const group=groups.get(option.provider)??{name:option.providerName,items:[]};group.items.push(option);groups.set(option.provider,group);}
  const key=value?`${value.provider}|${value.model}`:'';
- // The deployment default behaves like a selected model, so its efforts are editable too.
+ const EFFORT_KEYS:Record<string,string>={'off':'effortOff','low':'effortLow','medium':'effortMedium','high':'effortHigh','max':'effortMax'};
+/** Reasoning-effort ids come from the catalogue in English; map the known ones to local labels. */
+const effortLabel=(id:string,name:string,t:(key:string)=>string):string=>{
+ const key=EFFORT_KEYS[id.toLowerCase()];
+ return key?t(key):name;
+};
+// The deployment default behaves like a selected model, so its efforts are editable too.
  const base:ModelChoice|undefined=value??(catalog?{provider:catalog.default.provider,model:catalog.default.model,...(catalog.default.reasoningEffort?{reasoningEffort:catalog.default.reasoningEffort}:{})}:undefined);
  const option=base?(catalog?.options??[]).find(item=>item.provider===base.provider&&item.model===base.model):undefined;
  const efforts=option?.reasoningEfforts??[];
@@ -41,8 +47,8 @@ export function ModelSelect({value,onChange,disabled,t,load}:{value:ModelChoice|
   {(error||(catalog?.failures.length??0)>0)&&<small className="cs-hint" role="status">{t('modelsUnavailable')}</small>}
   </label>
   {efforts.length>0?<label>{t('reasoningEffort')}<select value={effort} disabled={disabled} onChange={event=>pick(event.target.value)}>
-   <option value="">{t('effortModelDefault')}{option?.defaultEffort?` · ${option.defaultEffort}`:''}</option>
-   {efforts.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}
+   <option value="">{t('effortModelDefault')}{option?.defaultEffort?` · ${effortLabel(option.defaultEffort,option.defaultEffort,t)}`:''}</option>
+   {efforts.map(item=><option key={item.id} value={item.id}>{effortLabel(item.id,item.name,t)}</option>)}
   </select>
   {option?.description&&<small className="cs-hint">{option.description}</small>}
   </label>:null}
