@@ -210,10 +210,10 @@ export default class CreativeStudio extends TypertRemoteService {
   async readJobReply(id:string, jobId:string):Promise<JobReply> {
     const job=this.userStore().get(id).proposalJob;
     if(!job||job.id!==jobId) throw new Error('JOB_SCOPE_MISMATCH');
-    type Wait=(request:{sessionId:string;timeoutMs?:number;maxMessages?:number})=>Promise<{reason:'idle'|'input-required'|'timeout';state:{running:boolean};output:{records:readonly {type?:string;data?:unknown}[];truncated:boolean}}>;
+    type Wait=(request:{sessionId:string;timeoutMs?:number;maxMessages?:number},signal:AbortSignal)=>Promise<{reason:'idle'|'input-required'|'timeout';state:{running:boolean};output:{records:readonly {type?:string;data?:unknown}[];truncated:boolean}}>;
     const sessions=this.ctx.get('sessionController') as {wait?:Wait}|undefined;
     if(!sessions?.wait) throw new Error('SESSION_SERVICE_UNAVAILABLE');
-    const value=await sessions.wait({sessionId:job.sessionId,timeoutMs:0,maxMessages:6});
+    const value=await sessions.wait({sessionId:job.sessionId,timeoutMs:0,maxMessages:6},new AbortController().signal);
     const reply=extractReply(value.output.records,value.output.truncated);
     return {text:reply.text,truncated:reply.truncated,running:value.state.running,reason:value.reason};
   }
