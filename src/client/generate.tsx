@@ -9,6 +9,7 @@ function BriefCard({brief,t}:{brief:BriefInfo;t:(key:string)=>string}):React.Rea
  </>;
  return <section className="cs-brief" aria-label={t('briefTitle')}>
   <h4>{t('briefTitle')}<span className={`cs-intent cs-intent-${brief.intent}`}>{t('intent_'+brief.intent)}</span></h4>
+  {brief.questions.length>0&&<p className="cs-hint">{t('briefPendingPrefix')}{brief.questions.length}{t('briefPendingSuffix')}</p>}
   <p className="cs-brief-restated">{brief.restated}</p>
   {brief.interpretation&&<details className="cs-advanced"><summary>{t('briefInterpretationLabel')}</summary><p className="cs-hint">{brief.interpretation}</p></details>}
   <dl className="cs-pairs">
