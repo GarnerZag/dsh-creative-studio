@@ -210,7 +210,7 @@ const styles = `
 .creative-studio-root .cs-split::before{content:'';position:absolute;inset:0 6px;background:var(--cs-border);border-radius:8px}
 .creative-studio-root .cs-split:focus-visible{outline:2px solid var(--cs-accent);outline-offset:2px}
 .creative-studio-root .cs-demo-pane{min-width:0}
-.creative-studio-root .cs-steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 0 12px;padding:0}
+.creative-studio-root .cs-steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 0 12px;padding:0}.creative-studio-root .cs-steps{position:sticky;top:0;z-index:3;padding:8px 0;margin-bottom:4px;background-color:light-dark(#fbfbfc,#1b1b1e);box-shadow:0 1px 0 var(--cs-border)}
 .creative-studio-root .cs-steps button{display:inline-flex;align-items:center;gap:8px;min-height:32px;white-space:nowrap}
 .creative-studio-root .cs-steps button[aria-current='step']{border-color:var(--cs-accent);background:var(--cs-soft);font-weight:600}
 .creative-studio-root .cs-empty-start{margin:8px 0 0;padding:12px;max-width:64ch;border:1px dashed var(--cs-border);border-radius:10px;background:var(--cs-surface)}
