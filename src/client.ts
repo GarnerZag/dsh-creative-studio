@@ -7,6 +7,7 @@ export const inject: string[] = ['slots', 'remote', 'locale'];
 const namespace = 'creativeStudio';
 const dictionaries = {
   zh: {
+    attachmentDrop:'也可以把文件直接拖到这里。',
     attachmentsTitle:'参考资料（可选）',attachmentsHint:'可以传需求文档、截图、竞品资料，用来补充说明你的想法。单个文件最大 3 MB，最多 20 个。',attachmentAdd:'选择文件',attachmentBusy:'上传中…',attachmentTooLarge:'「{name}」超过 3 MB，没有上传。',attachmentLimit:'最多只能放 20 个文件，先移除一些再传。',attachmentRemove:'移除',
     confirmProjectChange:'切换或新建项目会关闭当前编辑区，未保存的表单和本地 Demo 预览将丢弃。确认继续？已保存数据不会删除。',
     editorConflict:'远端修改与未保存编辑冲突。已保留输入并暂停保存；请核对后重新载入。',editorReload:'放弃本地输入并载入最新值',
@@ -43,6 +44,7 @@ const dictionaries = {
     draftRule: 'AI 提供候选，你决定批准。', native: 'Harness 原生插件',
   },
   en: {
+    attachmentDrop:'You can also drag files here.',
     attachmentsTitle:'Reference material (optional)',attachmentsHint:'Requirement docs, screenshots or competitor notes that explain the idea. Up to 3 MB per file, 20 files.',attachmentAdd:'Choose files',attachmentBusy:'Uploading…',attachmentTooLarge:'“{name}” is over 3 MB, so it was not uploaded.',attachmentLimit:'20 files is the limit — remove one before adding more.',attachmentRemove:'Remove',
     confirmProjectChange:'Switching or creating a project closes the current editors and discards unsaved forms and local Demo previews. Continue? Saved data will not be deleted.',
     editorConflict:'Remote changes conflict with unsaved edits. Input is preserved and saving is paused; review then reload.',editorReload:'Discard local input and load latest values',

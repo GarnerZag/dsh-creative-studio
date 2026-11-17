@@ -1,0 +1,11 @@
+import {chromium} from 'playwright';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,executablePath:'/dsh-home/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome',viewport:{width:1400,height:1000}});
+const page=await ctx.newPage();
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded'});
+await page.getByRole('button',{name:'Creative Studio'}).click({timeout:60000});await page.waitForTimeout(1300);
+await page.locator('.cs-project-card').first().click();await page.waitForTimeout(1500);
+await page.locator('.cs-steps button').nth(0).click();await page.waitForTimeout(900);
+await page.locator('.cs-attachments').first().scrollIntoViewIfNeeded();
+await page.waitForTimeout(300);
+await page.locator('.cs-attachments').first().screenshot({path:'review/attachments.png'});
+console.log('ok');await ctx.close();

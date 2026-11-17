@@ -34,6 +34,7 @@ export function AttachmentsPanel({ project, t, busy, actions }: { project: Proje
   const [error, setError] = React.useState('');
   const [urls, setUrls] = React.useState<Record<string, string>>({});
   const [openId, setOpenId] = React.useState<string | null>(null);
+  const [dragging, setDragging] = React.useState(false);
   const disabled = busy || localBusy;
   const list = project.attachments ?? [];
   const images = list.filter(item => item.kind === 'image');
@@ -101,13 +102,20 @@ export function AttachmentsPanel({ project, t, busy, actions }: { project: Proje
   };
 
   return (
-    <section className="cs-attachments" aria-label={t('attachmentsTitle')}>
+    <section
+      className={dragging ? 'cs-attachments cs-drop' : 'cs-attachments'}
+      aria-label={t('attachmentsTitle')}
+      onDragOver={event => { event.preventDefault(); if (!disabled) setDragging(true); }}
+      onDragLeave={event => { if (event.currentTarget === event.target) setDragging(false); }}
+      onDrop={event => { event.preventDefault(); setDragging(false); if (!disabled) void add(event.dataTransfer.files); }}
+    >
       <div className="cs-toolbar">
         <label className="cs-file-button">
           {localBusy ? t('attachmentBusy') : t('attachmentAdd')}
           <input type="file" multiple disabled={disabled} onChange={event => { void add(event.currentTarget.files); event.currentTarget.value = ''; }} />
         </label>
         <span className="cs-hint">{t('attachmentsHint')}</span>
+        <span className="cs-hint">{t('attachmentDrop')}</span>
       </div>
       {error && <p role="alert" className="cs-error">{error}</p>}
       {list.length === 0
