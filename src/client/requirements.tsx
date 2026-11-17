@@ -99,7 +99,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
             <input className="cs-tree-search" aria-label={t('filterRequirements')} placeholder={t('filterRequirements')} value={search} onChange={e => setSearch(e.target.value)} />
             {needle && matchCount > 0 && <p className="cs-hint">{t('filterMatches').replace('{n}', String(matchCount))}</p>}
             {needle && visibleRows.length === 0 && <p className="cs-hint">{t('filterNoMatch')}</p>}
-            {visibleRows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 24 }}><button type="button" disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)}><span className="cs-outline-no" aria-hidden="true">{row.label}</span>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>}
+            {visibleRows.map(row => <div key={row.id} style={{ paddingLeft: row.depth * 24 }}><button type="button" disabled={busy} aria-pressed={selected === row.id} onClick={() => choose(row.id)} onDoubleClick={() => { choose(row.id); requestAnimationFrame(() => { const el = document.querySelector<HTMLInputElement>('[data-cs-title-input]'); if (el) { el.focus(); el.select(); } }); }}><span className="cs-outline-no" aria-hidden="true">{row.label}</span>{project.nodes.find(n => n.id === row.id)?.title}</button></div>)}</div>}
       {view === 'outline'&&<p className="cs-hint">{t('outlineHint')}</p>}
       {(()=>{const missing=project.nodes.filter(n=>n.desktopAcceptance.length===0||n.mobileAcceptance.length===0);if(!missing.length)return null;return <p className="cs-hint">{t('acceptanceMissingHint').replace('{n}',String(missing.length))}</p>;})()}
       {!node&&project.nodes.length>0&&<p className="cs-hint">{t('inspectorEmptyHint')}</p>}
@@ -128,7 +128,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
         <button disabled={busy}>{busy ? t('working') : t('saveDetails')}</button>
         {(priorityChanged||description!==node.description||lines(desktop).join('\n')!==node.desktopAcceptance.join('\n')||lines(mobile).join('\n')!==node.mobileAcceptance.join('\n'))&&<p className="cs-hint" role="status">{t('detailsDirty')}</p>}
       </form>
-      <button type="button" onClick={() => { if (window.confirm(removePrompt())) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button>
+      <div className="cs-row-actions"><button type="button" className="cs-danger" onClick={() => { if (window.confirm(removePrompt())) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button><p className="cs-hint">{t('removeNodeHint')}</p></div>
     </fieldset>
     </div>}
   </section>;
