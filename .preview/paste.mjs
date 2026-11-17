@@ -1,0 +1,23 @@
+import {chromium} from 'playwright';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,executablePath:'/dsh-home/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome',viewport:{width:1440,height:1000}});
+const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(String(e).slice(0,120)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded'});
+await page.getByRole('button',{name:'Creative Studio'}).click({timeout:60000});await page.waitForTimeout(1500);
+const cards=await page.locator('.cs-project-card').allTextContents();
+const idx=Math.max(0,cards.findIndex(t=>t.includes('考研市场中台开发')));
+await page.locator('.cs-project-card').nth(idx).click();await page.waitForTimeout(1600);
+await page.locator('.cs-steps button').nth(0).click();await page.waitForTimeout(900);
+const out={errs};
+out.text=(await page.locator('.cs-attachments').innerText()).replace(/\n/g,' | ');
+const fired=await page.evaluate(async()=>{
+ const section=document.querySelector('.cs-attachments');
+ const b64='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+ const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+ const dt=new DataTransfer();
+ dt.items.add(new File([bytes],'pasted.png',{type:'image/png'}));
+ section.focus();
+ section.dispatchEvent(new ClipboardEvent('paste',{clipboardData:dt,bubbles:true,cancelable:true}));
+ return true;});
+await page.waitForTimeout(2000);
+out.alert=await page.locator('.cs-attachments [role=alert]').innerText().catch(()=>null);
+console.log(JSON.stringify(out));await ctx.close();

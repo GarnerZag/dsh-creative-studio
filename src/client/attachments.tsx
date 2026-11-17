@@ -108,6 +108,16 @@ export function AttachmentsPanel({ project, t, busy, actions }: { project: Proje
       onDragOver={event => { event.preventDefault(); if (!disabled) setDragging(true); }}
       onDragLeave={event => { if (event.currentTarget === event.target) setDragging(false); }}
       onDrop={event => { event.preventDefault(); setDragging(false); if (!disabled) void add(event.dataTransfer.files); }}
+      onPaste={event => {
+        if (disabled) return;
+        const files = Array.from(event.clipboardData.files ?? []).filter(file => file.type.startsWith('image/'));
+        if (!files.length) return;
+        event.preventDefault();
+        const transfer = new DataTransfer();
+        files.forEach(file => transfer.items.add(file));
+        void add(transfer.files);
+      }}
+      tabIndex={0}
     >
       <div className="cs-toolbar">
         <label className="cs-file-button">
@@ -116,6 +126,7 @@ export function AttachmentsPanel({ project, t, busy, actions }: { project: Proje
         </label>
         <span className="cs-hint">{t('attachmentsHint')}</span>
         <span className="cs-hint">{t('attachmentDrop')}</span>
+        <span className="cs-hint">{t('attachmentPaste')}</span>
       </div>
       {error && <p role="alert" className="cs-error">{error}</p>}
       {list.length === 0
