@@ -42,8 +42,8 @@ export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Sta
     {!compare&&<p className="cs-hint cs-stage-hint">{active.hint}</p>}
     <div ref={grid} className="cs-grid" style={{gridTemplateColumns:focus||compare?'minmax(0,1fr)':`minmax(0,${split}fr) 24px minmax(0,${100-split}fr)`,gap:12,marginTop:12,alignItems:'start'}}>
       <div className="cs-stage-body" style={{display:'grid',gridTemplateRows:compare&&!focus?'auto auto':'auto',gap:12,minWidth:0}}>
-        {showRequirementPane&&requirementStage&&<section className={paneClass} style={{gridRow:1}} aria-label={requirementStage.label}>{compare&&active.id!=='requirements'&&<p className="cs-pane-label">{t('paneCompareReference')}</p>}{blocks(requirementStage.blocks)}</section>}
-        {showStagePane&&(!compare?<div style={{gridRow:1,minWidth:0}}>{blocks(active.blocks,true)}</div>:<section className={paneClass} style={{gridRow:2}} aria-label={active.label}>{compare&&<p className="cs-pane-label">{t('paneCurrent')}：{active.label}</p>}{blocks(active.blocks)}</section>)}
+        {showStagePane&&(!compare?<div style={{gridRow:1,minWidth:0}}>{blocks(active.blocks,true)}</div>:<section className={paneClass} style={{gridRow:1}} aria-label={active.label}>{compare&&<p className="cs-pane-label">{t('paneCurrent')}{t('labelSep')}{active.label}</p>}{blocks(active.blocks)}</section>)}
+        {showRequirementPane&&requirementStage&&<section className={paneClass} style={{gridRow:2}} aria-label={requirementStage.label}>{compare&&active.id!=='requirements'&&<p className="cs-pane-label">{t('paneCompareReference')}</p>}{blocks(requirementStage.blocks)}</section>}
       </div>
       <div hidden={focus||compare} role="separator" aria-label={t('layoutWidth')} aria-orientation="vertical" aria-valuemin={30} aria-valuemax={70} aria-valuenow={Math.round(split)} tabIndex={focus?-1:0}
         onKeyDown={e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();change({...layout,split:Math.max(30,Math.min(70,split+(e.key==='ArrowRight'?2:-2)))});}}}
