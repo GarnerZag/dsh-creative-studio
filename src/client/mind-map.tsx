@@ -56,7 +56,6 @@ export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes:
   const outY=top<el.scrollTop||top+CARD_HEIGHT*scale>el.scrollTop+el.clientHeight;
   if(outX||outY)el.scrollTo({left,top,behavior:'smooth'});},[selected,scale]);
   return <div ref={root} style={{minWidth:0}}>
-    <p className="cs-hint">{t('nodeDragHint')}</p>
     {dragActive&&<div role="note" data-cs-parent="" style={{padding:8,marginBottom:12,border:'1px dashed var(--cs-accent)',borderRadius:10,background:'var(--cs-soft)',fontSize:'var(--cs-text-sm)',lineHeight:'20px'}}>{t('nodeDropRoot')}</div>}
     <div ref={box} style={{overflow:'auto',maxHeight, border:'1px solid var(--cs-border)',borderRadius:12,maskImage:clipped?'linear-gradient(to bottom,#000 calc(100% - 28px),rgba(0,0,0,0.12))':undefined}}><div style={{width:Math.ceil(width*scale),height:Math.ceil(height*scale)}}><svg width={width} height={height} style={{ display: 'block', transform:`scale(${scale})`, transformOrigin:'top left' }}>
       {nodes.map(node => {
@@ -76,6 +75,6 @@ export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes:
           </div></foreignObject>
         </g>;
       })}
-    </svg></div></div>{clipped&&<p className="cs-hint">{t('canvasScrollHint')}</p>}{hasMixed&&<p className="cs-hint">{t('priorityLegend')}</p>}
+    </svg></div></div><details className="cs-help"><summary>{t('mapHelp')}</summary><p className="cs-hint">{t('nodeDragHint')}</p>{clipped&&<p className="cs-hint">{t('canvasScrollHint')}</p>}{hasMixed&&<p className="cs-hint">{t('priorityLegend')}</p>}</details>
   </div>;
 }
