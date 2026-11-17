@@ -11,6 +11,9 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
   const [selected, setSelected] = React.useState<string | null>(null);
   const node = project.nodes.find(n => n.id === selected);
   const siblings=node?orderedChildren(project.nodes,node.parentId):[];
+  const descendantIds=new Set<string>();
+  if(node){let changed=true;while(changed){changed=false;for(const n of project.nodes){const p=n.parentId;if(!p)continue;if(p===node.id||descendantIds.has(p)){if(!descendantIds.has(n.id)){descendantIds.add(n.id);changed=true;}}}}}
+  const parentOptions=project.nodes.filter(n=>n.id!==node?.id&&!descendantIds.has(n.id));
   const position=siblings.findIndex(n=>n.id===selected);
   React.useEffect(()=>{onSelect?.(node?.id??null);},[node?.id,onSelect]);
   const snapshot=()=>({title:node?.title??'',description:node?.description??'',desktop:node?.desktopAcceptance.join('\n')??'',mobile:node?.mobileAcceptance.join('\n')??''});
@@ -119,7 +122,7 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
       <div className="cs-toolbar"><button type="button" disabled={position<=0} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position-1]!.id})}>{t('moveEarlier')}</button><button type="button" disabled={position<0||position>=siblings.length-1} onClick={()=>save({kind:'reorder',id:node.id,beforeId:siblings[position+2]?.id??null})}>{t('moveLater')}</button><button type="button" disabled={busy} onClick={()=>choose(node.parentId)}>{t('selectParent')}</button></div>
       <p className="cs-hint">{t('dragAlternativeHint')}</p>
       <form onSubmit={e => { e.preventDefault(); if (title.trim()) save({ kind: 'rename', id: node.id, title }); }}><label>{t('nodeTitle')}<input data-cs-title-input value={title} onChange={e => setTitle(e.target.value)} /></label><button disabled={!title.trim()||title.trim()===node.title}>{t('rename')}</button>{title.trim()!==node.title&&<p className="cs-hint" role="status">{t('renameDirty')}</p>}</form>
-      <label>{t('parentNode')}<select aria-label={t('parentNode')} value={node.parentId ?? ''} onChange={e => save({ kind: 'move', id: node.id, parentId: e.target.value || null })}><option value="">{t('selectRoot')}</option>{project.nodes.filter(n => n.id !== node.id).map(n => <option key={n.id} value={n.id}>{`${'\u3000'.repeat(depthOf(n.id))}${n.title}`}</option>)}</select></label>
+      <label>{t('parentNode')}<select aria-label={t('parentNode')} value={node.parentId ?? ''} onChange={e => save({ kind: 'move', id: node.id, parentId: e.target.value || null })}><option value="">{t('selectRoot')}</option>{parentOptions.map(n => <option key={n.id} value={n.id}>{`${'\u3000'.repeat(depthOf(n.id))}${n.title}`}</option>)}</select></label>
       <fieldset className="cs-deps" style={{ border: 0, padding: 0, minWidth: 0 }}>
         <legend>{t('requirementDependencies')}</legend>
         <p className="cs-hint">{t('requirementDependencyHint')}</p>
