@@ -2,10 +2,22 @@
 type Guard = () => boolean;
 
 const guards = new Set<Guard>();
+let unloadInstalled = false;
 
 export function registerDirtyGuard(guard: Guard): () => void {
   guards.add(guard);
+  installUnloadListener();
   return () => { guards.delete(guard); };
+}
+
+function installUnloadListener(): void {
+  if (unloadInstalled || typeof window === 'undefined') return;
+  unloadInstalled = true;
+  window.addEventListener('beforeunload', event => {
+    if (!hasUnsavedEdits()) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
 }
 
 export function hasUnsavedEdits(): boolean {

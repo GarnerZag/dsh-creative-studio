@@ -1,0 +1,18 @@
+import {chromium} from 'playwright';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,executablePath:'/dsh-home/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome',viewport:{width:1440,height:1150}});
+const page=await ctx.newPage();
+const errs=[];page.on('pageerror',e=>errs.push(String(e).slice(0,120)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded'});
+await page.getByRole('button',{name:'Creative Studio'}).click({timeout:60000});
+await page.waitForTimeout(1200);
+const idx=(await page.locator('.cs-project-card').allTextContents()).findIndex(t=>t.includes('考研市场中台'));
+await page.locator('.cs-project-card').nth(idx).click();await page.waitForTimeout(1500);
+await page.locator('.cs-steps button').nth(1).click();await page.waitForTimeout(1200);
+await page.locator('svg button[aria-pressed]').nth(1).click();await page.waitForTimeout(700);
+const probe=()=>page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});window.dispatchEvent(e);return e.defaultPrevented;});
+const clean=await probe();
+await page.locator('textarea[aria-label="Requirement description"], textarea').first().fill('临时未保存的内容');
+await page.waitForTimeout(400);
+const dirty=await probe();
+const hint=await page.evaluate(()=>[...document.querySelectorAll('.cs-hint')].map(e=>e.textContent.trim()).filter(t=>t.includes('unsaved')||t.includes('还没保存')).slice(0,2));
+console.log(JSON.stringify({clean,dirty,hint,errs}));await ctx.close();
