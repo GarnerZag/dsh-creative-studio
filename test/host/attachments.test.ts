@@ -54,3 +54,29 @@ test('stored bytes stream back in bounded chunks and purge with the project', as
   assert.equal(await store.purge('p1'), 1);
   assert.equal(rows.size, 1);
 });
+
+test('multi-chunk reads reassemble exactly the bytes that were stored', async () => {
+  const rows = new Map<string, StoredAttachment>();
+  const table = {
+    get: (id: string) => rows.get(id),
+    put: async (id: string, row: StoredAttachment) => { rows.set(id, structuredClone(row)); },
+    entries: () => rows.entries(),
+    delete: async (id: string) => rows.delete(id),
+  };
+  const store = new AttachmentStore(table);
+  const bytes = Buffer.alloc(700 * 1024);
+  for (let index = 0; index < bytes.length; index++) bytes[index] = index % 251;
+  await store.put('p', 'a', bytes);
+  const parts: Buffer[] = [];
+  let offset = 0;
+  while (offset < bytes.length) {
+    const read = store.chunk('p', 'a', offset, 256 * 1024);
+    const piece = Buffer.from(read.base64, 'base64');
+    assert.ok(piece.length > 0);
+    parts.push(piece);
+    if (read.nextOffset === null) break;
+    offset = read.nextOffset;
+  }
+  assert.equal(Buffer.concat(parts).equals(bytes), true);
+  assert.equal(store.chunk('p', 'a', 0, 256 * 1024).total, bytes.length);
+});
