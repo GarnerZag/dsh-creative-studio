@@ -125,8 +125,10 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
         <label>{t('nodeDescription')}<textarea aria-label={t('nodeDescription')} rows={4} value={description} onChange={e => setDescription(e.target.value)}/></label>
         <label>{t('desktopAcceptance')}<textarea aria-label={t('desktopAcceptance')} rows={3} placeholder={t('acceptanceExample')} value={desktop} onChange={e => setDesktop(e.target.value)}/></label>
         <label>{t('mobileAcceptance')}<textarea aria-label={t('mobileAcceptance')} rows={3} placeholder={t('acceptanceExample')} value={mobile} onChange={e => setMobile(e.target.value)}/></label>
+        <div className="cs-save-bar">
         <button disabled={busy}>{busy ? t('working') : t('saveDetails')}</button>
         {(priorityChanged||description!==node.description||lines(desktop).join('\n')!==node.desktopAcceptance.join('\n')||lines(mobile).join('\n')!==node.mobileAcceptance.join('\n'))&&<p className="cs-hint" role="status">{t('detailsDirty')}</p>}
+        </div>
       </form>
       <div className="cs-row-actions"><button type="button" className="cs-danger" onClick={() => { if (window.confirm(removePrompt())) save({ kind: 'remove', id: node.id }); }}>{t('removeNode')}</button><p className="cs-hint">{t('removeNodeHint')}</p></div>
     </fieldset>
