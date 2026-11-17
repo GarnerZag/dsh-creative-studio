@@ -45,6 +45,17 @@ function BriefEditor({brief,busy,t,save,cancel}:{brief:BriefInfo;busy:boolean;t:
   </form>
  </section>;
 }
+// Session replies are plain Markdown from the model: show bold and inline code instead of raw asterisks.
+function renderReply(text:string):React.ReactNode[]{
+ return text.split('\n').map((line,index)=>{
+  const parts=line.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).filter(part=>part.length>0).map((part,key)=>{
+   if(part.startsWith('**')&&part.endsWith('**')&&part.length>4)return <strong key={key}>{part.slice(2,-2)}</strong>;
+   if(part.startsWith('`')&&part.endsWith('`')&&part.length>2)return <code key={key}>{part.slice(1,-1)}</code>;
+   return <React.Fragment key={key}>{part}</React.Fragment>;
+  });
+  return <p key={index}>{parts.length>0?parts:'\u00a0'}</p>;
+ });
+}
 function JobReplyBlock({jobId,active,t,load,refreshKey,canEnd,endAttempt}:{jobId:string;active:boolean;t:(key:string)=>string;load:(jobId:string)=>Promise<JobReply>;refreshKey:number;canEnd:boolean;endAttempt:()=>void}):React.ReactElement {
  const [reply,setReply]=React.useState<JobReply|null>(null),[error,setError]=React.useState(''),[unavailable,setUnavailable]=React.useState(false),[loading,setLoading]=React.useState(false);
  // An older Host process answers 404 for this method: say so plainly instead of showing a transport stack.
@@ -52,7 +63,7 @@ function JobReplyBlock({jobId,active,t,load,refreshKey,canEnd,endAttempt}:{jobId
  React.useEffect(()=>{fetchReply();},[fetchReply,refreshKey]);
  return <section className="cs-reply" aria-label={t('jobReply')}>
   <h4>{t('jobReply')}<button type="button" className="cs-quiet" disabled={loading} onClick={fetchReply}>{t('jobReplyRefresh')}</button></h4>
-  {unavailable?<p className="cs-hint">{t('jobReplyNeedsRestart')}</p>:error?<p role="alert" className="cs-error">{error}</p>:reply?.text?<div className="cs-reply-text">{reply.text}{reply.truncated&&<span className="cs-hint"> {t('jobReplyTruncated')}</span>}</div>:<p className="cs-hint">{loading?t('jobReplyLoading'):active&&!(reply&&!reply.running)?t('jobReplyWaiting'):reply&&(reply.records??0)===0?t('jobReplyNoRecords'):t('jobReplyEmpty')}</p>}
+  {unavailable?<p className="cs-hint">{t('jobReplyNeedsRestart')}</p>:error?<p role="alert" className="cs-error">{error}</p>:reply?.text?<div className="cs-reply-text">{renderReply(reply.text)}{reply.truncated&&<span className="cs-hint"> {t('jobReplyTruncated')}</span>}</div>:<p className="cs-hint">{loading?t('jobReplyLoading'):active&&!(reply&&!reply.running)?t('jobReplyWaiting'):reply&&(reply.records??0)===0?t('jobReplyNoRecords'):t('jobReplyEmpty')}</p>}
   {reply&&(reply.text||reply.running)&&<p className="cs-hint">{reply.running?t('jobReplyRunning'):t('jobReplyEnded')}</p>}
   {canEnd&&!reply?.running&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={loading} onClick={endAttempt}>{t('jobReplyEndAttempt')}</button><small className="cs-hint">{t('jobReplyEndHint')}</small></div>}
  </section>;

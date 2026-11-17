@@ -181,6 +181,7 @@ const styles = `
 .creative-studio-root .cs-brief-list li+li{margin-top:4px}
 .creative-studio-root .cs-reply{margin:16px 0;padding:16px;border:1px solid var(--cs-border);border-radius:12px;background:var(--cs-surface)}
 .creative-studio-root .cs-reply h4{margin:0 0 8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.creative-studio-root .cs-reply-text p{margin:0 0 8px;max-width:64ch}.creative-studio-root .cs-reply-text p:last-child{margin-bottom:0}.creative-studio-root .cs-reply-text strong{font-weight:600}.creative-studio-root .cs-reply-text code{padding:0 4px;border-radius:4px;background:var(--cs-soft);font-size:var(--cs-text-sm)}
 .creative-studio-root .cs-reply-text{margin:0;max-width:64ch;font-size:var(--cs-text-sm);line-height:20px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto}
 .creative-studio-root .cs-brief-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:8px 0 0}
 .creative-studio-root .cs-brief-form label{display:grid;gap:4px;margin:0;min-width:0;font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted);font-weight:500}
