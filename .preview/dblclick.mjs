@@ -1,0 +1,18 @@
+import {chromium} from 'playwright';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,executablePath:'/dsh-home/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome',viewport:{width:1440,height:1150}});
+const page=await ctx.newPage();
+const errs=[];page.on('pageerror',e=>errs.push(String(e).slice(0,120)));
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded'});
+await page.getByRole('button',{name:'Creative Studio'}).click({timeout:60000});
+await page.waitForTimeout(1200);
+const idx=(await page.locator('.cs-project-card').allTextContents()).findIndex(t=>t.includes('考研市场中台'));
+await page.locator('.cs-project-card').nth(idx).click();await page.waitForTimeout(1500);
+await page.locator('.cs-steps button').nth(1).click();await page.waitForTimeout(1200);
+const canvasBtn=page.getByRole('button',{name:/Canvas|画布/}).first();
+if(await canvasBtn.count())await canvasBtn.click();
+await page.waitForTimeout(600);
+const cards=await page.locator('svg button[aria-pressed]').count();
+const card=page.locator('svg button[aria-pressed]').nth(2);
+await card.dblclick();await page.waitForTimeout(600);
+const out=await page.evaluate(()=>{const el=document.activeElement;const hints=[...document.querySelectorAll('.cs-hint')].map(e=>e.textContent.trim()).filter(t=>t.includes('双击'));return{active:el?el.tagName+':'+(el.getAttribute('data-cs-title-input')!==null):'none',value:el&&el.value?el.value.slice(0,20):null,hints:hints.slice(0,2)};});
+console.log(JSON.stringify({cards,...out,errs}));await ctx.close();
