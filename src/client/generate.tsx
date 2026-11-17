@@ -74,7 +74,12 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
  const [workspaces,setWorkspaces]=React.useState<WorkspaceOption[]>([]),[workspaceError,setWorkspaceError]=React.useState(''),[refreshKey,setRefreshKey]=React.useState(0);
  const [answers,setAnswers]=React.useState(''),[lastProject,setLastProject]=React.useState<ProjectSnapshot>(project),[busyLocal,setBusyLocal]=React.useState(false),[error,setError]=React.useState(''),[editOpen,setEditOpen]=React.useState(false);
  if(project.projectRevision!==lastProject.projectRevision){setLastProject(project);setError('');}
- const act=async(operation:()=>Promise<ProjectSnapshot>):Promise<void>=>{setBusyLocal(true);setError('');try{setLastProject(await operation());refresh();}catch(e){setError(e instanceof Error?e.message:t('briefContinueStale'));}finally{setBusyLocal(false);}};
+ const explain=(caught:unknown):string=>{const message=caught instanceof Error?caught.message:String(caught);
+  if(message.includes('CONFLICT'))return t('errorConflict');
+  if(message.includes('JOB_NOT_ACTIVE'))return t('errorJobNotActive');
+  if(message.includes('JOB_SCOPE_MISMATCH'))return t('errorJobScope');
+  return message||t('briefContinueStale');};
+ const act=async(operation:()=>Promise<ProjectSnapshot>):Promise<void>=>{setBusyLocal(true);setError('');try{setLastProject(await operation());refresh();}catch(caught){setError(explain(caught));}finally{setBusyLocal(false);}};
  React.useEffect(()=>{let live=true;setWorkspaceError('');void listWorkspaces().then(items=>{if(live){setWorkspaces(items);setWorkspace(id=>{if(items.some(w=>w.id===id))return id;let remembered='';try{remembered=localStorage.getItem('cs.workspaceId')??'';}catch{remembered='';}if(remembered&&items.some(w=>w.id===remembered))return remembered;return items.length===1?items[0]!.id:'';});}}).catch(e=>{if(live){setWorkspaceError(String(e));setWorkspaces([]);setWorkspace('');}});return()=>{live=false;};},[listWorkspaces,refreshKey]);
  const job=project.proposalJob,active=job&&!['finished','failed'].includes(job.status);
  return <section><p className="cs-lead">{t('generateNotice')}</p>
@@ -101,7 +106,7 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
     : <button type="button" disabled={busy||busyLocal||!answers.trim()} onClick={()=>{if(window.confirm(t('briefContinueConfirm')))void act(()=>continueJob(job.id,answers.trim(),false));}}>{t('briefContinue')}</button>}
    <button type="button" className="cs-quiet" disabled={busy||busyLocal} onClick={()=>{if(window.confirm(t('briefAbandonConfirm')))void act(()=>abandonJob(job.id));}}>{t('briefAbandon')}</button>
   </div>
-  {error&&<p role="alert" className="cs-error">{error}</p>}
+  {error&&<p role="alert" className="cs-error">{error}{error===t('errorConflict')&&<button type="button" style={{marginLeft:8}} onClick={()=>{setError('');refresh();}}>{t('errorReload')}</button>}</p>}
  </div>}
  <button type="button" disabled={busy} onClick={refresh}>{t('refreshProposal')}</button>
  </section>;

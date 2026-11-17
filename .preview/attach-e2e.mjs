@@ -70,7 +70,7 @@ const snapshot = await page.evaluate(async name => {
 const rows = await page.locator('.cs-attachment-list li').all();
 for (const row of rows) {
   if (!(await row.innerText()).includes('需求草稿.md')) continue;
-  await row.getByRole('button').click();
+  await row.locator('button').last().click();
   await page.waitForTimeout(1800);
   break;
 }
