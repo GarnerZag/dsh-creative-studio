@@ -47,7 +47,7 @@ const followUp=[
  ...proposalRules,
 ].join('\n');
 /** Uploaded material is context for the model, never a requirement by itself. */
-function materialSection(material?:{name:string;kind:string;text?:string}[]):string{
+export function materialSection(material?:{name:string;kind:string;text?:string}[]):string{
  if(!material?.length)return '';
  const lines=['','用户还上传了这些材料，仅供理解上下文；不要把文件名或截图当成需求条目：'];
  let budget=24000;
