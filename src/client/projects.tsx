@@ -47,6 +47,7 @@ export interface ProjectActions {
   edit(project: ProjectSnapshot, change: RequirementChange): Promise<ProjectSnapshot>;
 }
 
+function countLabel(t:(key:string)=>string,n:number,one:string,many:string):string{return `${n}${t(n===1?one:many)}`;}
 export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: string) => string }): React.ReactElement {
   const [projects, setProjects] = React.useState<ProjectSummary[]>([]);
   const [project, setProject] = React.useState<ProjectSnapshot>();
@@ -163,7 +164,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
       <li><strong>{t('chooserStep2Title')}</strong><span>{t('chooserStep2Body')}</span></li>
       <li><strong>{t('chooserStep3Title')}</strong><span>{t('chooserStep3Body')}</span></li>
     </ol>
-    <nav className="cs-project-list" aria-label={t('projects')}>{projects.map(p => <button type="button" className="cs-project-card" key={p.id} disabled={busy} onClick={() => void run(() => api.get(p.id))}><strong>{p.name}</strong><small className="cs-hint">{p.contentRevision?t('revisionSummary').replace('{n}',String(p.contentRevision)):t('revisionSummaryNone')}{typeof p.requirementCount==='number'?` · ${p.requirementCount} ${t('chooserRequirements')} · ${p.architectureCount??0} ${t('chooserModules')}`:''}</small>{p.proposalStatus==='submitted'&&<small className="cs-hint cs-card-flag">{t('chooserAwaitingModel')}</small>}{typeof p.requirementCount==='number'&&!p.requirementCount&&<small className="cs-hint">{t('chooserNextIdea')}</small>}{typeof p.requirementCount==='number'&&p.requirementCount>0&&!p.architectureCount&&<small className="cs-hint">{t('chooserNextArch')}</small>}</button>)}</nav>
+    <nav className="cs-project-list" aria-label={t('projects')}>{projects.map(p => <button type="button" className="cs-project-card" key={p.id} disabled={busy} onClick={() => void run(() => api.get(p.id))}><strong>{p.name}</strong><small className="cs-hint">{p.contentRevision?t('revisionSummary').replace('{n}',String(p.contentRevision)):t('revisionSummaryNone')}{typeof p.requirementCount==='number'?` · ${countLabel(t,p.requirementCount,'chooserRequirementOne','chooserRequirements')} · ${countLabel(t,p.architectureCount??0,'chooserModuleOne','chooserModules')}`:''}</small>{p.proposalStatus==='submitted'&&<small className="cs-hint cs-card-flag">{t('chooserAwaitingModel')}</small>}{typeof p.requirementCount==='number'&&!p.requirementCount&&<small className="cs-hint">{t('chooserNextIdea')}</small>}{typeof p.requirementCount==='number'&&p.requirementCount>0&&!p.architectureCount&&<small className="cs-hint">{t('chooserNextArch')}</small>}</button>)}</nav>
     {!projects.length && <p className="cs-hint">{t('railEmptyHint')}</p>}
   </section>;
   return <section className="cs-projects" aria-label={t('projects')}>

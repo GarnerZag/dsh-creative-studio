@@ -14814,11 +14814,11 @@
   // ../src/client/reports.tsx
   var import_jsx_runtime4 = __toESM(require_jsx_runtime());
   function ReportsPanel({ project: project2, busy, t: t2, accept, refresh }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("section", { children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("section", { "aria-label": t2("reportsTitle"), children: [
       /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h3", { children: t2("reportsTitle") }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "cs-toolbar", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { disabled: busy, onClick: refresh, children: t2("reportsRefresh") }) }),
       /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: t2("reportsNotice") }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { disabled: busy, onClick: refresh, children: t2("reportsRefresh") }),
-      !project2.reports.length && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: t2("reportsEmpty") }),
+      !project2.reports.length && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "cs-hint", children: t2("reportsEmpty") }),
       project2.reports.map((r) => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("article", { style: { border: "1px solid var(--cs-border)", borderRadius: 12, padding: 16, marginTop: 16 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("h4", { children: [
           r.taskId,
@@ -15326,6 +15326,7 @@ ${preset || t2("defaultAgent")}`)) return;
   var import_jsx_runtime6 = __toESM(require_jsx_runtime());
   var BLOCKER_KEYS = { ARCHITECTURE_MISSING: "blockerArchitectureMissing", ARCHITECTURE_DETAILS: "blockerArchitectureDetails", CONTRACT_STRUCTURE: "blockerContractStructure", TASK_STRUCTURE: "blockerTaskStructure", TASK_ACCEPTANCE_OWNERSHIP: "blockerTaskAcceptanceOwnership", TASK_COVERAGE: "blockerTaskCoverage", TASK_PLAN_EMPTY: "blockerTaskPlanEmpty", TASK_PLAN_UNCONFIRMED: "blockerTaskPlanUnconfirmed", DESKTOP_ACCEPTANCE: "blockerDesktopAcceptance", MOBILE_ACCEPTANCE: "blockerMobileAcceptance", NO_DEMO: "blockerNoDemo", DEMO_UNCOVERED: "blockerDemoUncovered", EMPTY_SCOPE: "blockerEmptyScope", PROTOTYPE_ONLY: "blockerPrototypeOnly", VERSION_NOT_FOUND: "blockerVersionNotFound" };
   var BLOCKER_ENTITY_CODES = /* @__PURE__ */ new Set(["TASK_COVERAGE", "ARCHITECTURE_DETAILS", "DEMO_UNCOVERED", "TASK_ACCEPTANCE_OWNERSHIP", "DESKTOP_ACCEPTANCE", "MOBILE_ACCEPTANCE"]);
+  var BLOCKER_STAGE = { ARCHITECTURE_MISSING: "stageArchitecture", ARCHITECTURE_DETAILS: "stageArchitecture", CONTRACT_STRUCTURE: "stageArchitecture", TASK_STRUCTURE: "stageArchitecture", TASK_ACCEPTANCE_OWNERSHIP: "stageArchitecture", TASK_PLAN_EMPTY: "stageArchitecture", TASK_PLAN_UNCONFIRMED: "stageArchitecture", TASK_COVERAGE: "stageRequirements", DESKTOP_ACCEPTANCE: "stageRequirements", MOBILE_ACCEPTANCE: "stageRequirements", EMPTY_SCOPE: "stageRequirements", NO_DEMO: "stageIdea", DEMO_UNCOVERED: "stageIdea", PROTOTYPE_ONLY: "stageApproval", VERSION_NOT_FOUND: "stageApproval" };
   function blockerText(code, id3, t2) {
     const key = BLOCKER_KEYS[code];
     const label = key ? t2(key) : "";
@@ -15336,7 +15337,8 @@ ${preset || t2("defaultAgent")}`)) return;
     return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : bytes >= 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${bytes} B`;
   }
   function HandoffPanel({ project: project2, api, t: t2, dispatch, onProject }) {
-    const [versionId, setVersionId] = React5.useState(""), [readiness, setReadiness] = React5.useState(), [info, setInfo] = React5.useState(), [busy, setBusy] = React5.useState(false), [error51, setError] = React5.useState("");
+    const latest = project2.versions[project2.versions.length - 1]?.id ?? "";
+    const [versionId, setVersionId] = React5.useState(latest), [readiness, setReadiness] = React5.useState(), [info, setInfo] = React5.useState(), [busy, setBusy] = React5.useState(false), [error51, setError] = React5.useState("");
     const active = React5.useRef(true);
     React5.useEffect(() => {
       active.current = true;
@@ -15356,6 +15358,16 @@ ${preset || t2("defaultAgent")}`)) return;
         if (active.current) setBusy(false);
       }
     };
+    const firstRun = React5.useRef(true);
+    React5.useEffect(() => {
+      if (!firstRun.current) return;
+      firstRun.current = false;
+      if (!versionId) return;
+      void run(async () => {
+        const r = await api.readiness(project2.id, versionId);
+        if (active.current) setReadiness(r);
+      });
+    }, []);
     const download = async () => {
       if (!window.confirm(t2("handoffExportNotice"))) return;
       let pkg = info;
@@ -15380,33 +15392,55 @@ ${preset || t2("defaultAgent")}`)) return;
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("h3", { children: t2("handoffTitle") }),
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: t2("handoffExplanation") }),
       !project2.versions.length && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { role: "status", className: "cs-hint", children: t2("handoffNoVersion") }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("label", { children: [
-        t2("handoffVersion"),
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("select", { "aria-label": t2("handoffVersion"), disabled: busy, value: versionId, onChange: (e) => {
-          setVersionId(e.target.value);
-          setInfo(void 0);
-          setReadiness(void 0);
-          setError("");
-        }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("option", { value: "", children: t2("handoffSelectPlaceholder") }),
-          project2.versions.map((v) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("option", { value: v.id, children: [
-            v.label,
-            " \xB7 ",
-            v.id
-          ] }, v.id))
-        ] })
+      project2.versions.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("label", { children: [
+          t2("handoffVersion"),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("select", { "aria-label": t2("handoffVersion"), disabled: busy, value: versionId, onChange: (e) => {
+            setVersionId(e.target.value);
+            setInfo(void 0);
+            setReadiness(void 0);
+            setError("");
+          }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("option", { value: "", children: t2("handoffSelectPlaceholder") }),
+            project2.versions.map((v) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("option", { value: v.id, children: v.label }, v.id))
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { disabled: busy || !versionId, onClick: () => {
+          void run(async () => {
+            const r = await api.readiness(project2.id, versionId);
+            if (active.current) setReadiness(r);
+          });
+        }, children: readiness ? t2("handoffRecheck") : t2("handoffCheck") })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { disabled: busy || !versionId, onClick: () => {
-        void run(async () => {
-          const r = await api.readiness(project2.id, versionId);
-          if (active.current) setReadiness(r);
-        });
-      }, children: t2("handoffCheck") }),
       readiness && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: readiness.ready ? t2("handoffReady") : t2("handoffReviewOnly") }),
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("ul", { children: [...readiness.blockers, ...readiness.warnings].map((i, index) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("li", { children: blockerText(i.code, i.id, t2) }, `${i.code}-${i.id}-${index}`)) })
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("ul", { children: [
+          readiness.blockers.map((i, index) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("li", { className: "cs-blocker", children: [
+            blockerText(i.code, i.id, t2),
+            BLOCKER_STAGE[i.code] && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("em", { className: "cs-hint", children: [
+              " ",
+              (() => {
+                const key = BLOCKER_STAGE[i.code];
+                return key ? t2("blockerAtStage").replace("{stage}", t2(key)) : "";
+              })()
+            ] })
+          ] }, `b-${i.code}-${i.id}-${index}`)),
+          readiness.warnings.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("li", { className: "cs-warn-item", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: t2("handoffWarnHeading") }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("ul", { children: readiness.warnings.map((i, index) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("li", { className: "cs-warn", children: [
+              blockerText(i.code, i.id, t2),
+              BLOCKER_STAGE[i.code] && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("em", { className: "cs-hint", children: [
+                " ",
+                (() => {
+                  const key = BLOCKER_STAGE[i.code];
+                  return key ? t2("blockerAtStage").replace("{stage}", t2(key)) : "";
+                })()
+              ] })
+            ] }, `w-${i.code}-${i.id}-${index}`)) })
+          ] })
+        ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { disabled: busy || !versionId, onClick: () => {
+      project2.versions.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("button", { disabled: busy || !versionId, onClick: () => {
         void run(download);
       }, children: busy ? t2("handoffWorking") : t2("handoffDownload") }),
       info && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
@@ -15464,6 +15498,35 @@ ${preset || t2("defaultAgent")}`)) return;
     }
   }
 
+  // ../src/client/dirty.ts
+  var guards = /* @__PURE__ */ new Set();
+  var unloadInstalled = false;
+  function registerDirtyGuard(guard) {
+    guards.add(guard);
+    installUnloadListener();
+    return () => {
+      guards.delete(guard);
+    };
+  }
+  function installUnloadListener() {
+    if (unloadInstalled || typeof window === "undefined") return;
+    unloadInstalled = true;
+    window.addEventListener("beforeunload", (event) => {
+      if (!hasUnsavedEdits()) return;
+      event.preventDefault();
+      event.returnValue = "";
+    });
+  }
+  function hasUnsavedEdits() {
+    for (const guard of guards) {
+      try {
+        if (guard()) return true;
+      } catch {
+      }
+    }
+    return false;
+  }
+
   // ../src/client/workbench.tsx
   var import_jsx_runtime7 = __toESM(require_jsx_runtime());
   function Workbench({ projectId, stages, demo: demo2, t: t2 }) {
@@ -15475,10 +15538,35 @@ ${preset || t2("defaultAgent")}`)) return;
         return parseLayout(null);
       }
     });
-    const [stage, setStage] = React6.useState(stages[0]?.id ?? "");
+    const stageKey = `creative-studio-stage:${projectId}`;
+    const [stage, setStage] = React6.useState(() => {
+      try {
+        const saved = localStorage.getItem(stageKey);
+        return stages.some((s) => s.id === saved) ? String(saved) : stages[0]?.id ?? "";
+      } catch {
+        return stages[0]?.id ?? "";
+      }
+    });
     const [focus, setFocus] = React6.useState(false);
     const grid = React6.useRef(null);
+    const shell = React6.useRef(null);
+    const [narrow, setNarrow] = React6.useState(false);
+    React6.useEffect(() => {
+      const el = shell.current;
+      if (!el) return;
+      const observer = new ResizeObserver(() => setNarrow(el.clientWidth < 1080));
+      observer.observe(el);
+      setNarrow(el.clientWidth < 1080);
+      return () => observer.disconnect();
+    }, []);
     const split = layout.split;
+    const goStage = (id3) => {
+      setStage(id3);
+      try {
+        localStorage.setItem(stageKey, id3);
+      } catch {
+      }
+    };
     const change = (next) => {
       setLayout(next);
       try {
@@ -15495,6 +15583,8 @@ ${preset || t2("defaultAgent")}`)) return;
     const compare = layout.compare;
     const showRequirementPane = compare && Boolean(requirementStage);
     const showStagePane = !compare || active.id !== "requirements";
+    const singlePane = !(showRequirementPane && showStagePane);
+    const paneClass = `cs-pane cs-pane-scroll${singlePane ? " cs-pane-single" : ""}`;
     const scrollTo = (id3) => {
       const el = document.getElementById("cs-block-" + id3);
       if (!el) return;
@@ -15505,42 +15595,46 @@ ${preset || t2("defaultAgent")}`)) return;
       withNav && list.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("nav", { className: "cs-block-nav", "aria-label": t2("blocksNav"), children: [
         /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("span", { className: "cs-block-nav-label", children: [
           t2("blocksNav"),
-          "\uFF1A"
+          t2("labelSep")
         ] }),
         list.map((block) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", className: "cs-quiet", onClick: () => scrollTo(block.id), children: block.label }, block.id))
       ] }),
       list.map((block) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("section", { id: withNav ? `cs-block-${block.id}` : void 0, className: "cs-block", "aria-label": block.label, children: block.content }, block.id))
     ] });
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("section", { className: "cs-workbench", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("ol", { className: "cs-steps", "aria-label": t2("stages"), children: stages.map((item, index) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("button", { type: "button", "aria-current": active.id === item.id ? "step" : void 0, onClick: () => setStage(item.id), children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("section", { className: "cs-workbench", ref: shell, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("ol", { className: "cs-steps", "aria-label": t2("stages"), children: stages.map((item, index) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("button", { type: "button", "aria-current": active.id === item.id ? "step" : void 0, onClick: () => {
+        if (item.id !== stage && hasUnsavedEdits() && !window.confirm(t2("discardStageEdit"))) return;
+        goStage(item.id);
+      }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "cs-step-index", "aria-hidden": "true", children: index + 1 }),
         item.label,
         item.badge && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("small", { className: "cs-step-badge", children: item.badge })
       ] }) }, item.id)) }),
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "cs-toolbar", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", title: t2("layoutExploreHint"), "aria-pressed": !compare, onClick: () => change({ ...layout, compare: false }), children: t2("layoutExplore") }),
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", title: t2("layoutCompareHint"), "aria-pressed": compare, onClick: () => change({ ...layout, compare: true }), children: t2("layoutCompare") }),
-        !compare && !focus && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("label", { className: "cs-inline-field", title: t2("layoutWidthHint"), children: [
+        !narrow && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", title: t2("layoutExploreHint"), "aria-pressed": !compare, onClick: () => change({ ...layout, compare: false }), children: t2("layoutExplore") }),
+        !narrow && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", title: t2("layoutCompareHint"), "aria-pressed": compare, onClick: () => change({ ...layout, compare: true }), children: t2("layoutCompare") }),
+        !narrow && !compare && !focus && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("label", { className: "cs-inline-field", title: t2("layoutWidthHint"), children: [
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { children: t2("layoutWidth") }),
           /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("input", { type: "range", min: "30", max: "70", value: split, onChange: (e) => change({ ...layout, split: Number(e.target.value) }) })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", title: t2("layoutFocusHint"), "aria-pressed": focus, onClick: () => setFocus(!focus), children: t2("layoutFocus") })
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("button", { type: "button", title: t2("layoutFocusHint"), "aria-pressed": focus, onClick: () => setFocus(!focus), children: t2("layoutFocus") }),
+        narrow && !focus && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "cs-hint cs-narrow-hint", children: t2("layoutNarrowHint") })
       ] }),
       !compare && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { className: "cs-hint cs-stage-hint", children: active.hint }),
       /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { ref: grid, className: "cs-grid", style: { gridTemplateColumns: focus || compare ? "minmax(0,1fr)" : `minmax(0,${split}fr) 24px minmax(0,${100 - split}fr)`, gap: 12, marginTop: 12, alignItems: "start" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "cs-stage-body", style: { display: "grid", gridTemplateRows: compare && !focus ? "auto auto" : "auto", gap: 12, minWidth: 0 }, children: [
-          showRequirementPane && requirementStage && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("section", { className: "cs-pane cs-pane-scroll", style: { gridRow: 1 }, "aria-label": requirementStage.label, children: [
-            compare && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { className: "cs-pane-label", children: t2("paneCompareReference") }),
-            blocks(requirementStage.blocks)
-          ] }),
-          showStagePane && (!compare ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { style: { gridRow: 1, minWidth: 0 }, children: blocks(active.blocks, true) }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("section", { className: "cs-pane cs-pane-scroll", style: { gridRow: 2 }, "aria-label": active.label, children: [
+          showStagePane && (!compare ? /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { style: { gridRow: 1, minWidth: 0 }, children: blocks(active.blocks, true) }) : /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("section", { className: paneClass, style: { gridRow: 1 }, "aria-label": active.label, children: [
             compare && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("p", { className: "cs-pane-label", children: [
               t2("paneCurrent"),
-              "\uFF1A",
+              t2("labelSep"),
               active.label
             ] }),
             blocks(active.blocks)
-          ] }))
+          ] })),
+          showRequirementPane && requirementStage && /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("section", { className: paneClass, style: { gridRow: 2 }, "aria-label": requirementStage.label, children: [
+            compare && active.id !== "requirements" && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { className: "cs-pane-label", children: t2("paneCompareReference") }),
+            blocks(requirementStage.blocks)
+          ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
           "div",
@@ -30500,7 +30594,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   function ReferencesPanel({ project: project2, busy, t: t2, save }) {
     const empty = () => ({ id: newId(), name: "", location: "", notes: "", license: "unknown", sourceKind: "url", origin: "manual" });
     const [draft, setDraft] = React9.useState(empty);
-    const [editing, setEditing] = React9.useState(false);
+    const [editing, setEditing] = React9.useState(() => project2.references.length === 0);
     const existing = project2.references.find((r) => r.id === draft.id);
     const dirty = editing && (existing ? JSON.stringify(existing) !== JSON.stringify(draft) : Boolean(draft.name || draft.location || draft.notes || draft.license !== "unknown"));
     const choose = (next) => {
@@ -30698,9 +30792,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           " ",
           t2("jobReplyTruncated")
         ] })
-      ] }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: loading ? t2("jobReplyLoading") : active && !(reply && !reply.running) ? t2("jobReplyWaiting") : `${t2("jobReplyEmpty")}${reply ? `\uFF08${t2("jobReplyRecords")} ${reply.records ?? 0}\uFF09` : ""}` }),
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: loading ? t2("jobReplyLoading") : active && !(reply && !reply.running) ? t2("jobReplyWaiting") : reply && (reply.records ?? 0) === 0 ? t2("jobReplyNoRecords") : t2("jobReplyEmpty") }),
       reply && (reply.text || reply.running) && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: reply.running ? t2("jobReplyRunning") : t2("jobReplyEnded") }),
-      reply && !reply.text && !reply.running && (reply.records ?? 0) === 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: t2("jobReplyNoRecords") }),
       canEnd && !reply?.running && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "cs-row-actions", children: [
         /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { type: "button", className: "cs-quiet", disabled: loading, onClick: endAttempt, children: t2("jobReplyEndAttempt") }),
         /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("small", { className: "cs-hint", children: t2("jobReplyEndHint") })
@@ -30777,7 +30870,15 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           if (window.confirm(t2("researchSeedConfirm"))) setRequest(researchSeed(project2.researchJob));
         }, children: t2("researchSeed") }) }),
         /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("details", { className: "cs-advanced", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("summary", { children: t2("generateSettings") }),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("summary", { children: [
+            t2("generateSettings"),
+            (() => {
+              if (!model) return ` \xB7 ${t2("generateSettingsDefault")}`;
+              const effort = model.reasoningEffort ?? "";
+              const suffix = effort ? ` / ${t2(`effort${effort.slice(0, 1).toUpperCase()}${effort.slice(1)}`)}` : "";
+              return ` \xB7 ${model.model.split("/").pop()}${suffix}`;
+            })()
+          ] }),
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: t2("generateSettingsHint") }),
           /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("label", { children: [
             t2("workspaceId"),
@@ -30801,18 +30902,19 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ModelSelect, { value: model, onChange: setModel, disabled: busy || !!active, t: t2, load: listModels })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "cs-row-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { disabled: busy || !!active || !request.trim() || !workspace.trim(), children: t2("generateProposal") }),
-          !request.trim() && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("small", { className: "cs-hint", children: t2("ideaRequired") }),
-          !!request.trim() && !workspace.trim() && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("small", { className: "cs-hint", children: t2("workspaceRequired") }),
-          !!active && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("small", { className: "cs-hint", children: t2("ideaBlockedByActive") })
-        ] })
+        (() => {
+          const note = active ? job?.status === "unknown" ? t2("ideaBlockedByUnknown") : t2("ideaBlockedByActive") : !request.trim() ? t2("ideaRequired") : !workspace.trim() ? t2("workspaceRequired") : "";
+          return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
+            note && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint cs-submit-note", children: note }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "cs-row-actions", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { disabled: busy || !!active || !request.trim() || !workspace.trim(), children: t2("generateProposal") }) })
+          ] });
+        })()
       ] }),
       job && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { role: "status", className: "cs-job-status", children: [
         /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("p", { className: "cs-status", children: [
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-status-dot", "aria-hidden": "true" }),
           t2("jobProgress"),
-          "\uFF1A",
+          t2("labelSep"),
           t2("job_" + job.status)
         ] }),
         job.status === "unknown" && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "cs-hint", children: t2("unknownJob") }),
@@ -30820,13 +30922,13 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("summary", { children: t2("techDetails") }),
           /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("small", { children: [
             t2("sessionId"),
-            "\uFF1A",
+            t2("labelSep"),
             job.sessionId
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("br", {}),
           /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("small", { children: [
             t2("jobIdLabel"),
-            "\uFF1A",
+            t2("labelSep"),
             job.id
           ] })
         ] })
@@ -31324,6 +31426,9 @@ ${r.featureIdeas.join("\n")}` });
 
   // ../src/client/approval.tsx
   var import_jsx_runtime13 = __toESM(require_jsx_runtime());
+  function countUnit(t2, n, one, many) {
+    return `${n}${t2(n === 1 ? one : many)}`;
+  }
   function ApprovalForm({ project: project2, busy, approve, t: t2 }) {
     const [base, setBase] = React11.useState(project2.versions.at(-1)?.id ?? "");
     const [partial2, setPartial] = React11.useState(false);
@@ -31381,6 +31486,18 @@ ${r.featureIdeas.join("\n")}` });
         } }),
         t2("partialApproval")
       ] }),
+      partial2 && /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: "cs-toolbar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { type: "button", onClick: () => {
+          setFields(Object.fromEntries(changes.map((c) => [`${c.collection}:${c.id}`, [...c.fields]])));
+          setSelected(changes.map((c) => `${c.collection}:${c.id}`));
+          setAck(false);
+        }, children: t2("approvalSelectAll") }),
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { type: "button", onClick: () => {
+          setFields({});
+          setSelected([]);
+          setAck(false);
+        }, children: t2("approvalSelectNone") })
+      ] }),
       partial2 && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("ul", { children: changes.map((c) => {
         const key = `${c.collection}:${c.id}`;
         const picked = fields[key] ?? [];
@@ -31426,7 +31543,7 @@ ${r.featureIdeas.join("\n")}` });
           /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "cs-hint", children: t2("approvalCoverageNotice") }),
           /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("p", { className: "cs-hint", children: [
             t2("demoMapped"),
-            "\uFF1A",
+            t2("labelSep"),
             preview2.approval.mappedRequirementIds.length ? preview2.approval.mappedRequirementIds.map((id3) => requirementName(id3)).join("\u3001") : "\u2014"
           ] })
         ] }),
@@ -31463,7 +31580,8 @@ ${r.featureIdeas.join("\n")}` });
         t2("versionLabel"),
         /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("input", { "aria-label": t2("versionLabel"), value: label, onChange: (e) => setLabel(e.target.value), placeholder: t2("versionLabel") })
       ] }),
-      preview2 && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "cs-hint", children: project2.nodes.length === 0 ? t2("approvalNothingToFreeze") : `${t2("approvalWillFreeze")}${project2.nodes.length}${t2("approvalReqUnit")}\u3001${project2.architecture.length}${t2("approvalArchUnit")}${base && changes.length > 0 ? `\uFF0C${t2("approvalBaselineChanges")}${changes.length}${t2("approvalChangesUnit")}` : ""}` }),
+      !label.trim() && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "cs-hint", children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { type: "button", disabled: busy, onClick: () => setLabel(`v${project2.versions.length + 1}`), children: t2("versionLabelSuggest").replace("{name}", `v${project2.versions.length + 1}`) }) }),
+      preview2 && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "cs-hint", children: project2.nodes.length === 0 ? t2("approvalNothingToFreeze") : `${t2("approvalWillFreeze")}${countUnit(t2, project2.nodes.length, "approvalReqUnitOne", "approvalReqUnitMany")}${t2("listJoin")}${countUnit(t2, project2.architecture.length, "approvalArchUnitOne", "approvalArchUnitMany")}${base && changes.length > 0 ? `${t2("listJoin")}${t2("approvalBaselineChanges")}${countUnit(t2, changes.length, "approvalChangeOne", "approvalChangeMany")}` : ""}` }),
       !label.trim() && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "cs-hint", children: t2("approvalNeedLabel") }),
       /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("button", { disabled: !ready || !label.trim(), children: t2("approveVersion") })
     ] }) });
@@ -31526,6 +31644,9 @@ ${r.featureIdeas.join("\n")}` });
 
   // ../src/client/versions.tsx
   var import_jsx_runtime15 = __toESM(require_jsx_runtime());
+  function countUnit2(t2, n, one, many) {
+    return `${n}${t2(n === 1 ? one : many)}`;
+  }
   function VersionPanel({ project: project2, busy, approve, t: t2, confirmTasks }) {
     const [base, setBase] = React12.useState(project2.versions.at(-1)?.id ?? "");
     const [target, setTarget] = React12.useState("draft");
@@ -31545,11 +31666,9 @@ ${r.featureIdeas.join("\n")}` });
           formatWhen(v.createdAt)
         ] }),
         " \xB7 ",
-        v.nodes.length,
-        t2("approvalReqUnit"),
+        countUnit2(t2, v.nodes.length, "approvalReqUnitOne", "approvalReqUnitMany"),
         " / ",
-        v.architecture.length,
-        t2("approvalArchUnit"),
+        countUnit2(t2, v.architecture.length, "approvalArchUnitOne", "approvalArchUnitMany"),
         /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(ApprovalReceipt, { record: v.approval, t: t2 }),
         /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("details", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("summary", { children: t2("taskPlanReview") }),
@@ -31584,18 +31703,20 @@ ${r.featureIdeas.join("\n")}` });
           }, children: v.taskPlanConfirmed ? t2("tasksConfirmed") : t2("confirmTasks") })
         ] })
       ] }, v.id)) }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
-        t2("compareFrom"),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: base, onChange: (e) => setBase(e.target.value), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "", children: t2("selectVersion") }),
-          options
-        ] })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
-        t2("compareTo"),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: target, onChange: (e) => setTarget(e.target.value), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "draft", children: t2("currentDraft") }),
-          options
+      project2.versions.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(import_jsx_runtime15.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
+          t2("compareFrom"),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: base, onChange: (e) => setBase(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "", children: t2("selectVersion") }),
+            options
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
+          t2("compareTo"),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: target, onChange: (e) => setTarget(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "draft", children: t2("currentDraft") }),
+            options
+          ] })
         ] })
       ] }),
       before && after && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(import_jsx_runtime15.Fragment, { children: [
@@ -31674,9 +31795,24 @@ ${r.featureIdeas.join("\n")}` });
       return () => ro.disconnect();
     }, []);
     const width = 1100, height = Math.max(160, rows * 108 + 60);
-    const scale = avail > 0 ? Math.min(1, Math.max(0.75, (avail - 2) / width)) : 1;
+    const scale = avail > 0 ? Math.min(1, Math.max(0.85, (avail - 2) / width)) : 1;
+    const limit = 440;
+    const fitRows = Math.max(1, Math.floor((limit / scale - 48 - 76 - 8) / 108) + 1);
+    const readRows = Math.min(rows, fitRows);
+    const maxHeight = Math.min(limit, Math.ceil((48 + (readRows - 1) * 108 + 76 + 8) * scale));
+    React13.useEffect(() => {
+      const el = box.current;
+      const p = positions.get(selected);
+      if (!el || !p) return;
+      if (!el.clientHeight) return;
+      const left = Math.max(0, p.x * scale - 20);
+      const top = Math.max(0, p.y * scale - 12);
+      const outX = left < el.scrollLeft || left + 230 > el.scrollLeft + el.clientWidth;
+      const outY = top < el.scrollTop || top + 80 > el.scrollTop + el.clientHeight;
+      if (outX || outY) el.scrollTo({ left, top, behavior: "smooth" });
+    }, [selected, scale]);
     return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { style: { marginBlock: 12 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { ref: box, style: { overflow: "auto", maxHeight: 440 }, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { style: { width: Math.ceil(width * scale), height: Math.ceil(height * scale) }, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("svg", { width, height, style: { display: "block", transform: `scale(${scale})`, transformOrigin: "top left" }, "aria-label": t2("architectureGraph"), role: "group", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { ref: box, style: { overflow: "auto", maxHeight }, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { style: { width: Math.ceil(width * scale), height: Math.ceil(height * scale) }, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("svg", { width, height, style: { display: "block", transform: `scale(${scale})`, transformOrigin: "top left" }, "aria-label": t2("architectureGraph"), role: "group", children: [
         /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("defs", { children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("marker", { id: marker, viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: "currentColor" }) }) }),
         kinds.map((kind, i) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("text", { x: 20 + i * 270, y: 24, fill: "currentColor", children: t2(`architecture_${kind}`) }, kind)),
         items.flatMap((n) => n.dependsOn.map((id3) => {
@@ -31691,13 +31827,13 @@ ${r.featureIdeas.join("\n")}` });
         })),
         items.map((n) => {
           const p = positions.get(n.id);
-          return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("foreignObject", { x: p.x, y: p.y, width: 228, height: 76, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("button", { disabled: busy, "aria-pressed": selected === n.id, onClick: () => select(n.id), style: { width: "100%", height: "100%", overflow: "hidden", textAlign: "left", padding: 12, borderRadius: 8, border: selected === n.id ? "2px solid var(--cs-accent)" : "1px solid var(--cs-border)", background: selected === n.id ? "var(--cs-soft)" : "var(--cs-surface)", color: "inherit" }, children: [
+          return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("foreignObject", { x: p.x, y: p.y, width: 228, height: 76, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("button", { disabled: busy, "aria-pressed": selected === n.id, title: n.body ? `${n.title} \u2014 ${n.body}` : n.title, onClick: () => select(n.id), style: { width: "100%", height: "100%", overflow: "hidden", textAlign: "left", padding: 12, borderRadius: 8, border: selected === n.id ? "2px solid var(--cs-accent)" : "1px solid var(--cs-border)", background: selected === n.id ? "var(--cs-soft)" : "var(--cs-surface)", color: "inherit" }, children: [
             n.title,
             /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("small", { style: { display: "block" }, children: n.kind === "contract" ? n.contract ? n.contract.notApplicable ? t2("contractNotApplicable") : n.contract.surface || t2("contractStructure") : t2("architectureBody") : n.kind === "task" && n.task ? `${n.task.outputs.length} ${t2("taskOutputs")} \xB7 ${n.task.acceptanceIds.length ? `${n.task.acceptanceIds.length} ${t2("taskAcceptShort")}` : t2("taskAcceptanceNone")}` : `${t2("linkedRequirements")}: ${n.requirementIds.length}` })
           ] }) }, n.id);
         })
       ] }) }) }),
-      width * scale > avail && avail > 0 && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("p", { className: "cs-hint", children: t2("archScrollHint") }),
+      (width * scale > avail && avail > 0 || height * scale > maxHeight) && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("p", { className: "cs-hint", children: t2("archScrollHint") }),
       /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("p", { children: t2("architectureGraphNote") })
     ] });
   }
@@ -31713,12 +31849,23 @@ ${r.featureIdeas.join("\n")}` });
         setSelected(id3);
       }
     };
+    React14.useEffect(() => registerDirtyGuard(() => dirty), [dirty]);
     const current = project2.architecture.find((item) => item.id === selected);
+    const lastRev = React14.useRef(project2.contentRevision);
+    const [savedRev, setSavedRev] = React14.useState(null);
+    React14.useEffect(() => {
+      if (project2.contentRevision === lastRev.current) return;
+      lastRev.current = project2.contentRevision;
+      setSavedRev(project2.contentRevision);
+      const timer = setTimeout(() => setSavedRev(null), 2600);
+      return () => clearTimeout(timer);
+    }, [project2.contentRevision]);
     return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("section", { "aria-label": t2("architecture"), children: [
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("h3", { children: t2("architecture") }),
       project2.architecture.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "cs-hint cs-empty-start", children: t2("architectureEmptyHint") }),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(ArchitectureMap, { items: project2.architecture, selected, busy, select: choose, t: t2 }),
       project2.architecture.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "cs-hint", children: t2("architecturePickHint") }),
+      savedRev !== null && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { role: "status", className: "cs-hint", children: t2("savedNotice").replace("{rev}", String(savedRev)) }),
       ["module", "contract", "decision", "task"].map((kind) => {
         const items = project2.architecture.filter((item) => item.kind === kind);
         if (!items.length && kind !== "module") return null;
@@ -31774,6 +31921,10 @@ ${r.featureIdeas.join("\n")}` });
     });
     const patchContract = (changes) => patch({ contract: { ...contract, ...changes } });
     const patchTask = (changes) => patch({ task: { ...task, ...changes } });
+    const [query, setQuery] = React14.useState("");
+    const match = (title) => query.trim() === "" || title.includes(query.trim());
+    const visibleNodes = project2.nodes.filter((node) => match(node.title));
+    const visibleOthers = project2.architecture.filter((other) => other.id !== id3 && match(other.title));
     const acceptance = project2.nodes.flatMap((node) => [
       ...node.desktopAcceptance.map((text, index) => ({ id: `${node.id}:desktop:${index + 1}`, text: `${node.title} \xB7 ${t2("desktop")} \xB7 ${text}` })),
       ...node.mobileAcceptance.map((text, index) => ({ id: `${node.id}:mobile:${index + 1}`, text: `${node.title} \xB7 ${t2("mobile")} \xB7 ${text}` }))
@@ -31851,15 +32002,26 @@ ${r.featureIdeas.join("\n")}` });
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("fieldset", { disabled: busy, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("legend", { children: t2("linkedRequirements") }),
-        project2.nodes.map((node) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("label", { style: { display: "block" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("legend", { children: [
+          t2("linkedRequirements"),
+          " \xB7 ",
+          t2("linkedCount").replace("{n}", String(item.requirementIds.length)).replace("{total}", String(project2.nodes.length))
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("input", { "aria-label": t2("filterLinks"), placeholder: t2("filterLinks"), value: query, onChange: (e) => setQuery(e.target.value), style: { marginBottom: 8 } }),
+        visibleNodes.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "cs-hint", children: t2("filterNoMatch") }),
+        visibleNodes.map((node) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("label", { style: { display: "block" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("input", { type: "checkbox", checked: item.requirementIds.includes(node.id), onChange: () => toggle("requirementIds", node.id) }),
           node.title
         ] }, node.id))
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("fieldset", { disabled: busy, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("legend", { children: t2("dependencies") }),
-        project2.architecture.filter((other) => other.id !== id3).map((other) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("label", { style: { display: "block" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("legend", { children: [
+          t2("dependencies"),
+          " \xB7 ",
+          t2("linkedCount").replace("{n}", String(item.dependsOn.length)).replace("{total}", String(project2.architecture.length - 1))
+        ] }),
+        visibleOthers.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "cs-hint", children: t2("filterNoMatch") }),
+        visibleOthers.map((other) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("label", { style: { display: "block" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("input", { type: "checkbox", checked: item.dependsOn.includes(other.id), onChange: () => toggle("dependsOn", other.id) }),
           other.title
         ] }, other.id))
@@ -31918,7 +32080,7 @@ ${r.featureIdeas.join("\n")}` });
   // ../src/client/mind-map.tsx
   var import_jsx_runtime18 = __toESM(require_jsx_runtime());
   var CARD_WIDTH = 220;
-  var CARD_HEIGHT = 48;
+  var CARD_HEIGHT = 56;
   var ROW_GAP = 72;
   var COLUMN_GAP = 248;
   var OFFSET = 20;
@@ -31954,6 +32116,7 @@ ${r.featureIdeas.join("\n")}` });
       const parentId = target.getAttribute("data-cs-parent") || null;
       if (canReparent(nodes2, drag.id, parentId) && window.confirm(t2("confirmNodeDrop"))) move(drag.id, parentId);
     };
+    const hasMixed = nodes2.some((n) => n.priority === "high") && nodes2.some((n) => n.priority !== "high");
     const positions = /* @__PURE__ */ new Map();
     let row = 0;
     const visit = (parent, depth) => {
@@ -31975,18 +32138,25 @@ ${r.featureIdeas.join("\n")}` });
       setAvail(el.clientWidth);
       return () => ro.disconnect();
     }, []);
-    const scale = avail > 0 ? Math.min(1, Math.max(0.75, (avail - 2) / width)) : 1;
+    const scale = avail > 0 ? Math.min(1, Math.max(0.85, (avail - 2) / width)) : 1;
+    const natural = Math.ceil(height * scale);
+    const maxHeight = Math.min(natural, 560);
+    const clipped = natural > maxHeight;
     React15.useEffect(() => {
       const el = box.current;
       if (!el || !selected) return;
       const p = positions.get(selected);
       if (!p) return;
-      el.scrollTo({ left: Math.max(0, p.x * scale - 40), top: Math.max(0, p.y * scale - 20), behavior: "smooth" });
+      if (!el.clientHeight) return;
+      const left = Math.max(0, p.x * scale - 40);
+      const top = Math.max(0, p.y * scale - 20);
+      const outX = left < el.scrollLeft || left + CARD_WIDTH * scale > el.scrollLeft + el.clientWidth;
+      const outY = top < el.scrollTop || top + CARD_HEIGHT * scale > el.scrollTop + el.clientHeight;
+      if (outX || outY) el.scrollTo({ left, top, behavior: "smooth" });
     }, [selected, scale]);
     return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { ref: root2, style: { minWidth: 0 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("p", { className: "cs-hint", children: t2("nodeDragHint") }),
       dragActive && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { role: "note", "data-cs-parent": "", style: { padding: 8, marginBottom: 12, border: "1px dashed var(--cs-accent)", borderRadius: 10, background: "var(--cs-soft)", fontSize: "var(--cs-text-sm)", lineHeight: "20px" }, children: t2("nodeDropRoot") }),
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { ref: box, style: { overflow: "auto", maxHeight: 560, border: "1px solid var(--cs-border)", borderRadius: 12 }, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { style: { width: Math.ceil(width * scale), height: Math.ceil(height * scale) }, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("svg", { width, height, style: { display: "block", transform: `scale(${scale})`, transformOrigin: "top left" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { ref: box, style: { overflow: "auto", maxHeight, border: "1px solid var(--cs-border)", borderRadius: 12, maskImage: clipped ? "linear-gradient(to bottom,#000 calc(100% - 28px),rgba(0,0,0,0.12))" : void 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { style: { width: Math.ceil(width * scale), height: Math.ceil(height * scale) }, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("svg", { width, height, style: { display: "block", transform: `scale(${scale})`, transformOrigin: "top left" }, children: [
         nodes2.map((node) => {
           const p = positions.get(node.id);
           const parent = node.parentId ? positions.get(node.parentId) : void 0;
@@ -31999,19 +32169,73 @@ ${r.featureIdeas.join("\n")}` });
           const active = selected === node.id;
           return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("g", { transform: `translate(${p.x},${p.y})`, children: [
             /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("rect", { width: CARD_WIDTH, height: CARD_HEIGHT, rx: 8, fill: active ? "var(--cs-soft)" : "var(--cs-surface)", stroke: active ? "var(--cs-accent)" : "var(--cs-border)", strokeWidth: active ? 2 : 1 }),
+            hasMixed && node.priority === "high" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("rect", { x: 1, y: 6, width: 3, height: CARD_HEIGHT - 12, rx: 1.5, fill: "var(--cs-accent)", children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("title", { children: t2("priorityHigh") }) }),
             /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("foreignObject", { width: CARD_WIDTH, height: CARD_HEIGHT, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { "data-cs-parent": node.id, style: { display: "flex", height: "100%", alignItems: "stretch" }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("button", { type: "button", className: "cs-quiet", disabled, "aria-label": `${t2("dragRequirement")} ${node.title}`, title: t2("dragRequirement"), onPointerDown: (e) => start(e, node.id), onPointerUp: finish, onPointerCancel: () => {
                 dragging.current = null;
               }, onLostPointerCapture: () => {
                 dragging.current = null;
               }, style: { flex: "0 0 24px", margin: 0, padding: 0, border: 0, minHeight: 0, background: "transparent", cursor: "grab", touchAction: "none", userSelect: "none", display: "grid", placeItems: "center", color: "var(--cs-muted)" }, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(GripIcon, {}) }),
-              /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("button", { type: "button", className: "cs-quiet", disabled, "aria-pressed": active, onClick: () => select(node.id), title: node.title, style: { flex: "1 1 auto", minWidth: 0, height: "100%", margin: 0, padding: "0 8px", border: 0, minHeight: 0, background: "transparent", color: "inherit", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "left", fontSize: "var(--cs-text-sm)", lineHeight: "20px" }, children: node.title })
+              /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("button", { type: "button", className: "cs-quiet", disabled, "aria-pressed": active, onClick: () => select(node.id), onDoubleClick: () => {
+                select(node.id);
+                requestAnimationFrame(() => {
+                  const el = document.querySelector("[data-cs-title-input]");
+                  if (el) {
+                    el.focus();
+                    el.select();
+                  }
+                });
+              }, title: node.title, style: { flex: "1 1 auto", minWidth: 0, height: "100%", margin: 0, padding: "0 8px", border: 0, minHeight: 0, background: "transparent", color: "inherit", overflow: "hidden", textAlign: "left", fontSize: "var(--cs-text-sm)", lineHeight: "18px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", whiteSpace: "normal", alignContent: "center" }, children: node.title })
             ] }) })
           ] }, node.id);
         })
       ] }) }) }),
-      height * scale > 560 && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("p", { className: "cs-hint", children: t2("canvasScrollHint") })
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("details", { className: "cs-help", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("summary", { children: t2("mapHelp") }),
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("p", { className: "cs-hint", children: t2("nodeDragHint") }),
+        clipped && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("p", { className: "cs-hint", children: t2("canvasScrollHint") }),
+        hasMixed && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("p", { className: "cs-hint", children: t2("priorityLegend") })
+      ] })
     ] });
+  }
+
+  // ../src/client/requirements-export.ts
+  var order = (node) => node.order ?? 0;
+  function childrenOf(nodes2, parentId) {
+    return nodes2.filter((node) => node.parentId === parentId).slice().sort((a, b) => order(a) - order(b) || a.title.localeCompare(b.title));
+  }
+  function orphanDetected(nodes2) {
+    const ids = new Set(nodes2.map((n) => n.id));
+    return nodes2.filter((n) => n.parentId !== null && !ids.has(n.parentId));
+  }
+  function linesFor(nodes2, children, depth, labels, byId) {
+    const lines = [];
+    for (const node of children) {
+      const marks = [];
+      if (node.priority === "high") marks.push(labels.priorityHigh);
+      if (node.priority === "low") marks.push(labels.priorityLow);
+      const indent = "  ".repeat(depth);
+      lines.push(`${indent}- **${node.title}**${marks.length ? ` _(${marks.join(", ")})_` : ""}`);
+      const detail = [];
+      if (node.description.trim()) detail.push(node.description.trim());
+      const acceptance = [...node.desktopAcceptance.map((a) => `${labels.desktop}: ${a}`), ...node.mobileAcceptance.map((a) => `${labels.mobile}: ${a}`)];
+      if (acceptance.length) detail.push(`${labels.acceptance} ${acceptance.join("; ")}`);
+      const depends = (node.dependsOn ?? []).map((id3) => byId.get(id3)?.title ?? id3).filter(Boolean);
+      if (depends.length) detail.push(`${labels.depends} ${depends.join(", ")}`);
+      for (const item of detail) lines.push(`${indent}  ${item}`);
+      lines.push(...linesFor(nodes2, childrenOf(nodes2, node.id), depth + 1, labels, byId));
+    }
+    return lines;
+  }
+  function requirementsMarkdown(name, nodes2, labels) {
+    if (!nodes2.length) return `${labels.empty}
+`;
+    const byId = new Map(nodes2.map((node) => [node.id, node]));
+    const lines = [`# ${name}`, `${labels.root}`, "", ...linesFor(nodes2, childrenOf(nodes2, null), 0, labels, byId)];
+    const orphans = orphanDetected(nodes2);
+    if (orphans.length) lines.push("", ...linesFor(nodes2, orphans, 0, labels, byId));
+    return `${lines.join("\n")}
+`;
   }
 
   // ../src/client/requirements.tsx
@@ -32020,6 +32244,24 @@ ${r.featureIdeas.join("\n")}` });
     const [selected, setSelected] = React16.useState(null);
     const node = project2.nodes.find((n) => n.id === selected);
     const siblings = node ? orderedChildren(project2.nodes, node.parentId) : [];
+    const descendantIds = /* @__PURE__ */ new Set();
+    if (node) {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const n of project2.nodes) {
+          const p = n.parentId;
+          if (!p) continue;
+          if (p === node.id || descendantIds.has(p)) {
+            if (!descendantIds.has(n.id)) {
+              descendantIds.add(n.id);
+              changed = true;
+            }
+          }
+        }
+      }
+    }
+    const parentOptions = project2.nodes.filter((n) => n.id !== node?.id && !descendantIds.has(n.id));
     const position = siblings.findIndex((n) => n.id === selected);
     React16.useEffect(() => {
       onSelect?.(node?.id ?? null);
@@ -32032,6 +32274,15 @@ ${r.featureIdeas.join("\n")}` });
     React16.useEffect(() => {
       setEditor((current) => refreshEditor(current, node?.id ?? null, snapshot()));
     }, [node]);
+    const depthOf = (id3) => {
+      let d = 0;
+      let cur = project2.nodes.find((n) => n.id === id3);
+      while (cur && cur.parentId) {
+        d += 1;
+        cur = project2.nodes.find((n) => n.id === cur.parentId);
+      }
+      return d;
+    };
     const subtreeCount = (id3) => {
       const seen = /* @__PURE__ */ new Set([id3]);
       let grew = true;
@@ -32052,7 +32303,17 @@ ${r.featureIdeas.join("\n")}` });
       if (kids === 0) return t2("confirmRemove");
       return t2("confirmRemoveBranch").replace("{title}", node.title).replace("{children}", String(kids)).replace("{total}", String(kids + 1));
     };
+    const lastRev = React16.useRef(project2.contentRevision);
+    const [savedRev, setSavedRev] = React16.useState(null);
+    React16.useEffect(() => {
+      if (project2.contentRevision === lastRev.current) return;
+      lastRev.current = project2.contentRevision;
+      setSavedRev(project2.contentRevision);
+      const timer = setTimeout(() => setSavedRev(null), 2600);
+      return () => clearTimeout(timer);
+    }, [project2.contentRevision]);
     const [view, setView] = React16.useState("canvas");
+    const [search, setSearch] = React16.useState("");
     const [dependencyState, setDependencyState] = React16.useState({ id: null, ids: [] });
     const dependencyDraft = dependencyState.id === (node?.id ?? null) ? dependencyState.ids : node?.dependsOn ?? [];
     const setDependencyDraft = (ids) => setDependencyState({ id: node?.id ?? null, ids });
@@ -32075,6 +32336,14 @@ ${r.featureIdeas.join("\n")}` });
         setSelected(id3);
       }
     };
+    const addNode = (parentId) => {
+      const dirty = editorDirty(editor) || dependenciesChanged || priorityChanged;
+      if (dirty && !window.confirm(t2("discardEdits"))) return;
+      const id3 = newId();
+      setDependencyState({ id: null, ids: [] });
+      setSelected(id3);
+      save({ kind: "add", node: { id: id3, parentId, title: t2("newRequirement"), kind: "feature", description: "", priority: "normal", dependsOn: [], desktopAcceptance: [], mobileAcceptance: [] } });
+    };
     const rows = [];
     const visit = (parent, depth, prefix) => {
       let index = 0;
@@ -32086,24 +32355,89 @@ ${r.featureIdeas.join("\n")}` });
       }
     };
     visit(null, 0, "");
+    const needle = search.trim();
+    const keep = /* @__PURE__ */ new Set();
+    if (needle) {
+      const byId = new Map(project2.nodes.map((n) => [n.id, n]));
+      for (const node2 of project2.nodes) {
+        if (!node2.title.includes(needle)) continue;
+        let cursor = node2;
+        while (cursor) {
+          keep.add(cursor.id);
+          const parent = cursor.parentId;
+          cursor = parent ? byId.get(parent) : void 0;
+        }
+      }
+    }
+    const visibleRows = needle ? rows.filter((row) => keep.has(row.id)) : rows;
+    const matchCount = needle ? project2.nodes.filter((n) => n.title.includes(needle)).length : 0;
     const lines = (text) => text.split("\n").map((s) => s.trim()).filter(Boolean);
-    return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("section", { className: `cs-editor ${view === "canvas" ? "cs-editor-canvas" : "cs-editor-outline"}`, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("style", { children: `.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start;margin-top:16px}@container (min-width:820px){.creative-studio-root .cs-editor-canvas{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.creative-studio-root .cs-editor-outline{grid-template-columns:minmax(240px,1fr) minmax(260px,1fr)}}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}.creative-studio-root .cs-segmented{display:flex;gap:4px;margin-left:auto}.creative-studio-root .cs-outline-no{display:inline-block;min-width:32px;text-align:right;margin-right:8px;color:var(--cs-muted);font-size:var(--cs-text-xs);font-variant-numeric:tabular-nums}.creative-studio-root .cs-inspector-title{margin:0 0 8px}@media(max-width:1024px){.creative-studio-root .cs-editor{grid-template-columns:minmax(0,1fr)}}` }),
+    const unsavedDraft = React16.useRef(false);
+    unsavedDraft.current = Boolean(node) && (editorDirty(editor) || dependenciesChanged || priorityChanged);
+    React16.useEffect(() => registerDirtyGuard(() => unsavedDraft.current), []);
+    return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("section", { className: `cs-editor ${node ? view === "canvas" ? "cs-editor-canvas" : "cs-editor-outline" : ""}`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("style", { children: `.creative-studio-root .cs-editor{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start;margin-top:16px}@container (min-width:820px){.creative-studio-root .cs-editor-canvas{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}.creative-studio-root .cs-editor-outline{grid-template-columns:minmax(240px,1fr) minmax(260px,1fr)}}.creative-studio-root .cs-tree{overflow:auto;max-height:540px}.creative-studio-root .cs-tree button[aria-pressed=true]{border-color:var(--cs-accent);background:var(--cs-soft)}.creative-studio-root .cs-segmented{display:flex;gap:4px;margin-left:auto}.creative-studio-root .cs-outline-no{display:inline-block;min-width:32px;text-align:right;margin-right:8px;color:var(--cs-muted);font-size:var(--cs-text-xs);font-variant-numeric:tabular-nums}.creative-studio-root .cs-inspector-title{margin:0 0 8px}.creative-studio-root .cs-tree-search{width:100%;margin-bottom:8px}@media(max-width:1024px){.creative-studio-root .cs-editor{grid-template-columns:minmax(0,1fr)}}` }),
       /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-canvas-column", children: [
         project2.nodes.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-empty-start", children: t2("requirementsEmptyHint") }),
         /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-toolbar", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", className: "cs-primary", disabled: busy, onClick: () => save({ kind: "add", node: { id: newId(), parentId: selected, title: t2("newRequirement"), kind: "feature", description: "", priority: "normal", dependsOn: [], desktopAcceptance: [], mobileAcceptance: [] } }), children: selected ? t2("addChild") : t2("addRoot") }),
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", disabled: busy, title: t2("selectRootHint"), onClick: () => choose(null), children: selected ? t2("clearSelection") : t2("selectRoot") }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", className: "cs-primary", disabled: busy, onClick: () => addNode(selected), children: selected ? t2("addChild") : t2("addRoot") }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", disabled: busy || !selected, title: selected ? t2("selectRootHint") : t2("selectNode"), onClick: () => choose(null), children: selected ? t2("clearSelection") : t2("selectRoot") }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", title: t2("exportMarkdown"), onClick: () => {
+            const text = requirementsMarkdown(project2.name, project2.nodes, { root: t2("exportRootLabel"), priorityHigh: t2("exportPriorityHigh"), priorityLow: t2("exportPriorityLow"), acceptance: t2("exportAcceptance"), depends: t2("exportDepends"), desktop: t2("exportDesktop"), mobile: t2("exportMobile"), empty: t2("exportEmpty") });
+            const url2 = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
+            const a = document.createElement("a");
+            a.href = url2;
+            a.download = `${project2.name.replace(/[^\w\u4e00-\u9fa5-]+/g, "-")}-requirements.md`;
+            a.style.display = "none";
+            document.body.append(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url2), 1e3);
+          }, children: t2("exportMarkdown") }),
           /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-segmented", role: "group", "aria-label": t2("requirementView"), children: [
             /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", "aria-pressed": view === "canvas", onClick: () => setView("canvas"), children: t2("canvasView") }),
             /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", "aria-pressed": view === "outline", onClick: () => setView("outline"), children: t2("outlineView") })
           ] })
         ] }),
-        view === "canvas" ? /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(MindMap, { t: t2, move: (id3, parentId) => save({ kind: "move", id: id3, parentId }), nodes: project2.nodes, selected, select: choose, disabled: busy }) : /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "cs-tree", "aria-label": t2("requirements"), children: rows.map((row) => /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { style: { paddingLeft: row.depth * 24 }, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("button", { type: "button", disabled: busy, "aria-pressed": selected === row.id, onClick: () => choose(row.id), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "cs-outline-no", "aria-hidden": "true", children: row.label }),
-          project2.nodes.find((n) => n.id === row.id)?.title
-        ] }) }, row.id)) }),
-        view === "outline" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2("outlineHint") })
+        view === "canvas" ? project2.nodes.length === 0 ? null : /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-canvas-search", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("input", { className: "cs-tree-search", "aria-label": t2("filterRequirements"), placeholder: t2("filterRequirements"), value: search, onChange: (e) => setSearch(e.target.value) }),
+          needle && matchCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(import_jsx_runtime19.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2(matchCount === 1 ? "canvasMatchOne" : "canvasMatches").replace("{n}", String(matchCount)) }),
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "cs-search-results", children: project2.nodes.filter((n) => n.title.includes(needle)).slice(0, 6).map((n) => /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", disabled: busy, onMouseDown: (e) => e.preventDefault(), onClick: () => {
+              choose(n.id);
+              requestAnimationFrame(() => {
+                const card = document.querySelector(`[data-cs-parent="${n.id}"]`);
+                card?.scrollIntoView({ block: "center", behavior: "smooth" });
+              });
+            }, children: n.title }, n.id)) })
+          ] }),
+          needle && matchCount === 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2("filterNoMatch") }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(MindMap, { t: t2, move: (id3, parentId) => save({ kind: "move", id: id3, parentId }), nodes: project2.nodes, selected, select: choose, disabled: busy })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-tree", "aria-label": t2("requirements"), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("input", { className: "cs-tree-search", "aria-label": t2("filterRequirements"), placeholder: t2("filterRequirements"), value: search, onChange: (e) => setSearch(e.target.value) }),
+          needle && matchCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2("filterMatches").replace("{n}", String(matchCount)) }),
+          needle && visibleRows.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2("filterNoMatch") }),
+          visibleRows.map((row) => /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { style: { paddingLeft: row.depth * 24 }, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("button", { type: "button", disabled: busy, "aria-pressed": selected === row.id, onClick: () => choose(row.id), onDoubleClick: () => {
+            choose(row.id);
+            requestAnimationFrame(() => {
+              const el = document.querySelector("[data-cs-title-input]");
+              if (el) {
+                el.focus();
+                el.select();
+              }
+            });
+          }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "cs-outline-no", "aria-hidden": "true", children: row.label }),
+            project2.nodes.find((n) => n.id === row.id)?.title
+          ] }) }, row.id))
+        ] }),
+        view === "outline" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2("outlineHint") }),
+        (() => {
+          const missing = project2.nodes.filter((n) => n.desktopAcceptance.length === 0 || n.mobileAcceptance.length === 0);
+          if (!missing.length) return null;
+          return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2("acceptanceMissingHint").replace("{n}", String(missing.length)) });
+        })(),
+        !node && project2.nodes.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2("inspectorEmptyHint") })
       ] }),
       editor.conflicts.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("p", { role: "alert", children: [
         t2("editorConflict"),
@@ -32112,9 +32446,10 @@ ${r.featureIdeas.join("\n")}` });
           if (window.confirm(t2("discardEdits"))) setEditor(openEditor(node?.id ?? null, snapshot()));
         }, children: t2("editorReload") })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-inspector", children: [
+      node && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-inspector", children: [
         /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("h4", { className: "cs-inspector-title", children: t2("inspectorTitle") }),
-        node ? /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("fieldset", { disabled: busy || editor.conflicts.length > 0, style: { border: 0, padding: 0, minWidth: 0 }, children: [
+        savedRev !== null && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { role: "status", className: "cs-hint", children: t2("savedNotice").replace("{rev}", String(savedRev)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("fieldset", { disabled: busy || editor.conflicts.length > 0, style: { border: 0, padding: 0, minWidth: 0 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("legend", { className: "cs-visually-hidden", children: t2("nodeDetails") }),
           /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-toolbar", children: [
             /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", disabled: position <= 0, onClick: () => save({ kind: "reorder", id: node.id, beforeId: siblings[position - 1].id }), children: t2("moveEarlier") }),
@@ -32128,7 +32463,7 @@ ${r.featureIdeas.join("\n")}` });
           }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
               t2("nodeTitle"),
-              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("input", { value: title, onChange: (e) => setTitle(e.target.value) })
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("input", { "data-cs-title-input": true, value: title, onChange: (e) => setTitle(e.target.value) })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { disabled: !title.trim() || title.trim() === node.title, children: t2("rename") }),
             title.trim() !== node.title && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", role: "status", children: t2("renameDirty") })
@@ -32137,7 +32472,7 @@ ${r.featureIdeas.join("\n")}` });
             t2("parentNode"),
             /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("select", { "aria-label": t2("parentNode"), value: node.parentId ?? "", onChange: (e) => save({ kind: "move", id: node.id, parentId: e.target.value || null }), children: [
               /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("option", { value: "", children: t2("selectRoot") }),
-              project2.nodes.filter((n) => n.id !== node.id).map((n) => /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("option", { value: n.id, children: n.title }, n.id))
+              parentOptions.map((n) => /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("option", { value: n.id, children: `${"\u3000".repeat(depthOf(n.id))}${n.title}` }, n.id))
             ] })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("fieldset", { className: "cs-deps", style: { border: 0, padding: 0, minWidth: 0 }, children: [
@@ -32167,35 +32502,45 @@ ${r.featureIdeas.join("\n")}` });
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
               t2("desktopAcceptance"),
-              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("textarea", { "aria-label": t2("desktopAcceptance"), rows: 3, value: desktop, onChange: (e) => setDesktop(e.target.value) })
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("textarea", { "aria-label": t2("desktopAcceptance"), rows: 3, placeholder: t2("acceptanceExample"), value: desktop, onChange: (e) => setDesktop(e.target.value) })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
               t2("mobileAcceptance"),
-              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("textarea", { "aria-label": t2("mobileAcceptance"), rows: 3, value: mobile, onChange: (e) => setMobile(e.target.value) })
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("textarea", { "aria-label": t2("mobileAcceptance"), rows: 3, placeholder: t2("acceptanceExample"), value: mobile, onChange: (e) => setMobile(e.target.value) })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { disabled: busy, children: busy ? t2("working") : t2("saveDetails") }),
-            (priorityChanged || description !== node.description || lines(desktop).join("\n") !== node.desktopAcceptance.join("\n") || lines(mobile).join("\n") !== node.mobileAcceptance.join("\n")) && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", role: "status", children: t2("detailsDirty") })
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-save-bar", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { disabled: busy, children: busy ? t2("working") : t2("saveDetails") }),
+              (priorityChanged || description !== node.description || lines(desktop).join("\n") !== node.desktopAcceptance.join("\n") || lines(mobile).join("\n") !== node.mobileAcceptance.join("\n")) && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", role: "status", children: t2("detailsDirty") })
+            ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", onClick: () => {
-            if (window.confirm(removePrompt())) save({ kind: "remove", id: node.id });
-          }, children: t2("removeNode") })
-        ] }) : /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2("selectNode") })
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "cs-row-actions", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", className: "cs-danger", onClick: () => {
+              if (window.confirm(removePrompt())) save({ kind: "remove", id: node.id });
+            }, children: t2("removeNode") }),
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("p", { className: "cs-hint", children: t2("removeNodeHint") })
+          ] })
+        ] })
       ] })
     ] });
   }
 
   // ../src/client/projects.tsx
   var import_jsx_runtime20 = __toESM(require_jsx_runtime());
+  function countLabel(t2, n, one, many) {
+    return `${n}${t2(n === 1 ? one : many)}`;
+  }
   function ProjectWorkspace({ api, t: t2 }) {
     const [projects, setProjects] = React17.useState([]);
     const [project2, setProject] = React17.useState();
     const [name, setName] = React17.useState("");
+    const taken = name.trim() !== "" && projects.some((p) => p.name.trim() === name.trim());
     const [error51, setError] = React17.useState("");
     const [busy, setBusy] = React17.useState(false);
     const [editorEpoch, setEditorEpoch] = React17.useState(0);
     const [history, setHistory] = React17.useState();
     const historyCurrent = history && project2 && history.projectId === project2.id && history.revision === project2.contentRevision;
     const [selectedRequirement, setSelectedRequirement] = React17.useState(null);
+    const [renaming, setRenaming] = React17.useState(null);
     const errorText = (message) => {
       const rule = (pattern, key) => {
         const m = message.match(pattern);
@@ -32287,7 +32632,7 @@ ${r.featureIdeas.join("\n")}` });
           void run(() => api.adopt(project2, id3), true);
         } }, `proposals-${project2.id}`) }
       ] },
-      { id: "requirements", label: t2("stageRequirements"), hint: t2("stageHintRequirements"), badge: `${project2.nodes.length}${t2("badgeRequirements")}`, blocks: [
+      { id: "requirements", label: t2("stageRequirements"), hint: t2("stageHintRequirements"), badge: `${project2.nodes.length}${t2(project2.nodes.length === 1 ? "badgeRequirementsOne" : "badgeRequirements")}`, blocks: [
         { id: "requirements", label: t2("layoutRequirements"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(RequirementsEditor, { onSelect: setSelectedRequirement, project: project2, busy, t: t2, save: (change) => {
           void run(async () => {
             const next = await api.edit(project2, change);
@@ -32312,7 +32657,7 @@ ${r.featureIdeas.join("\n")}` });
         ] }) },
         { id: "research", label: t2("researchTitle"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(ResearchPanel, { evidence: api.evidence, project: project2, busy, t: t2, listWorkspaces: api.listWorkspaces, listModels: api.listModels, start: (referenceId, request, workspaceId, model) => void run(() => api.research(project2, referenceId, request, workspaceId, model)), refresh: () => void run(() => api.get(project2.id)) }) }
       ] },
-      { id: "architecture", label: t2("stageArchitecture"), hint: t2("stageHintArchitecture"), badge: `${project2.architecture.length}${t2("badgeArchitecture")}`, blocks: [
+      { id: "architecture", label: t2("stageArchitecture"), hint: t2("stageHintArchitecture"), badge: `${project2.architecture.length}${t2(project2.architecture.length === 1 ? "badgeArchitectureOne" : "badgeArchitecture")}`, blocks: [
         { id: "architecture", label: t2("layoutArchitecture"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(ArchitectureEditor, { project: project2, busy, t: t2, save: (change) => {
           void run(async () => {
             const next = await api.architecture(project2, change);
@@ -32333,7 +32678,7 @@ ${r.featureIdeas.join("\n")}` });
       ] },
       { id: "handoff", label: t2("stageHandoff"), hint: t2("stageHintHandoff"), badge: project2.reports.length ? `${project2.reports.length}${t2("badgeReports")}` : void 0, blocks: [
         { id: "handoff", label: t2("handoffTitle"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(HandoffPanel, { project: project2, api: api.handoff, dispatch: api.dispatch, onProject: (next) => setProject((current) => current?.id === next.id && next.projectRevision >= current.projectRevision ? next : current), t: t2 }, `handoff-${project2.id}`) },
-        { id: "reports", label: t2("reportsTitle"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(ReportsPanel, { project: project2, busy, t: t2, refresh: () => void run(() => api.get(project2.id)), accept: (id3, value2) => void run(() => api.acceptReport(project2, id3, value2)) }) }
+        ...project2.versions.length || project2.reports.length ? [{ id: "reports", label: t2("reportsTitle"), content: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(ReportsPanel, { project: project2, busy, t: t2, refresh: () => void run(() => api.get(project2.id)), accept: (id3, value2) => void run(() => api.acceptReport(project2, id3, value2)) }) }] : []
       ] }
     ] : [];
     if (!project2) return /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("section", { className: "cs-projects cs-chooser", "aria-label": t2("projects"), children: [
@@ -32347,9 +32692,10 @@ ${r.featureIdeas.join("\n")}` });
       }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "cs-field", children: [
           /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("label", { htmlFor: "cs-project-name", children: t2("projectName") }),
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("input", { id: "cs-project-name", "aria-label": t2("projectName"), placeholder: t2("projectName"), value: name, onChange: (e) => setName(e.target.value), disabled: busy })
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("input", { id: "cs-project-name", "aria-label": t2("projectName"), placeholder: t2("projectName"), value: name, onChange: (e) => setName(e.target.value), disabled: busy, "aria-invalid": taken || void 0, "aria-describedby": taken ? "cs-project-name-taken" : void 0 })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { disabled: busy || !name.trim(), type: "submit", children: busy ? t2("working") : t2("newProject") })
+        taken && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("p", { id: "cs-project-name-taken", className: "cs-hint", children: t2("projectNameTaken") }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { disabled: busy || !name.trim() || taken, type: "submit", children: busy ? t2("working") : t2("newProject") })
       ] }),
       error51 && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("p", { role: "alert", className: "cs-error", children: errorText(error51) }),
       /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("ol", { className: "cs-onboarding", "aria-label": t2("chooserSteps"), children: [
@@ -32369,10 +32715,8 @@ ${r.featureIdeas.join("\n")}` });
       /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("nav", { className: "cs-project-list", "aria-label": t2("projects"), children: projects.map((p) => /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("button", { type: "button", className: "cs-project-card", disabled: busy, onClick: () => void run(() => api.get(p.id)), children: [
         /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("strong", { children: p.name }),
         /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("small", { className: "cs-hint", children: [
-          t2("draftRevision"),
-          " ",
-          p.contentRevision,
-          typeof p.requirementCount === "number" ? ` \xB7 ${p.requirementCount} ${t2("chooserRequirements")} \xB7 ${p.architectureCount ?? 0} ${t2("chooserModules")}` : ""
+          p.contentRevision ? t2("revisionSummary").replace("{n}", String(p.contentRevision)) : t2("revisionSummaryNone"),
+          typeof p.requirementCount === "number" ? ` \xB7 ${countLabel(t2, p.requirementCount, "chooserRequirementOne", "chooserRequirements")} \xB7 ${countLabel(t2, p.architectureCount ?? 0, "chooserModuleOne", "chooserModules")}` : ""
         ] }),
         p.proposalStatus === "submitted" && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("small", { className: "cs-hint cs-card-flag", children: t2("chooserAwaitingModel") }),
         typeof p.requirementCount === "number" && !p.requirementCount && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("small", { className: "cs-hint", children: t2("chooserNextIdea") }),
@@ -32382,33 +32726,48 @@ ${r.featureIdeas.join("\n")}` });
     ] });
     return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("section", { className: "cs-projects", "aria-label": t2("projects"), children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("article", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "cs-project-head", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("h2", { className: "cs-project-title", children: project2.name }),
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("small", { className: "cs-hint", children: [
-          t2("draftRevision"),
-          " ",
-          project2.contentRevision
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("button", { type: "button", className: "cs-quiet cs-back", style: { gridColumn: "1 / -1", justifySelf: "start", margin: "0 0 4px", paddingLeft: 0 }, disabled: busy, onClick: () => {
+          if (window.confirm(hasUnsavedEdits() ? t2("discardProjectEdit") : t2("confirmProjectChange"))) {
+            setProject(void 0);
+            setHistory(void 0);
+            setSelectedRequirement(null);
+          }
+        }, children: [
+          "\u2190 ",
+          t2("allProjects")
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "cs-toolbar cs-history", role: "group", "aria-label": t2("requirementHistory"), title: `${t2("historyScope")}${!historyCurrent ? ` ${t2("historyUnavailable")}` : ""}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("h2", { className: "cs-project-title", children: project2.name }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("small", { className: "cs-hint", children: project2.contentRevision ? t2("revisionSummary").replace("{n}", String(project2.contentRevision)) : t2("revisionSummaryNone") }),
+        history?.past.length || history?.future.length ? /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "cs-toolbar cs-history", role: "group", "aria-label": t2("requirementHistory"), title: `${t2("historyScope")}${!historyCurrent ? ` ${t2("historyUnavailable")}` : ""}`, children: [
           /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", className: "cs-quiet", disabled: busy || !historyCurrent || !history?.past.length, onClick: () => restore("undo"), children: t2("undoRequirements") }),
           /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", className: "cs-quiet", disabled: busy || !historyCurrent || !history?.future.length, onClick: () => restore("redo"), children: t2("redoRequirements") })
-        ] }),
+        ] }) : null,
         /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("details", { className: "cs-advanced cs-project-menu", children: [
           /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("summary", { children: t2("projectSettings") }),
           /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "cs-row-actions", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", className: "cs-quiet", disabled: busy, onClick: () => {
-              if (window.confirm(t2("confirmProjectChange"))) {
-                setProject(void 0);
-                setHistory(void 0);
-                setSelectedRequirement(null);
-              }
-            }, children: t2("allProjects") }),
-            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", className: "cs-quiet", disabled: busy, onClick: () => {
-              const next = window.prompt(t2("renameProject"), project2.name);
-              if (next?.trim() && next.trim() !== project2.name) void run(() => api.rename(project2, next.trim()));
-            }, children: t2("renameProject") }),
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", className: "cs-quiet", disabled: busy, onClick: () => setRenaming(project2.name), children: t2("renameProject") }),
             /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", className: "cs-danger", disabled: busy, onClick: () => {
               void removeProject();
             }, children: t2("deleteProject") })
+          ] }),
+          renaming !== null && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("form", { className: "cs-rename", onSubmit: (e) => {
+            e.preventDefault();
+            const next = renaming.trim();
+            if (!next) {
+              setRenaming(null);
+              return;
+            }
+            if (next !== project2.name) void run(() => api.rename(project2, next));
+            setRenaming(null);
+          }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("label", { children: [
+              t2("renameProject"),
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("input", { "aria-label": t2("renameProject"), autoFocus: true, value: renaming, onChange: (e) => setRenaming(e.target.value), disabled: busy })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "cs-row-actions", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "submit", disabled: busy || !renaming.trim(), children: t2("saveDetails") }),
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", className: "cs-quiet", disabled: busy, onClick: () => setRenaming(null), children: t2("cancel") })
+            ] })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("p", { className: "cs-hint", children: t2("projectSettingsHint") })
         ] })
@@ -32587,7 +32946,8 @@ ${r.featureIdeas.join("\n")}` });
 .creative-studio-root .cs-advanced>:not(summary){margin-top:8px}
 .creative-studio-root .cs-demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.creative-studio-root .cs-demo-head h3{margin:0}
 .creative-studio-root .cs-demo-actions{display:flex;align-items:center;gap:8px}.creative-studio-root .cs-demo-controls{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:12px 0}.creative-studio-root .cs-stale{margin:8px 0;font-size:var(--cs-text-sm);line-height:20px}.creative-studio-root .cs-job-status{margin-top:12px}.creative-studio-root .cs-job-status .cs-status{display:flex;align-items:center;gap:8px;margin:0;font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted)}.creative-studio-root .cs-status-dot{width:8px;height:8px;border-radius:50%;background:var(--cs-muted);flex:none}
-.creative-studio-root .cs-id-list{max-height:200px;overflow:auto;margin-top:8px;padding-left:20px}
+.creative-studio-root .cs-help{margin-top:8px}.creative-studio-root .cs-help>summary{padding:4px 0;min-height:24px;cursor:pointer;font-size:var(--cs-text-sm);color:var(--cs-muted)}.creative-studio-root .cs-help>summary:hover{color:var(--cs-text)}
+.creative-studio-root .cs-canvas-search{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}.creative-studio-root .cs-search-results{display:flex;flex-wrap:wrap;gap:8px}.creative-studio-root .cs-search-results button{max-inline-size:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.creative-studio-root .cs-save-bar{position:sticky;bottom:-1px;z-index:1;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:8px 0;background-color:light-dark(#fbfbfc,#1b1b1e);border-top:1px solid var(--cs-border)}.creative-studio-root .cs-blocker{font-weight:600}.creative-studio-root .cs-warn-item>ul{margin:4px 0 0;padding-left:20px}.creative-studio-root .cs-warn{color:var(--cs-muted)}.creative-studio-root .cs-id-list{max-height:200px;overflow:auto;margin-top:8px;padding-left:20px}
 .creative-studio-root .cs-onboarding{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0 20px;padding:0;list-style:none}
 .creative-studio-root .cs-onboarding li{display:grid;gap:4px;padding:12px;border:1px solid var(--cs-border);border-radius:10px;background:var(--cs-surface)}
 .creative-studio-root .cs-onboarding strong{font-size:var(--cs-text-md);font-weight:600}
@@ -32597,6 +32957,7 @@ ${r.featureIdeas.join("\n")}` });
 .creative-studio-root .cs-card-flag{color:var(--cs-accent-text,var(--cs-muted));font-weight:500}
 .creative-studio-root .cs-id-list li{display:flex;gap:8px;align-items:baseline;padding:4px 0;font-size:var(--cs-text-sm)}
 .creative-studio-root .cs-id-list small{color:var(--cs-muted);font-size:var(--cs-text-xs)}
+.creative-studio-root .cs-rename{display:grid;gap:8px;margin:8px 0}
 .creative-studio-root .cs-project-menu{grid-column:2;grid-row:1/-1;align-self:start;border-top:none;padding-top:0;margin-top:0}
 .creative-studio-root .cs-table .cs-row-actions{margin-top:0}
 .creative-studio-root .cs-chip{display:inline-flex;flex-direction:column;align-items:flex-start;gap:0;text-align:left;padding:4px 8px;min-height:32px;margin:0 4px 4px 0;background:var(--cs-surface);border-color:var(--cs-border)}
@@ -32636,9 +32997,12 @@ ${r.featureIdeas.join("\n")}` });
 .creative-studio-root .cs-article-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0 0 8px}
 .creative-studio-root .cs-article-head h3{margin:0}
 .creative-studio-root .cs-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
+.creative-studio-root .cs-toolbar .cs-narrow-hint{flex:1 1 100%;max-width:none;margin:0}
+.creative-studio-root .cs-submit-note{margin:0 0 4px}
 .creative-studio-root .cs-stack{display:flex;flex-direction:column;gap:12px}
 .creative-studio-root .cs-workbench{margin-top:16px}
 .creative-studio-root .cs-grid{display:grid}
+.creative-studio-root .cs-workbench{container-type:inline-size}
 .creative-studio-root .cs-inline-field{display:inline-flex;align-items:center;gap:8px;margin:0;min-height:32px;color:var(--cs-muted)}
 .creative-studio-root .cs-tabs{display:flex;flex-wrap:wrap;gap:8px}
 .creative-studio-root .cs-coverage{margin:8px 0 12px;padding:8px 12px;border-radius:10px;background:var(--cs-surface)}.creative-studio-root .cs-coverage p{margin:0 0 4px}.creative-studio-root .cs-coverage p:last-child{margin-bottom:0}
@@ -32649,7 +33013,7 @@ ${r.featureIdeas.join("\n")}` });
 .creative-studio-root .cs-split::before{content:'';position:absolute;inset:0 6px;background:var(--cs-border);border-radius:8px}
 .creative-studio-root .cs-split:focus-visible{outline:2px solid var(--cs-accent);outline-offset:2px}
 .creative-studio-root .cs-demo-pane{min-width:0}
-.creative-studio-root .cs-steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 0 12px;padding:0}
+.creative-studio-root .cs-steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 0 12px;padding:0}.creative-studio-root .cs-steps{position:sticky;top:0;z-index:3;padding:8px 0;margin-bottom:4px;background-color:light-dark(#fbfbfc,#1b1b1e);box-shadow:0 1px 0 var(--cs-border)}
 .creative-studio-root .cs-steps button{display:inline-flex;align-items:center;gap:8px;min-height:32px;white-space:nowrap}
 .creative-studio-root .cs-steps button[aria-current='step']{border-color:var(--cs-accent);background:var(--cs-soft);font-weight:600}
 .creative-studio-root .cs-empty-start{margin:8px 0 0;padding:12px;max-width:64ch;border:1px dashed var(--cs-border);border-radius:10px;background:var(--cs-surface)}
@@ -32668,7 +33032,7 @@ ${r.featureIdeas.join("\n")}` });
 .creative-studio-root .cs-block{padding:12px 16px;border:1px solid var(--cs-border);border-radius:12px;background:var(--cs-surface);margin:0 0 12px}
 .creative-studio-root .cs-block:last-child{margin-bottom:0}
 .creative-studio-root .cs-block>h4{margin:0 0 8px}
-.creative-studio-root .cs-pane-scroll{max-height:40vh;overflow:auto}
+.creative-studio-root .cs-pane-scroll{max-height:none;overflow:visible}.creative-studio-root .cs-pane-single{max-height:none;overflow:visible}
 .creative-studio-root .cs-checks{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 12px}
 .creative-studio-root .cs-checks>label{display:inline-flex;align-items:center;gap:8px;margin:0;min-height:24px}
 .creative-studio-root .cs-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
@@ -32677,6 +33041,8 @@ ${r.featureIdeas.join("\n")}` });
 .creative-studio-root:has(.cs-projects article) .cs-welcome > :is(.cs-eyebrow,h1,.cs-lead,.cs-flow,.cs-empty){display:none}
 .creative-studio-root:has(.cs-projects article) .cs-header{padding-bottom:16px}
 @media(max-width:900px){.creative-studio-root .cs-grid{grid-template-columns:minmax(0,1fr)!important}.creative-studio-root .cs-split{display:none}.creative-studio-root .cs-demo-pane{position:static!important}.creative-studio-root .cs-inline-field{display:none}}
+/* Panel narrower than ~1080px: stack editor above the demo, the editor column would be too cramped for the maps. */
+@container (max-width:1080px){.creative-studio-root .cs-grid{grid-template-columns:minmax(0,1fr)!important}.creative-studio-root .cs-split{display:none}.creative-studio-root .cs-demo-pane{position:static!important}}
 @media(max-width:900px){.creative-studio-root{padding:20px 16px 16px}.creative-studio-root .cs-flow{grid-template-columns:repeat(3,1fr)}.creative-studio-root .cs-welcome{margin:32px 0 24px}}
 .creative-studio-root .cs-arch-kind{margin:12px 0 4px;font-size:13px;letter-spacing:.02em}
 @media(prefers-reduced-motion:reduce){.creative-studio-root *{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
@@ -32984,7 +33350,7 @@ ${r.featureIdeas.join("\n")}` });
     reportsTitle: "\u5B9E\u65BD\u62A5\u544A",
     reportsNotice: "\u62A5\u544A\u548C\u6D4B\u8BD5\u8BC1\u636E\u7531 Agent \u81EA\u62A5\uFF0C\u672A\u72EC\u7ACB\u9A8C\u8BC1\u3002\u4F1A\u8BDD\u7A7A\u95F2\u4E0D\u8868\u793A\u5B8C\u6210\uFF1B\u53EA\u6709\u4F60\u80FD\u786E\u8BA4\u9A8C\u6536\u3002",
     reportsRefresh: "\u5237\u65B0\u62A5\u544A",
-    reportsEmpty: "\u5C1A\u65E0\u5B9E\u65BD\u62A5\u544A\u3002",
+    reportsEmpty: "\u8FD8\u6CA1\u6709\u5B9E\u65BD\u62A5\u544A\u3002\u5148\u5728\u4E0A\u9762\u5BFC\u51FA\u4EA4\u63A5\u5305\u5E76\u6D3E\u53D1\u5F00\u53D1\u4F1A\u8BDD\uFF1BAgent \u7528\u62A5\u544A\u5DE5\u5177\u56DE\u62A5\u540E\uFF0C\u8FD9\u91CC\u4F1A\u51FA\u73B0\u6761\u76EE\uFF0C\u518D\u7531\u4F60\u786E\u8BA4\u9A8C\u6536\u3002",
     reportsAccepted: "\u7528\u6237\u5DF2\u9A8C\u6536",
     reportsPending: "\u5F85\u7528\u6237\u9A8C\u6536",
     reportsDetails: "\u6587\u4EF6\u3001\u9A8C\u6536\u9879\u4E0E\u6D4B\u8BD5\u8BC1\u636E",
@@ -32999,9 +33365,11 @@ ${r.featureIdeas.join("\n")}` });
     workspaceId: "Harness \u5DE5\u4F5C\u533A ID",
     workspaceEmpty: "\u6CA1\u6709\u627E\u5230\u53EF\u7528\u7684\u5DE5\u4F5C\u533A\u3002\u5148\u5728 DSH \u91CC\u521B\u5EFA\u6216\u6253\u5F00\u4E00\u4E2A\uFF0C\u518D\u70B9\u300C\u5237\u65B0\u300D\u3002",
     workspaceRequired: "\u8FD8\u5DEE\u4E00\u4E2A\u5DE5\u4F5C\u533A\uFF1A\u5C55\u5F00\u300C\u751F\u6210\u8BBE\u7F6E\u300D\u9009\u4E00\u4E2A\uFF0C\u5C31\u80FD\u5F00\u59CB\u3002",
-    ideaRequired: "\u5148\u5728\u4E0A\u9762\u5199\u4E00\u53E5\u4F60\u60F3\u89E3\u51B3\u7684\u95EE\u9898\uFF08\u4E00\u53E5\u4E5F\u884C\uFF09\uFF0C\u6309\u94AE\u624D\u80FD\u70B9\u3002",
+    ideaRequired: "\u5199\u4E00\u53E5\u8981\u89E3\u51B3\u7684\u95EE\u9898\uFF08\u4E00\u53E5\u4E5F\u884C\uFF09\uFF0C\u6309\u94AE\u5C31\u4F1A\u4EAE\u3002",
     ideaShortcutHint: "\u5199\u5B8C\u6309 Ctrl/\u2318 + Enter \u76F4\u63A5\u63D0\u4EA4\u3002",
-    ideaBlockedByActive: "\u8FD9\u4E00\u8F6E\u8FD8\u6CA1\u7ED3\u675F\uFF0C\u6682\u65F6\u4E0D\u80FD\u63D0\u4EA4\u65B0\u7684\u60F3\u6CD5\u3002\u53EF\u4EE5\u7B49\u5B83\u8FD4\u56DE\uFF0C\u6216\u70B9\u4E0B\u9762\u7684\u300C\u7ED3\u675F\u8FD9\u6B21\u63A8\u5BFC\u300D\u91CD\u65B0\u5F00\u59CB\u3002",
+    ideaBlockedByActive: "\u8FD9\u4E00\u8F6E\u8FD8\u5728\u8DD1\uFF1A\u7B49\u5B83\u8FD4\u56DE\uFF0C\u6216\u7528\u4E0B\u65B9\u7684\u300C\u7ED3\u675F\u8FD9\u6B21\u63A8\u5BFC\u300D\u91CD\u65B0\u5F00\u59CB\u3002",
+    labelSep: "\uFF1A",
+    ideaBlockedByUnknown: "\u4E0A\u4E00\u8F6E\u7ED3\u679C\u4E0D\u660E\uFF1A\u5148\u6309\u4E0B\u9762\u300C\u6280\u672F\u4FE1\u606F\u300D\u6838\u5BF9\u90A3\u4E2A\u4F1A\u8BDD\uFF0C\u6216\u8005\u70B9\u300C\u7ED3\u675F\u8FD9\u6B21\u63A8\u5BFC\u300D\u91CD\u65B0\u5F00\u59CB\u3002",
     allProjects: "\u5168\u90E8\u9879\u76EE",
     projectSettings: "\u9879\u76EE\u8BBE\u7F6E",
     projectSettingsHint: "\u91CD\u547D\u540D\u53EA\u6539\u6807\u9898\u3002\u5220\u9664\u9879\u76EE\u4F1A\u540C\u65F6\u6E05\u6389\u5B83\u7684\u7248\u672C\u3001\u4EA4\u63A5\u5305\u548C\u8BB0\u5F55\uFF0C\u4E0D\u80FD\u64A4\u9500\u3002",
@@ -33009,10 +33377,13 @@ ${r.featureIdeas.join("\n")}` });
     layoutCompareHint: "\u4E0A\u65B9\u7F16\u8F91\uFF0C\u4E0B\u65B9\u5E76\u6392\u5BF9\u7167 Demo \u4E0E\u5DEE\u5F02\u3002",
     layoutWidthHint: "\u62D6\u52A8\u8C03\u6574\u5DE6\u4FA7\u4E0E\u53F3\u4FA7 Demo \u7684\u5BBD\u5EA6\u6BD4\u4F8B\u3002",
     layoutFocusHint: "\u6682\u65F6\u6536\u8D77\u53F3\u4FA7 Demo\uFF0C\u4E13\u5FC3\u7F16\u8F91\u3002",
+    layoutNarrowHint: "\u7A97\u53E3\u6BD4\u8F83\u7A84\uFF1ADemo \u5DF2\u7ECF\u653E\u5230\u7F16\u8F91\u533A\u4E0B\u65B9\u3002\u628A\u6D4F\u89C8\u5668\u62C9\u5230 1440 \u5BBD\u5DE6\u53F3\uFF0C\u5C31\u80FD\u5DE6\u53F3\u5E76\u6392\u770B\u3002",
     paneCompareReference: "\u5BF9\u7167\u53C2\u8003\uFF1A\u9700\u6C42",
     paneCurrent: "\u5F53\u524D\u9636\u6BB5",
     chooserHint: "\u9009\u62E9\u4E00\u4E2A\u9879\u76EE\u7EE7\u7EED\uFF0C\u6216\u65B0\u5EFA\u4E00\u4E2A\u3002",
     chooserRequirements: "\u6761\u9700\u6C42",
+    chooserRequirementOne: "\u6761\u9700\u6C42",
+    chooserModuleOne: "\u4E2A\u6A21\u5757",
     chooserModules: "\u4E2A\u6A21\u5757",
     chooserAwaitingModel: "\u5019\u9009\u63A8\u5BFC\u4E2D",
     chooserNextIdea: "\u4E0B\u4E00\u6B65\uFF1A\u53BB\u300C\u60F3\u6CD5\u300D\u5199\u4E0B\u8981\u89E3\u51B3\u7684\u95EE\u9898\uFF0C\u6216\u76F4\u63A5\u8FDB\u300C\u9700\u6C42\u300D\u624B\u5199\u3002",
@@ -33031,6 +33402,7 @@ ${r.featureIdeas.join("\n")}` });
     effortModelDefault: "\u8DDF\u968F\u6A21\u578B\u63A8\u8350",
     roughIdeaHint: "\u4F8B\u5982\uFF1A\u73B0\u5728\u9700\u6C42\u6563\u5728 5 \u4E2A\u6587\u6863\u548C\u804A\u5929\u8BB0\u5F55\u91CC\uFF0C\u6211\u60F3\u8BA9\u56E2\u961F\u5728\u4E00\u4E2A\u5730\u65B9\u5BF9\u9F50\u201C\u8981\u505A\u4EC0\u4E48\u3001\u4E3A\u4EC0\u4E48\u505A\u3001\u5148\u505A\u54EA\u4E00\u6B65\u201D\u3002\u4E0D\u7528\u5199\u5B8C\u6574\uFF0C\u6211\u4F1A\u5148\u590D\u8FF0\u4E00\u904D\u518D\u95EE\u4F60\u3002",
     generateSettings: "\u751F\u6210\u8BBE\u7F6E\uFF08\u4F1A\u8C03\u7528\u6A21\u578B\uFF0C\u53EF\u80FD\u4EA7\u751F\u8D39\u7528\uFF09",
+    generateSettingsDefault: "\u9ED8\u8BA4\u6A21\u578B",
     generateSettingsHint: "\u9ED8\u8BA4\u4F7F\u7528\u5F53\u524D\u90E8\u7F72\u7684\u6A21\u578B\u4E0E\u5DE5\u4F5C\u533A\uFF0C\u901A\u5E38\u4E0D\u9700\u8981\u6539\u52A8\u3002",
     techDetails: "\u6280\u672F\u4FE1\u606F",
     jobIdLabel: "\u4F5C\u4E1A ID",
@@ -33168,7 +33540,9 @@ ${r.featureIdeas.join("\n")}` });
     layoutVersions: "\u7248\u672C\u5BF9\u6BD4",
     stages: "\u9636\u6BB5",
     stageIdea: "\u60F3\u6CD5",
+    badgeRequirementsOne: " \u6761",
     badgeRequirements: " \u6761",
+    badgeArchitectureOne: " \u4E2A",
     badgeArchitecture: " \u4E2A",
     badgeUnfrozen: "\u672A\u51BB\u7ED3",
     badgeAwaitingModel: "\u7B49\u5F85\u6A21\u578B",
@@ -33208,7 +33582,9 @@ ${r.featureIdeas.join("\n")}` });
     handoffArchiveSha: "ZIP \u6821\u9A8C\u503C",
     handoffManifestDigest: "\u6E05\u5355\u6821\u9A8C\u503C",
     handoffCheck: "\u68C0\u67E5\u5C31\u7EEA\u72B6\u6001",
+    handoffRecheck: "\u91CD\u65B0\u68C0\u67E5",
     handoffReady: "\u53EF\u4EA4\u63A5\uFF08\u542F\u52A8\u5F00\u53D1\u4ECD\u9700\u786E\u8BA4\uFF09",
+    handoffWarnHeading: "\u8FD9\u4E9B\u4E0D\u963B\u585E\u4EA4\u63A5\uFF0C\u4F46\u5EFA\u8BAE\u5148\u770B\u4E00\u773C\uFF1A",
     handoffReviewOnly: "\u4EC5\u4F9B\u8BC4\u5BA1\uFF0C\u4E0D\u53EF\u76F4\u63A5\u5B9E\u65BD",
     handoffDownload: "\u5BFC\u51FA\u5E76\u4E0B\u8F7D ZIP",
     handoffWorking: "\u5904\u7406\u4E2D\u2026",
@@ -33276,6 +33652,8 @@ ${r.featureIdeas.join("\n")}` });
     demoMapped: "Demo \u5DF2\u6620\u5C04\u9700\u6C42",
     demoUncovered: "Demo \u672A\u8986\u76D6\u9700\u6C42",
     approvalNothingUncovered: "\u5168\u90E8\u9700\u6C42\u90FD\u6709 Demo \u58F0\u660E\u8986\u76D6\u3002",
+    approvalSelectAll: "\u5168\u9009\u8FD9\u4E9B\u6539\u52A8",
+    approvalSelectNone: "\u5168\u90E8\u53D6\u6D88",
     approvalNothingUnverified: "\u6CA1\u6709\u672A\u9A8C\u8BC1\u7684\u9A8C\u6536\u9879\u3002",
     unverifiedAcceptance: "\u5C1A\u672A\u9A8C\u8BC1\u7684\u9A8C\u6536\u9879",
     ackUnverified: "\u6211\u7406\u89E3\u4E0A\u8FF0\u672A\u8986\u76D6/\u672A\u9A8C\u8BC1\u9879\uFF0C\u5E76\u540C\u610F\u5E26\u7740\u8FD9\u4E9B\u9650\u5236\u51BB\u7ED3\u6B64\u7248\u672C\uFF1B\u8FD9\u4E0D\u8868\u793A\u9A8C\u6536\u901A\u8FC7\u3002",
@@ -33295,17 +33673,26 @@ ${r.featureIdeas.join("\n")}` });
     blockerEmptyScope: "\u8FD9\u4E2A\u7248\u672C\u6CA1\u6709\u4EFB\u4F55\u9700\u6C42",
     blockerPrototypeOnly: "\u8FD9\u4E00\u7248\u53EA\u662F\u539F\u578B\u8349\u7A3F\uFF0C\u4E0D\u80FD\u76F4\u63A5\u5B9E\u65BD",
     blockerVersionNotFound: "\u627E\u4E0D\u5230\u8FD9\u4E2A\u7248\u672C",
+    blockerAtStage: "\u53BB\u300C{stage}\u300D\u9636\u6BB5\u5904\u7406",
     approvalNothingToFreeze: "\u8FD8\u6CA1\u6709\u53EF\u51BB\u7ED3\u7684\u9700\u6C42\u3002\u5148\u5230\u300C\u9700\u6C42\u300D\u9636\u6BB5\u5199\u6E05\u8981\u505A\u4EC0\u4E48\uFF0C\u518D\u56DE\u6765\u5BA1\u6279\u3002",
     approvalWillFreeze: "\u5C06\u51BB\u7ED3\uFF1A",
     approvalReqUnit: " \u6761\u9700\u6C42",
+    approvalReqUnitOne: " \u6761\u9700\u6C42",
+    approvalReqUnitMany: " \u6761\u9700\u6C42",
     approvalArchUnit: " \u4E2A\u67B6\u6784\u6761\u76EE",
+    approvalArchUnitOne: " \u4E2A\u67B6\u6784\u6761\u76EE",
+    approvalArchUnitMany: " \u4E2A\u67B6\u6784\u6761\u76EE",
+    listJoin: "\u3001",
     approvalBaselineChanges: "\u76F8\u5BF9\u6240\u9009\u57FA\u7EBF\u6709",
     approvalChangesUnit: "\u5904\u53D8\u5316",
+    approvalChangeOne: " \u5904\u53D8\u5316",
+    approvalChangeMany: " \u5904\u53D8\u5316",
     approvalNeedLabel: "\u5148\u7ED9\u8FD9\u4E00\u7248\u8D77\u4E2A\u540D\u5B57\uFF08\u4F8B\u5982\u300Cv1 \u641C\u7D22\u300D\uFF09\uFF0C\u4E0B\u9762\u7684\u6309\u94AE\u624D\u80FD\u70B9\u3002",
     approvalScope: "\u6279\u51C6\u5168\u90E8\u5DF2\u4FDD\u5B58\u9700\u6C42\u4E0E\u67B6\u6784\uFF0C\u6216\u9009\u62E9\u76F8\u5BF9\u57FA\u7EBF\u7684\u90E8\u5206\u53D8\u5316\u3002\u672A\u4FDD\u5B58\u7684\u8868\u5355\u8F93\u5165\u4E0D\u5305\u542B\u5728\u5185\uFF1B\u8FD9\u4E0D\u662F\u5F00\u53D1\u6D3E\u53D1\uFF0C\u4E5F\u4E0D\u4EE3\u8868\u6D4B\u8BD5\u9A8C\u6536\u901A\u8FC7\u3002",
     approvalFirstTime: "\u8FD9\u4E2A\u9879\u76EE\u8FD8\u6CA1\u6709\u51BB\u7ED3\u8FC7\u7248\u672C\u3002\u7B2C\u4E00\u6B21\u8BF7\u5148\u628A\u5F53\u524D\u8349\u7A3F\u6574\u4EFD\u51BB\u7ED3\u6210 v1\uFF1B\u6709\u4E86 v1\uFF0C\u4E4B\u540E\u624D\u80FD\u9010\u6761\u5BF9\u6BD4\u548C\u53EA\u6279\u51C6\u52FE\u9009\u7684\u53D8\u5316\u3002",
     confirmApproval: "\u786E\u8BA4\u51BB\u7ED3\u6B64\u5DF2\u4FDD\u5B58\u7248\u672C\uFF1F\u5F53\u524D\u5185\u5BB9\u4FEE\u8BA2\u53F7\uFF1A",
     versionLabel: "\u7248\u672C\u540D\u79F0",
+    versionLabelSuggest: "\u5C31\u7528\u300C{name}\u300D",
     approveVersion: "\u6279\u51C6\u5E76\u51BB\u7ED3",
     compareFrom: "\u5BF9\u6BD4\u57FA\u7EBF",
     compareTo: "\u5BF9\u6BD4\u76EE\u6807",
@@ -33327,6 +33714,9 @@ ${r.featureIdeas.join("\n")}` });
     architecture_task: "\u5F00\u53D1\u4EFB\u52A1",
     addArchitecture: "\u65B0\u589E\u67B6\u6784\u9879",
     linkedRequirements: "\u5173\u8054\u9700\u6C42",
+    linkedCount: "\u5DF2\u9009 {n} / {total}",
+    filterLinks: "\u6309\u540D\u79F0\u7B5B\u9009",
+    filterNoMatch: "\u6CA1\u6709\u5339\u914D\u7684\u6761\u76EE",
     dependencies: "\u4F9D\u8D56\u5173\u7CFB",
     removeArchitecture: "\u5220\u9664\u8BE5\u67B6\u6784\u9879\uFF1F\u88AB\u5176\u4ED6\u9879\u5F15\u7528\u65F6\u4F1A\u62D2\u7EDD\u5220\u9664\u3002",
     hint_module: "\u804C\u8D23\u3001\u8FB9\u754C\u3001\u8F93\u5165\u8F93\u51FA\u3001\u684C\u9762/\u624B\u673A\u5DEE\u5F02",
@@ -33359,6 +33749,7 @@ ${r.featureIdeas.join("\n")}` });
     taskAcceptanceEmpty: "\u8BF7\u5148\u5728\u9700\u6C42\u4E2D\u8865\u5145\u9A8C\u6536\u6761\u4EF6\uFF0C\u4EFB\u52A1\u65E0\u6CD5\u51ED\u7A7A\u58F0\u660E\u9A8C\u6536\u3002",
     discardEdits: "\u5C1A\u6709\u672A\u4FDD\u5B58\u7684\u7F16\u8F91\uFF0C\u653E\u5F03\u5E76\u5207\u6362\u8282\u70B9\uFF1F",
     dragRequirement: "\u62D6\u52A8\u9700\u6C42",
+    mapHelp: "\u8FD9\u5F20\u56FE\u600E\u4E48\u7528\uFF1F",
     nodeDragHint: "\u62D6\u52A8\u5361\u7247\u5DE6\u4FA7\u7684\u624B\u67C4\u5230\u53E6\u4E00\u5F20\u5361\u7247\u53EF\u6539\u4E3A\u5176\u5B50\u8282\u70B9\uFF1B\u4E5F\u53EF\u4F7F\u7528\u7236\u8282\u70B9\u9009\u62E9\u5668\u3002",
     nodeDropRoot: "\u62D6\u5230\u6B64\u5904\u6539\u4E3A\u6839\u8282\u70B9",
     confirmNodeDrop: "\u786E\u8BA4\u5C06\u62D6\u52A8\u7684\u9700\u6C42\u79FB\u52A8\u5230\u76EE\u6807\u7236\u8282\u70B9\uFF1F\u540E\u4EE3\u5173\u7CFB\u4F1A\u968F\u4E4B\u79FB\u52A8\u3002",
@@ -33366,6 +33757,8 @@ ${r.featureIdeas.join("\n")}` });
     undoRequirements: "\u64A4\u9500\u9700\u6C42\u4FEE\u6539",
     redoRequirements: "\u91CD\u505A\u9700\u6C42\u4FEE\u6539",
     historyScope: "\u4EC5\u5F53\u524D\u9875\u9762\u5185\u6700\u8FD1 20 \u6B21\u5DF2\u4FDD\u5B58\u7684\u9700\u6C42\u64CD\u4F5C\uFF1B\u5237\u65B0\u9875\u9762\u3001\u5207\u6362\u9879\u76EE\u3001\u91C7\u7EB3\u65B9\u6848\u6216\u5916\u90E8\u5185\u5BB9\u66F4\u65B0\u4F1A\u4F7F\u65E7\u5386\u53F2\u4E0D\u53EF\u7528\u3002",
+    discardStageEdit: "\u8FD9\u4E2A\u9636\u6BB5\u8FD8\u6709\u6CA1\u4FDD\u5B58\u7684\u8F93\u5165\uFF0C\u5207\u8D70\u5C31\u4F1A\u4E22\u6389\u3002\u786E\u5B9A\u5207\u5230\u522B\u7684\u9636\u6BB5\u5417\uFF1F",
+    discardProjectEdit: "\u8FD9\u4E2A\u9879\u76EE\u8FD8\u6709\u6CA1\u4FDD\u5B58\u7684\u8F93\u5165\uFF0C\u56DE\u5230\u9879\u76EE\u5217\u8868\u5C31\u4F1A\u4E22\u6389\u3002\u786E\u5B9A\u79BB\u5F00\u5417\uFF1F",
     historyConfirm: "\u6062\u590D\u4E0A\u4E00/\u4E0B\u4E00\u6B21\u5DF2\u4FDD\u5B58\u9700\u6C42\u72B6\u6001\uFF1F\u672A\u4FDD\u5B58\u8868\u5355\u4E0E\u4E34\u65F6 Demo \u5C06\u4E22\u5F03\uFF1B\u5BA1\u6279\u5FEB\u7167\u4E0D\u53D8\u3002",
     historyDesync: "\u6062\u590D\u5386\u53F2\u540E\u672C\u5730\u8BB0\u5F55\u4E0E\u670D\u52A1\u5668\u72B6\u6001\u4E0D\u4E00\u81F4\uFF0C\u5DF2\u6E05\u7A7A\u5386\u53F2\uFF1B\u8BF7\u91CD\u65B0\u52A0\u8F7D\u9879\u76EE\u3002",
     errorDependencyCycle: "\u4F9D\u8D56\u5173\u7CFB\u4F1A\u6210\u73AF\uFF0C\u5DF2\u62D2\u7EDD\uFF1A",
@@ -33385,6 +33778,7 @@ ${r.featureIdeas.join("\n")}` });
     parentNode: "\u7236\u8282\u70B9",
     nodeDescription: "\u9700\u6C42\u8BF4\u660E",
     desktopAcceptance: "\u684C\u9762\u7AEF\u9A8C\u6536\uFF08\u6BCF\u884C\u4E00\u6761\uFF09",
+    acceptanceExample: "\u6BCF\u884C\u4E00\u6761\uFF0C\u4F8B\u5982\uFF1A\u9009\u4E2D\u4E00\u6761\u4F1A\u8BDD\u540E\uFF0C\u53F3\u4FA7\u80FD\u770B\u5230\u5B83\u7684\u6D88\u606F",
     mobileAcceptance: "\u624B\u673A\u7AEF\u9A8C\u6536\uFF08\u6BCF\u884C\u4E00\u6761\uFF09",
     saveDetails: "\u4FDD\u5B58\u8BE6\u60C5",
     requirementDependencies: "\u9700\u6C42\u4F9D\u8D56\uFF08\u5148\u51B3\u6761\u4EF6\uFF09",
@@ -33409,19 +33803,37 @@ ${r.featureIdeas.join("\n")}` });
     confirmRemove: "\u5220\u9664\u8BE5\u9700\u6C42\u53CA\u5176\u5168\u90E8\u5B50\u8282\u70B9\uFF1F",
     confirmRemoveBranch: "\u5220\u9664\u300C{title}\u300D\u4F1A\u8FDE\u540C\u5B83\u4E0B\u9762\u7684 {children} \u4E2A\u5B50\u9700\u6C42\u4E00\u8D77\u5220\u9664\uFF08\u5171 {total} \u6761\uFF09\uFF0C\u4E0D\u80FD\u64A4\u9500\u3002\u786E\u5B9A\u5417\uFF1F",
     removeNode: "\u5220\u9664\u8282\u70B9",
+    removeNodeHint: "\u4F1A\u8FDE\u540C\u5B83\u4E0B\u9762\u7684\u5B50\u9700\u6C42\u4E00\u8D77\u5220\u9664\u3002\u5220\u9519\u4E86\u53EF\u4EE5\u7528\u9875\u9762\u53F3\u4E0A\u89D2\u7684\u300C\u64A4\u9500\u300D\u627E\u56DE\u3002",
     selectNode: "\u9009\u62E9\u4E00\u4E2A\u9700\u6C42\u8282\u70B9\u8FDB\u884C\u7F16\u8F91\u3002",
+    inspectorEmptyHint: "\u70B9\u4E00\u4E0B\u753B\u5E03\u91CC\u7684\u9700\u6C42\u5361\u7247\uFF0C\u8FD9\u91CC\u5C31\u4F1A\u51FA\u73B0\u5B83\u7684\u7F16\u8F91\u9762\u677F\uFF1A\u8BF4\u660E\u3001\u4F18\u5148\u7EA7\u3001\u684C\u9762/\u624B\u673A\u9A8C\u6536\u6807\u51C6\u90FD\u5728\u91CC\u9762\u3002",
     nodeDetails: "\u9700\u6C42\u8BE6\u60C5",
     inspectorTitle: "\u68C0\u67E5\u5668",
+    savedNotice: "\u5DF2\u4FDD\u5B58\u5230\u9879\u76EE\uFF08\u5185\u5BB9\u7B2C {rev} \u6B21\u53D8\u66F4\uFF09",
     requirementView: "\u9700\u6C42\u89C6\u56FE",
     canvasView: "\u753B\u5E03",
     outlineView: "\u5927\u7EB2",
+    filterRequirements: "\u6309\u540D\u79F0\u7B5B\u9009\u9700\u6C42",
+    filterMatches: "\u5339\u914D {n} \u6761\uFF08\u542B\u5176\u4E0A\u7EA7\uFF09",
+    exportMarkdown: "\u5BFC\u51FA\u4E3A\u6587\u672C",
+    exportRootLabel: "\u9700\u6C42\u5927\u7EB2",
+    exportPriorityHigh: "\u4F18\u5148\u505A",
+    exportPriorityLow: "\u53EF\u4EE5\u540E\u505A",
+    exportAcceptance: "\u9A8C\u6536",
+    exportDepends: "\u4F9D\u8D56",
+    exportDesktop: "\u684C\u9762",
+    exportMobile: "\u79FB\u52A8",
+    exportEmpty: "\u8FD8\u6CA1\u6709\u9700\u6C42\u3002",
+    canvasMatchOne: "\u5728\u56FE\u4E0A\u627E\u5230 1 \u4E2A\u9700\u6C42\uFF0C\u70B9\u4E00\u4E0B\u53EF\u4EE5\u76F4\u63A5\u8DF3\u8FC7\u53BB\u3002",
+    canvasMatches: "\u5728\u56FE\u4E0A\u627E\u5230 {n} \u4E2A\u9700\u6C42\uFF0C\u70B9\u4E00\u4E0B\u53EF\u4EE5\u76F4\u63A5\u8DF3\u8FC7\u53BB\u3002",
     canvasHint: "\u62D6\u52A8\u5361\u7247\u5DE6\u4FA7\u7684\u624B\u67C4\u53EF\u6539\u7236\u5B50\u5173\u7CFB\uFF1B\u70B9\u9009\u5361\u7247\u540E\u5728\u53F3\u4FA7\u68C0\u67E5\u5668\u91CC\u7F16\u8F91\u5185\u5BB9\u3002",
     outlineHint: "\u5927\u7EB2\u6309\u5C42\u7EA7\u5217\u51FA\u9700\u6C42\u5E76\u81EA\u52A8\u7F16\u53F7\uFF1B\u70B9\u9009\u540E\u5728\u53F3\u4FA7\u68C0\u67E5\u5668\u91CC\u6539\u540D\u3001\u8C03\u987A\u5E8F\u6216\u6539\u7236\u8282\u70B9\uFF0C\u5207\u6362\u56DE\u753B\u5E03\u53EF\u770B\u7ED3\u6784\u3002",
     selectParent: "\u9009\u4E2D\u5176\u7236\u8282\u70B9",
-    dragAlternativeHint: "\u4E5F\u53EF\u4EE5\u4E0D\u7528\u62D6\u52A8\uFF1A\u7528\u201C\u540C\u7EA7\u4E0A\u79FB/\u4E0B\u79FB\u201D\u8C03\u6574\u987A\u5E8F\uFF0C\u6216\u7528\u4E0B\u65B9\u201C\u7236\u8282\u70B9\u201D\u4E0B\u62C9\u76F4\u63A5\u6539\u7236\u7EA7\u3002",
+    dragAlternativeHint: "\u4E5F\u53EF\u4EE5\u4E0D\u7528\u62D6\u52A8\uFF1A\u7528\u201C\u540C\u7EA7\u4E0A\u79FB/\u4E0B\u79FB\u201D\u8C03\u6574\u987A\u5E8F\uFF0C\u6216\u7528\u4E0B\u65B9\u201C\u7236\u8282\u70B9\u201D\u4E0B\u62C9\u76F4\u63A5\u6539\u7236\u7EA7\u3002\u53CC\u51FB\u5361\u7247\u53EF\u4EE5\u76F4\u63A5\u6539\u6807\u9898\u3002",
     working: "\u5904\u7406\u4E2D\u2026",
+    acceptanceMissingHint: "\u8FD8\u6709 {n} \u6761\u9700\u6C42\u6CA1\u5199\u5168\u684C\u9762/\u624B\u673A\u9A8C\u6536\uFF08\u70B9\u5361\u7247\u5728\u68C0\u67E5\u5668\u91CC\u8865\uFF09\uFF1B\u4EA4\u63A5\u524D\u8FD9\u4E9B\u5FC5\u987B\u5148\u8865\u9F50\u3002",
     canvasScrollHint: "\u753B\u5E03\u53EF\u4EE5\u6EDA\u52A8\u67E5\u770B\u5B8C\u6574\u7ED3\u6784\uFF1B\u70B9\u9009\u5361\u7247\u65F6\u4F1A\u81EA\u52A8\u6EDA\u5230\u5B83\u3002",
-    archScrollHint: "\u67B6\u6784\u56FE\u53EF\u5DE6\u53F3\u6EDA\u52A8\u67E5\u770B\u5168\u90E8\u56DB\u5217\uFF1B\u70B9\u9009\u5361\u7247\u53EF\u805A\u7126\u5B83\u7684\u4F9D\u8D56\u3002",
+    priorityLegend: "\u5361\u7247\u5DE6\u4FA7\u7684\u8272\u6761\u8868\u793A\u300C\u4F18\u5148\u505A\u300D\u3002",
+    archScrollHint: "\u56FE\u91CC\u653E\u4E0D\u4E0B\u5168\u90E8\u5185\u5BB9\u65F6\uFF0C\u53EF\u4EE5\u4E0A\u4E0B\u3001\u5DE6\u53F3\u6EDA\u52A8\u67E5\u770B\uFF1B\u70B9\u9009\u5361\u7247\u4F1A\u805A\u7126\u5B83\u7684\u4F9D\u8D56\u3002",
     errorContractStructure: "\u5951\u7EA6\u9879\u9700\u8981\u586B\u5199\u63A5\u53E3/\u5B9E\u4F53\u540D\u79F0\uFF0C\u6216\u660E\u786E\u6807\u8BB0\u201C\u4E0D\u9002\u7528\u201D\u3002",
     errorTaskStructure: "\u4EFB\u52A1\u9700\u8981\u586B\u5199\u9884\u671F\u4EA7\u7269\u5E76\u81F3\u5C11\u5173\u8054\u4E00\u4E2A\u9A8C\u6536\u70B9\u3002",
     errorArchitecturePayloadKind: "\u5951\u7EA6/\u4EFB\u52A1\u7ED3\u6784\u53EA\u80FD\u7528\u5728\u5BF9\u5E94\u7C7B\u578B\u7684\u67B6\u6784\u9879\u4E0A\u3002",
@@ -33437,7 +33849,10 @@ ${r.featureIdeas.join("\n")}` });
     projects: "\u4EA7\u54C1\u9879\u76EE",
     projectName: "\u9879\u76EE\u540D\u79F0",
     newProject: "\u65B0\u5EFA\u9879\u76EE",
+    projectNameTaken: "\u5DF2\u7ECF\u6709\u540C\u540D\u9879\u76EE\u4E86\u3002\u4EE5\u540E\u5728\u5217\u8868\u91CC\u4F1A\u5206\u4E0D\u6E05\uFF0C\u5EFA\u8BAE\u52A0\u4E2A\u65E5\u671F\u6216\u7248\u672C\uFF0C\u4F8B\u5982\u300C\u641C\u7D22 v2\u300D\u3002",
     draftRevision: "\u8349\u7A3F\u4FEE\u8BA2",
+    revisionSummary: "\u5185\u5BB9\u6539\u4E86 {n} \u6B21",
+    revisionSummaryNone: "\u8FD8\u6CA1\u6709\u6539\u52A8",
     emptyRequirements: "\u5C1A\u65E0\u9700\u6C42\u8282\u70B9\u3002",
     requirementsEmptyHint: "\u8FD8\u6CA1\u6709\u9700\u6C42\u3002\u53EF\u4EE5\u76F4\u63A5\u70B9\u300C\u6DFB\u52A0\u6839\u8282\u70B9\u300D\u624B\u5199\uFF0C\u6216\u56DE\u5230\u300C\u60F3\u6CD5\u300D\u9636\u6BB5\u5199\u4E0B\u8981\u89E3\u51B3\u7684\u95EE\u9898\uFF0C\u8BA9 AI \u5148\u7ED9\u5019\u9009\u65B9\u6848\uFF0C\u91C7\u7EB3\u540E\u4F1A\u81EA\u52A8\u51FA\u73B0\u5728\u8FD9\u91CC\u3002",
     title: "\u521B\u610F\u5DE5\u574A",
