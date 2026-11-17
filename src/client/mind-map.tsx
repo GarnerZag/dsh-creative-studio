@@ -45,11 +45,10 @@ export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes:
   React.useEffect(()=>{const el=box.current;if(!el)return;const ro=new ResizeObserver(()=>setAvail(el.clientWidth));ro.observe(el);setAvail(el.clientWidth);return()=>ro.disconnect();},[]);
   // Fit wide trees without shrinking text past comfortable reading size.
   const scale=avail>0?Math.min(1,Math.max(0.85,(avail-2)/width)):1;
-  // Fit as many whole rows as the box allows: a half-cut card row reads as broken.
-  const limit=560;
-  const fitRows=Math.max(1,Math.floor((limit/scale-OFFSET-CARD_HEIGHT-12)/ROW_GAP)+1);
-  const readRows=Math.min(row,fitRows);
-  const maxHeight=Math.min(limit,Math.ceil((OFFSET+(readRows-1)*ROW_GAP+CARD_HEIGHT+12)*scale));
+  // Show the whole tree when it fits in a comfortable box; only cap (and scroll) when it does not.
+  const natural=Math.ceil(height*scale);
+  const maxHeight=Math.min(natural,560);
+  const clipped=natural>maxHeight;
   React.useEffect(()=>{const el=box.current;if(!el||!selected)return;const p=positions.get(selected);if(!p)return;if(!el.clientHeight)return;
   // Only move when the card is actually out of view, so focusing the first row does not clip the last one.
   const left=Math.max(0,p.x*scale-40);const top=Math.max(0,p.y*scale-20);
@@ -59,7 +58,7 @@ export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes:
   return <div ref={root} style={{minWidth:0}}>
     <p className="cs-hint">{t('nodeDragHint')}</p>
     {dragActive&&<div role="note" data-cs-parent="" style={{padding:8,marginBottom:12,border:'1px dashed var(--cs-accent)',borderRadius:10,background:'var(--cs-soft)',fontSize:'var(--cs-text-sm)',lineHeight:'20px'}}>{t('nodeDropRoot')}</div>}
-    <div ref={box} style={{overflow:'auto',maxHeight, border:'1px solid var(--cs-border)',borderRadius:12}}><div style={{width:Math.ceil(width*scale),height:Math.ceil(height*scale)}}><svg width={width} height={height} style={{ display: 'block', transform:`scale(${scale})`, transformOrigin:'top left' }}>
+    <div ref={box} style={{overflow:'auto',maxHeight, border:'1px solid var(--cs-border)',borderRadius:12,maskImage:clipped?'linear-gradient(to bottom,#000 calc(100% - 28px),rgba(0,0,0,0.12))':undefined}}><div style={{width:Math.ceil(width*scale),height:Math.ceil(height*scale)}}><svg width={width} height={height} style={{ display: 'block', transform:`scale(${scale})`, transformOrigin:'top left' }}>
       {nodes.map(node => {
         const p = positions.get(node.id); const parent = node.parentId ? positions.get(node.parentId) : undefined;
         if (!p || !parent) return null;
@@ -77,6 +76,6 @@ export function MindMap({ nodes, selected, select, disabled, move, t }: { nodes:
           </div></foreignObject>
         </g>;
       })}
-    </svg></div></div>{height*scale>maxHeight&&<p className="cs-hint">{t('canvasScrollHint')}</p>}{hasMixed&&<p className="cs-hint">{t('priorityLegend')}</p>}
+    </svg></div></div>{clipped&&<p className="cs-hint">{t('canvasScrollHint')}</p>}{hasMixed&&<p className="cs-hint">{t('priorityLegend')}</p>}
   </div>;
 }
