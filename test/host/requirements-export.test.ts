@@ -25,3 +25,12 @@ test('explains an empty project and still lists orphans',()=>{
   const orphan=node({id:'lost',parentId:'missing',title:'Lost'});
   assert.ok(requirementsMarkdown('P',[orphan],labels).includes('- **Lost**'));
 });
+test('lists attached reference material after the tree',()=>{
+  const nodes=[node({id:'root',title:'Root'})];
+  const out=requirementsMarkdown('Demo',nodes,{...labels,attachments:'Reference material'},[{name:'需求草稿.md',kind:'text'},{name:'首页截图.png',kind:'image'}]);
+  assert.ok(out.includes('## Reference material'));
+  assert.ok(out.includes('- 需求草稿.md (text)'));
+  assert.ok(out.includes('- 首页截图.png (image)'));
+  assert.ok(out.indexOf('- **Root**')<out.indexOf('## Reference material'));
+  assert.equal(requirementsMarkdown('Demo',nodes,labels).includes('## Reference material'),false);
+});

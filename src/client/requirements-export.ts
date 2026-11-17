@@ -1,5 +1,5 @@
 import type {RequirementNode} from '../types.js';
-export interface ExportLabels { root: string; priorityHigh: string; priorityLow: string; acceptance: string; depends: string; desktop: string; mobile: string; empty: string }
+export interface ExportLabels { attachments?: string; root: string; priorityHigh: string; priorityLow: string; acceptance: string; depends: string; desktop: string; mobile: string; empty: string }
 const order=(node:RequirementNode)=>node.order??0;
 function childrenOf(nodes:readonly RequirementNode[],parentId:string|null):RequirementNode[]{
   return nodes.filter(node=>node.parentId===parentId).slice().sort((a,b)=>order(a)-order(b)||a.title.localeCompare(b.title));
@@ -28,11 +28,12 @@ function linesFor(nodes:readonly RequirementNode[],children:readonly Requirement
   return lines;
 }
 /** Render the requirement tree as shareable Markdown; keeps nesting, priority, acceptance and dependencies. */
-export function requirementsMarkdown(name:string,nodes:readonly RequirementNode[],labels:ExportLabels):string{
+export function requirementsMarkdown(name:string,nodes:readonly RequirementNode[],labels:ExportLabels,material:readonly {name:string;kind:string}[]=[]):string{
   if(!nodes.length)return `${labels.empty}\n`;
   const byId=new Map(nodes.map(node=>[node.id,node]));
   const lines=[`# ${name}`,`${labels.root}`,'',...linesFor(nodes,childrenOf(nodes,null),0,labels,byId)];
   const orphans=orphanDetected(nodes);
   if(orphans.length)lines.push('',...linesFor(nodes,orphans,0,labels,byId));
+  if(material.length&&labels.attachments)lines.push('',`## ${labels.attachments}`,'',...material.map(item=>`- ${item.name} (${item.kind})`));
   return `${lines.join('\n')}\n`;
 }

@@ -7,6 +7,7 @@ export const inject: string[] = ['slots', 'remote', 'locale'];
 const namespace = 'creativeStudio';
 const dictionaries = {
   zh: {
+    badgeAttachmentsOne:' 份资料',badgeAttachments:' 份资料',
     attachmentDrop:'也可以把文件直接拖到这里。',attachmentPaste:'截图可以先复制，点一下这个区域再按 Ctrl/⌘+V 粘贴。',
     attachmentsTitle:'参考资料（可选）',attachmentsHint:'可以传需求文档、截图、竞品资料，用来补充说明你的想法。单个文件最大 3 MB，最多 20 个。',attachmentAdd:'选择文件',attachmentBusy:'上传中…',attachmentTooLarge:'「{name}」超过 3 MB，没有上传。',attachmentLimit:'最多只能放 20 个文件，先移除一些再传。',attachmentRemove:'移除',
     confirmProjectChange:'切换或新建项目会关闭当前编辑区，未保存的表单和本地 Demo 预览将丢弃。确认继续？已保存数据不会删除。',
@@ -44,6 +45,7 @@ const dictionaries = {
     draftRule: 'AI 提供候选，你决定批准。', native: 'Harness 原生插件',
   },
   en: {
+    badgeAttachmentsOne:' file',badgeAttachments:' files',
     attachmentDrop:'You can also drag files here.',attachmentPaste:'Copied a screenshot? Click this area and press Ctrl/⌘+V.',
     attachmentsTitle:'Reference material (optional)',attachmentsHint:'Requirement docs, screenshots or competitor notes that explain the idea. Up to 3 MB per file, 20 files.',attachmentAdd:'Choose files',attachmentBusy:'Uploading…',attachmentTooLarge:'“{name}” is over 3 MB, so it was not uploaded.',attachmentLimit:'20 files is the limit — remove one before adding more.',attachmentRemove:'Remove',
     confirmProjectChange:'Switching or creating a project closes the current editors and discards unsaved forms and local Demo previews. Continue? Saved data will not be deleted.',
