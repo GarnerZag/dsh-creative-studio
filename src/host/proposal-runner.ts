@@ -46,8 +46,21 @@ const followUp=[
  '',
  ...proposalRules,
 ].join('\n');
+/** Uploaded material is context for the model, never a requirement by itself. */
+function materialSection(material?:{name:string;kind:string;text?:string}[]):string{
+ if(!material?.length)return '';
+ const lines=['','用户还上传了这些材料，仅供理解上下文；不要把文件名或截图当成需求条目：'];
+ let budget=24000;
+ for(const item of material){
+  const text=(item.text??'').trim();
+  if(item.kind==='text'&&text){const slice=text.slice(0,Math.min(6000,budget));budget-=slice.length;lines.push('· '+item.name+'：','```',slice,'```');if(budget<=0)break;}
+  else lines.push(`· ${item.name}（${item.kind==='image'?'截图，你无法直接看到内容，只能参考用户在想法里的描述':'文件'}）`);
+ }
+ return lines.join('\n');
+}
+
 /** This adapter is usable only after the caller installs session-scoped tool restrictions. */
-export async function startProposal(store:ProjectStore,gateway:ProposalSessionGateway,input:{projectId:string;expectedProjectRevision:number;request:string;workspaceId?:string;model?:ModelChoice},signal:AbortSignal):Promise<void>{
+export async function startProposal(store:ProjectStore,gateway:ProposalSessionGateway,input:{projectId:string;expectedProjectRevision:number;request:string;workspaceId?:string;model?:ModelChoice;material?:{name:string;kind:string;text?:string}[]},signal:AbortSignal):Promise<void>{
  signal.throwIfAborted();
  const jobId=randomUUID(),sessionId=randomUUID();
  const project=await store.beginProposalJob(input.projectId,input.expectedProjectRevision,jobId,sessionId,input.request);
@@ -57,7 +70,7 @@ export async function startProposal(store:ProjectStore,gateway:ProposalSessionGa
   if(created.sessionId!==sessionId) throw new Error('SESSION_ID_MISMATCH');
   if(input.model&&gateway.selectModel) await gateway.selectModel({sessionId,...input.model});
   await gateway.prompt({requestId:jobId,sessionId,mode:'queue',content:[{type:'text',text:
-   firstTurn+'\n'+JSON.stringify({projectId:project.id,jobId,baseContentRevision:job.baseContentRevision,request:job.request,briefConfirmed:false})}]},signal);
+   firstTurn+materialSection(input.material)+'\n'+JSON.stringify({projectId:project.id,jobId,baseContentRevision:job.baseContentRevision,request:job.request,briefConfirmed:false})}]},signal);
   await store.markProposalJob(project.id,jobId,'submitted');
  } catch(error) {
   await store.markProposalJob(project.id,jobId,'unknown');

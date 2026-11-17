@@ -241,13 +241,24 @@ export default class CreativeStudio extends TypertRemoteService {
     };
   }
 
+  /** Text attachments are handed to the session as material; images only by name. */
+  private materialFor(project:Project):{name:string;kind:string;text?:string}[]{
+    if(!this.attachments||!project.attachments.length)return [];
+    return project.attachments.map(item=>{
+      if(item.kind!=='text')return {name:item.name,kind:item.kind};
+      try{return {name:item.name,kind:item.kind,text:this.attachments!.bytes(project.id,item.id).toString('utf8')};}
+      catch{return {name:item.name,kind:item.kind};}
+    });
+  }
+
   @Remote
   async generateProposal(id:string, expectedProjectRevision:number, request:string, workspaceId:string, model:ModelChoice|undefined, signal:AbortSignal):Promise<ProjectSnapshot> {
     const store=this.userStore();
     if(!request.trim()||!workspaceId.trim()) throw new Error('REQUEST_AND_WORKSPACE_REQUIRED');
     const sessions=this.ctx.get('sessionController') as ProposalSessionGateway|undefined;
     if(!sessions) throw new Error('SESSION_SERVICE_UNAVAILABLE');
-    await startProposal(store,sessions,{projectId:id,expectedProjectRevision,request,workspaceId,...(model?{model}:{})},signal);
+    const material=this.materialFor(store.get(id));
+    await startProposal(store,sessions,{projectId:id,expectedProjectRevision,request,workspaceId,material,...(model?{model}:{})},signal);
     return store.get(id);
   }
 

@@ -44,6 +44,14 @@ export class AttachmentStore {
     return { base64: slice.toString('base64'), nextOffset: end < row.total ? end : null, total: row.total, attachmentId };
   }
 
+  /** Whole file, used when text attachments are fed to the model as material. */
+  bytes(projectId: string, attachmentId: string): Buffer {
+    const row = this.record(projectId, attachmentId);
+    const bytes = Buffer.concat(row.chunks.map(chunk => Buffer.from(chunk, 'base64')));
+    if (bytes.length !== row.total) throw new Error('ATTACHMENT_BYTES_CORRUPT');
+    return bytes;
+  }
+
   async remove(projectId: string, attachmentId: string): Promise<void> {
     const remove = this.table.delete;
     if (remove) await remove.call(this.table, key(projectId, attachmentId));
