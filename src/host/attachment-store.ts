@@ -17,7 +17,9 @@ interface AttachmentTable {
   entries?(): IterableIterator<[string, StoredAttachment]>;
 }
 
-const key = (projectId: string, attachmentId: string) => `${projectId}:${attachmentId}`;
+/** Per-record storage keys must be path-safe: no ':' or other separators. */
+export const attachmentKey = (projectId: string, attachmentId: string) => `${projectId}__${attachmentId}`;
+const key = attachmentKey;
 
 export class AttachmentStore {
   constructor(private readonly table: AttachmentTable) {}

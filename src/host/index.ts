@@ -14,6 +14,7 @@ import { requireUserAuthority } from './authority.js';
 
 import {HandoffStore,StoredHandoffSchema,type StoredHandoff} from './handoff-store.js';
 import {AttachmentStore,StoredAttachmentSchema,type StoredAttachment} from './attachment-store.js';
+import {decodeUpload} from './attachment-upload.js';
 import {MAX_ATTACHMENT_BYTES} from '../domain/attachment-schema.js';
 import {checkHandoff} from '../domain/handoff.js';
 import type { AttachmentChunk, BriefInfo, JobReply, ModelCatalogView, ModelChoice, WorkspaceOption,HandoffInfo,HandoffChunk,HandoffReadinessResult,DemoSceneData, StudioHealth, ProjectHead, ProjectSummary, ProjectSnapshot, RequirementChange, ArchitectureChange, ProposalInput, ReferenceChange, FeatureChange } from '../types.js';
@@ -110,9 +111,7 @@ export default class CreativeStudio extends TypertRemoteService {
     if(!attachments)throw new Error('STORAGE_NOT_READY');
     const current=store.get(id);
     if(current.projectRevision!==expectedProjectRevision||current.contentRevision!==expectedContentRevision)throw new Error('CONFLICT');
-    const bytes=Buffer.from(input.base64,'base64');
-    if(!bytes.length)throw new Error('ATTACHMENT_EMPTY');
-    if(bytes.length>MAX_ATTACHMENT_BYTES)throw new Error('ATTACHMENT_TOO_LARGE');
+    const bytes=decodeUpload(input.base64);
     const attachmentId=randomUUID();
     await attachments.put(id,attachmentId,bytes);
     try{

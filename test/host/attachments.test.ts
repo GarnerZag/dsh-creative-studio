@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { createProject } from '../../src/domain/project.js';
 import { addAttachment, removeAttachment, attachmentKind } from '../../src/domain/attachments.js';
 import { ATTACHMENT_CHUNK_BYTES, MAX_ATTACHMENTS, MAX_ATTACHMENT_BYTES } from '../../src/domain/attachment-schema.js';
-import { AttachmentStore, type StoredAttachment } from '../../src/host/attachment-store.js';
+import { AttachmentStore, attachmentKey, type StoredAttachment } from '../../src/host/attachment-store.js';
+import { decodeUpload } from '../../src/host/attachment-upload.js';
 
 const meta = (id: string, name = 'brief.md', mime = 'text/markdown') => ({ id, name, mime, size: 12, createdAt: '2026-11-17T00:00:00Z' });
 
@@ -79,4 +80,27 @@ test('multi-chunk reads reassemble exactly the bytes that were stored', async ()
   }
   assert.equal(Buffer.concat(parts).equals(bytes), true);
   assert.equal(store.chunk('p', 'a', 0, 256 * 1024).total, bytes.length);
+});
+
+test('storage keys stay path-safe and upload payloads are validated before writing', async () => {
+  const rows = new Map<string, StoredAttachment>();
+  const table = {
+    get: (id: string) => rows.get(id),
+    put: async (id: string, row: StoredAttachment) => {
+      assert.match(id, /^[a-zA-Z0-9_-]+$/, 'per-record keys must be path-safe');
+      rows.set(id, structuredClone(row));
+    },
+    entries: () => rows.entries(),
+    delete: async (id: string) => rows.delete(id),
+  };
+  const store = new AttachmentStore(table);
+  const projectId = 'b2180d17-6944-4746-be48-30142e9e4a30';
+  const attachmentId = 'd4373246-e8de-480d-b1b4-c0da3acf5293';
+  assert.equal(attachmentKey(projectId, attachmentId), `${projectId}__${attachmentId}`);
+  await store.put(projectId, attachmentId, Buffer.from('hello'));
+  assert.equal(Buffer.from(store.chunk(projectId, attachmentId, 0, 16).base64, 'base64').toString(), 'hello');
+  assert.throws(() => decodeUpload('not base64!!'), /ATTACHMENT_ENCODING/);
+  assert.throws(() => decodeUpload(''), /ATTACHMENT_EMPTY/);
+  assert.throws(() => decodeUpload(Buffer.alloc(MAX_ATTACHMENT_BYTES + 1).toString('base64')), /ATTACHMENT_TOO_LARGE/);
+  assert.equal(decodeUpload(Buffer.from('ok').toString('base64')).toString(), 'ok');
 });
