@@ -94,7 +94,13 @@ export function RequirementsEditor({ project, save, busy, t, onSelect }: { onSel
         </div>
       </div>
       {view === 'canvas'
-        ? (project.nodes.length===0 ? null : <MindMap t={t} move={(id,parentId)=>save({kind:'move',id,parentId})} nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>)
+        ? (project.nodes.length===0 ? null : <div className="cs-canvas-search">
+            <input className="cs-tree-search" aria-label={t('filterRequirements')} placeholder={t('filterRequirements')} value={search} onChange={e => setSearch(e.target.value)} />
+            {needle && matchCount > 0 && <><p className="cs-hint">{t(matchCount===1?'canvasMatchOne':'canvasMatches').replace('{n}', String(matchCount))}</p>
+              <div className="cs-search-results">{project.nodes.filter(n => n.title.includes(needle)).slice(0, 6).map(n => <button key={n.id} type="button" disabled={busy} onMouseDown={e => e.preventDefault()} onClick={() => { choose(n.id); requestAnimationFrame(() => { const card = document.querySelector(`[data-cs-parent="${n.id}"]`); card?.scrollIntoView({ block: 'center', behavior: 'smooth' }); }); }}>{n.title}</button>)}</div></>}
+            {needle && matchCount === 0 && <p className="cs-hint">{t('filterNoMatch')}</p>}
+            <MindMap t={t} move={(id,parentId)=>save({kind:'move',id,parentId})} nodes={project.nodes} selected={selected} select={choose} disabled={busy}/>
+          </div>)
         : <div className="cs-tree" aria-label={t('requirements')}>
             <input className="cs-tree-search" aria-label={t('filterRequirements')} placeholder={t('filterRequirements')} value={search} onChange={e => setSearch(e.target.value)} />
             {needle && matchCount > 0 && <p className="cs-hint">{t('filterMatches').replace('{n}', String(matchCount))}</p>}
