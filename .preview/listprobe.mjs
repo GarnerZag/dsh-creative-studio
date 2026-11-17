@@ -1,0 +1,10 @@
+import {chromium} from 'playwright';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,executablePath:'/dsh-home/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome',viewport:{width:1440,height:1150}});
+const page=await ctx.newPage();
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded'});
+await page.getByRole('button',{name:'Creative Studio'}).click({timeout:60000});
+await page.waitForTimeout(1200);
+const r=await page.evaluate(async()=>{const rpcId='x'+Math.random().toString(36).slice(2);
+ const r=await fetch('/api/creativeStudio/listProjects',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'client-request',rpcId,method:'creativeStudio/listProjects',payload:{args:{}}})});
+ const j=await r.json();return j.result}); 
+console.log(JSON.stringify(r).slice(0,600));await ctx.close();

@@ -1,0 +1,24 @@
+import {chromium} from 'playwright';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,executablePath:'/dsh-home/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome',viewport:{width:1440,height:1150}});
+const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(String(e).slice(0,160)));page.on('dialog',d=>d.accept());
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded'});
+await page.getByRole('button',{name:'Creative Studio'}).click({timeout:60000});
+await page.waitForTimeout(1200);
+const idx=(await page.locator('.cs-project-card').allTextContents()).findIndex(t=>t.includes('Structured handoff probe'));
+await page.locator('.cs-project-card').nth(idx).click();await page.waitForTimeout(1500);
+await page.locator('.cs-steps button').nth(3).click();await page.waitForTimeout(1200);
+await page.locator('label:has-text("Approve selected changes only") input').check();
+await page.waitForTimeout(800);
+const snap=async()=>page.evaluate(()=>{
+  const btn=[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Select all changes');
+  if(!btn)return{noToolbar:true};
+  const box=btn.parentElement;const ul=box.nextElementSibling;
+  const list=ul?[...ul.querySelectorAll('input[type=checkbox]')]:[];
+  const status=[...document.querySelectorAll('[role=status]')].map(e=>e.textContent.trim()).slice(0,3);
+  return{items:list.length,checked:list.filter(i=>i.checked).length,status};});
+const before=await snap();
+await page.getByRole('button',{name:'Select all changes'}).click();await page.waitForTimeout(700);
+const after=await snap();
+await page.getByRole('button',{name:'Clear all'}).click();await page.waitForTimeout(600);
+const cleared=await snap();
+console.log(JSON.stringify({before,after,cleared,errs}));await ctx.close();
