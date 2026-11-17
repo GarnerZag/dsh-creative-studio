@@ -12,7 +12,10 @@ export function researchTools(store:ProjectStore){
 }
 export function researchGuard(store:ProjectStore){return (exec:{agent?:{id:string};name:string;arguments?:unknown})=>{
  const session=exec.agent?.id;if(!session)return;
- const project=store.list().map(p=>store.get(p.id)).find(p=>p.researchSessions.includes(session)||p.researchJob?.sessionId===session);if(!project)return;
+ // Same scoping rule as the proposal guard: only the session that owns the current,
+ // still-active research job is restricted. Stale ids in project.researchSessions must
+ // not keep locking an ordinary session.
+ const project=store.list().map(p=>store.get(p.id)).find(p=>p.researchJob?.sessionId===session);if(!project)return;
  const job=project.researchJob;
- if(!job||job.sessionId!==session||!researchToolAllowed(job,exec.name,exec.arguments))return '研究会话仅允许当前来源范围内的只读工具和结论回传。';
+ if(!job||job.sessionId!==session||!['queued','submitted','unknown'].includes(job.status)||!researchToolAllowed(job,exec.name,exec.arguments))return '研究会话仅允许当前来源范围内的只读工具和结论回传。';
  };}

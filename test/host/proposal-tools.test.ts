@@ -15,8 +15,11 @@ test('proposal tools reject foreign sessions and guard blocks execution tools',a
  assert.equal(guard({name:read.name,agent:{id:'session'},signal}),undefined);
  assert.equal(guard({name:'bash',agent:{id:'unrelated'},signal}),undefined);
  const old=rows.get(p.id)!;old.proposalJob!.status='finished';
+ // A finished job releases its session: historical ids must never keep a normal
+ // session restricted (an unrelated session once locked by a stale id is the bug this guards).
+ assert.equal(guard({name:'bash',agent:{id:'session'},signal}),undefined);
  await s.beginProposalJob(p.id,old.projectRevision,'job2','session2','下一轮');
- assert.ok(guard({name:'bash',agent:{id:'session'},signal}));
+ assert.equal(guard({name:'bash',agent:{id:'session'},signal}),undefined);
  assert.ok(guard({name:'bash',agent:{id:'session2'},signal}));
  await assert.rejects(read.execute({projectId:p.id,jobId:'job'},{name:read.name,agent:{id:'session'},signal}),/JOB_SCOPE_MISMATCH/);
 });

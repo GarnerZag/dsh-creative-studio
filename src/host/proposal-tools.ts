@@ -39,6 +39,10 @@ export function proposalTools(store:ProjectStore):ToolDefinition[]{
 /** Applies only to dedicated proposal sessions; other Harness sessions are untouched. */
 export function proposalGuard(store:ProjectStore):ToolGuard{return exec=>{
  const sessionId=exec.agent?.id;if(!sessionId)return;
- const bound=store.list().some(p=>{const project=store.get(p.id);return project.proposalSessions.includes(sessionId)||project.proposalJob?.sessionId===sessionId;});
+ // Bind only the session that currently owns an active job. Historical session ids
+ // (project.proposalSessions) are kept for audit only: a finished or abandoned job must
+ // never keep restricting an unrelated user session that happens to share an old id.
+ const bound=store.list().some(p=>{const job=store.get(p.id).proposalJob;
+  return !!job&&job.sessionId===sessionId&&['queued','submitted','unknown'].includes(job.status);});
  return bound&&!proposalToolNames.includes(exec.name)?'需求推导会话仅可读取冻结内容、提交理解与候选，不可执行开发或审批。':undefined;
 };}
