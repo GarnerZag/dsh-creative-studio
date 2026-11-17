@@ -16,6 +16,16 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+/** Turns transport or domain codes into something a product person can act on. */
+function describeError(message: string, t: (key: string) => string): string {
+  if (message.includes('CONFLICT')) return t('attachmentConflict');
+  if (message.includes('ATTACHMENT_LIMIT')) return t('attachmentLimit');
+  if (message.includes('ATTACHMENT_TOO_LARGE')) return t('attachmentTooLargeServer');
+  if (message.includes('ATTACHMENT_NOT_FOUND')) return t('attachmentGone');
+  if (message.includes('HTTP 404') || message.includes('not found')) return t('attachmentUnavailable');
+  return message;
+}
+
 function readBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -67,15 +77,17 @@ export function AttachmentsPanel({ project, t, busy, actions }: { project: Proje
     setError('');
     setLocalBusy(true);
     try {
-      const room = MAX_FILES - list.length;
+      let current = project;
+      let room = MAX_FILES - list.length;
       for (const file of Array.from(files)) {
         if (file.size > MAX_BYTES) { setError(t('attachmentTooLarge').replace('{name}', file.name)); continue; }
         if (room <= 0) { setError(t('attachmentLimit')); break; }
         const base64 = await readBase64(file);
-        await actions.upload(project, { name: file.name, mime: file.type || 'application/octet-stream', base64 });
+        current = await actions.upload(current, { name: file.name, mime: file.type || 'application/octet-stream', base64 });
+        room -= 1;
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(describeError(caught instanceof Error ? caught.message : String(caught), t));
     } finally {
       setLocalBusy(false);
     }
@@ -95,7 +107,7 @@ export function AttachmentsPanel({ project, t, busy, actions }: { project: Proje
       });
       if (openId === attachmentId) setOpenId(null);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(describeError(caught instanceof Error ? caught.message : String(caught), t));
     } finally {
       setLocalBusy(false);
     }

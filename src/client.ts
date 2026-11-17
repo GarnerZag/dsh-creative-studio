@@ -9,7 +9,7 @@ const dictionaries = {
   zh: {
     badgeAttachmentsOne:' 份资料',badgeAttachments:' 份资料',
     attachmentDrop:'也可以把文件直接拖到这里。',attachmentPaste:'截图可以先复制，点一下这个区域再按 Ctrl/⌘+V 粘贴。',
-    attachmentsTitle:'参考资料（可选）',attachmentsHint:'可以传需求文档、截图、竞品资料，用来补充说明你的想法。单个文件最大 3 MB，最多 20 个。',attachmentAdd:'选择文件',attachmentBusy:'上传中…',attachmentTooLarge:'「{name}」超过 3 MB，没有上传。',attachmentLimit:'最多只能放 20 个文件，先移除一些再传。',attachmentRemove:'移除',
+    attachmentsTitle:'参考资料（可选）',attachmentsHint:'可以传需求文档、截图、竞品资料，用来补充说明你的想法。单个文件最大 3 MB，最多 20 个。',attachmentAdd:'选择文件',attachmentBusy:'上传中…',attachmentTooLarge:'「{name}」超过 3 MB，没有上传。',attachmentLimit:'最多只能放 20 个文件，先移除一些再传。',attachmentConflict:'项目在别处被改过了，刷新一下页面再传。',attachmentGone:'这个文件已经不在了，刷新一下看看。',attachmentTooLargeServer:'文件太大，服务器没有接收，换个小一点的。',attachmentUnavailable:'上传功能还没加载，需要在宿主机重启一次 Web 服务。',attachmentRemove:'移除',
     confirmProjectChange:'切换或新建项目会关闭当前编辑区，未保存的表单和本地 Demo 预览将丢弃。确认继续？已保存数据不会删除。',
     editorConflict:'远端修改与未保存编辑冲突。已保留输入并暂停保存；请核对后重新载入。',editorReload:'放弃本地输入并载入最新值',
     researchSeed:'将最新研究带入推导输入',researchSeedConfirm:'用最新研究摘要替换当前未提交输入？只预填文本，不发送模型请求。随后生成时，这些摘要及限制会发送给所选模型；不包含原始工具结果或源文件。',
@@ -47,7 +47,7 @@ const dictionaries = {
   en: {
     badgeAttachmentsOne:' file',badgeAttachments:' files',
     attachmentDrop:'You can also drag files here.',attachmentPaste:'Copied a screenshot? Click this area and press Ctrl/⌘+V.',
-    attachmentsTitle:'Reference material (optional)',attachmentsHint:'Requirement docs, screenshots or competitor notes that explain the idea. Up to 3 MB per file, 20 files.',attachmentAdd:'Choose files',attachmentBusy:'Uploading…',attachmentTooLarge:'“{name}” is over 3 MB, so it was not uploaded.',attachmentLimit:'20 files is the limit — remove one before adding more.',attachmentRemove:'Remove',
+    attachmentsTitle:'Reference material (optional)',attachmentsHint:'Requirement docs, screenshots or competitor notes that explain the idea. Up to 3 MB per file, 20 files.',attachmentAdd:'Choose files',attachmentBusy:'Uploading…',attachmentTooLarge:'“{name}” is over 3 MB, so it was not uploaded.',attachmentLimit:'20 files is the limit — remove one before adding more.',attachmentConflict:'The project changed somewhere else — refresh before uploading again.',attachmentGone:'That file is gone now — refresh to see the current list.',attachmentTooLargeServer:'The file was too large for the server to accept — try a smaller one.',attachmentUnavailable:'Uploads are not loaded yet — restart the Web service on the host once.',attachmentRemove:'Remove',
     confirmProjectChange:'Switching or creating a project closes the current editors and discards unsaved forms and local Demo previews. Continue? Saved data will not be deleted.',
     editorConflict:'Remote changes conflict with unsaved edits. Input is preserved and saving is paused; review then reload.',editorReload:'Discard local input and load latest values',
     researchSeed:'Bring latest research into proposal input',researchSeedConfirm:'Replace the unsent input with the latest research summary? This only prefills text. Generating later sends the summary and limitations to the model, but not raw tool results or source files.',
