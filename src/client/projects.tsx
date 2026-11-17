@@ -37,6 +37,9 @@ export interface ProjectActions {
   abandonProposal(project:ProjectSnapshot,jobId:string):Promise<ProjectSnapshot>;
   editBrief(project:ProjectSnapshot,jobId:string,brief:import('../types.js').BriefInfo):Promise<ProjectSnapshot>;
   jobReply(project:ProjectSnapshot,jobId:string):Promise<import('../types.js').JobReply>;
+  uploadAttachment(project:ProjectSnapshot,file:{name:string;mime:string;base64:string}):Promise<ProjectSnapshot>;
+  deleteAttachment(project:ProjectSnapshot,attachmentId:string):Promise<ProjectSnapshot>;
+  readAttachment(project:ProjectSnapshot,attachmentId:string):Promise<Blob>;
   list(): Promise<ProjectSummary[]>;
   remove(project:ProjectSnapshot):Promise<ProjectSummary[]>;
   adopt(project: ProjectSnapshot, proposalId: string): Promise<ProjectSnapshot>;
@@ -132,7 +135,7 @@ export function ProjectWorkspace({ api, t }: { api: ProjectActions; t: (key: str
   };
   const stages:Stage[]=project?[
     {id:'idea',label:t('stageIdea'),hint:t('stageHintIdea'),badge:project.proposalJob?.status==='submitted'?t('badgeAwaitingModel'):project.proposals.length?`${project.proposals.length}${t('badgeCandidates')}`:undefined,blocks:[
-      {id:'generate',label:t('generateTitle'),content:<GeneratePanel listWorkspaces={api.listWorkspaces} listModels={api.listModels} key={`generate-${project.id}`} project={project} busy={busy} t={t} generate={(request,workspaceId,model)=>{void run(()=>api.generate(project,request,workspaceId,model));}} refresh={()=>{void run(()=>api.get(project.id));}} continueJob={async(jobId,answers,confirmed)=>api.continueProposal(project,jobId,answers,confirmed)} abandonJob={async jobId=>api.abandonProposal(project,jobId)} editBrief={async(jobId,brief)=>api.editBrief(project,jobId,brief)} readReply={async jobId=>api.jobReply(project,jobId)}/>},
+      {id:'generate',label:t('generateTitle'),content:<GeneratePanel listWorkspaces={api.listWorkspaces} listModels={api.listModels} key={`generate-${project.id}`} attachments={{upload:api.uploadAttachment,remove:api.deleteAttachment,read:api.readAttachment}} onProject={next=>{setProject(next);void api.list().then(items=>setProjects(items)).catch(()=>undefined);}} project={project} busy={busy} t={t} generate={(request,workspaceId,model)=>{void run(()=>api.generate(project,request,workspaceId,model));}} refresh={()=>{void run(()=>api.get(project.id));}} continueJob={async(jobId,answers,confirmed)=>api.continueProposal(project,jobId,answers,confirmed)} abandonJob={async jobId=>api.abandonProposal(project,jobId)} editBrief={async(jobId,brief)=>api.editBrief(project,jobId,brief)} readReply={async jobId=>api.jobReply(project,jobId)}/>},
       {id:'proposals',label:t('proposals'),content:<ProposalPanel registerReference={reference=>{void run(()=>api.reference(project,{kind:'save',reference}));}} reject={id=>{void run(()=>api.reject(project,id));}} key={`proposals-${project.id}`} project={project} busy={busy} t={t} adopt={id=>{void run(()=>api.adopt(project,id),true);}}/>},
     ]},
     {id:'requirements',label:t('stageRequirements'),hint:t('stageHintRequirements'),badge:`${project.nodes.length}${t(project.nodes.length===1?'badgeRequirementsOne':'badgeRequirements')}`,blocks:[

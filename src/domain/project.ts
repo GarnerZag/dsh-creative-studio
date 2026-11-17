@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import {AttachmentSchema,MAX_ATTACHMENTS} from './attachment-schema.js';
 import {SceneSchema,validateScene} from './demo.js';
 import {RecommendationsSchema} from './recommendations.js';
 import {reorderRequirements} from './requirement-order.js';
@@ -103,6 +104,7 @@ export const ProjectSchema = z.object({
   proposalSessions: z.array(id).default([]),
   references:z.array(ReferenceSchema).default([]),
   features:z.array(FeatureNoteSchema).default([]),
+  attachments:z.array(AttachmentSchema).max(MAX_ATTACHMENTS).default([]),
 }).strict();
 export type Project = z.infer<typeof ProjectSchema>;
 export type RequirementEdit =

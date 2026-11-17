@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {disposeAll,type Cleanup} from './dispose.js';
 import {evidencePage} from './evidence-page.js';
 import type {ApprovalReviewInput,ResearchEvidencePage} from '../types.js';
@@ -12,8 +13,10 @@ import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol';
 import { requireUserAuthority } from './authority.js';
 
 import {HandoffStore,StoredHandoffSchema,type StoredHandoff} from './handoff-store.js';
+import {AttachmentStore,StoredAttachmentSchema,type StoredAttachment} from './attachment-store.js';
+import {MAX_ATTACHMENT_BYTES} from '../domain/attachment-schema.js';
 import {checkHandoff} from '../domain/handoff.js';
-import type { BriefInfo, JobReply, ModelCatalogView, ModelChoice, WorkspaceOption,HandoffInfo,HandoffChunk,HandoffReadinessResult,DemoSceneData, StudioHealth, ProjectHead, ProjectSummary, ProjectSnapshot, RequirementChange, ArchitectureChange, ProposalInput, ReferenceChange, FeatureChange } from '../types.js';
+import type { AttachmentChunk, BriefInfo, JobReply, ModelCatalogView, ModelChoice, WorkspaceOption,HandoffInfo,HandoffChunk,HandoffReadinessResult,DemoSceneData, StudioHealth, ProjectHead, ProjectSummary, ProjectSnapshot, RequirementChange, ArchitectureChange, ProposalInput, ReferenceChange, FeatureChange } from '../types.js';
 import { defineDomain, domainTable } from '@deepseek-ai/dsh-storage-domain';
 import { ProjectSchema, type Project } from '../domain/project.js';
 import { ProjectStore } from './store.js';
@@ -30,22 +33,24 @@ export default class CreativeStudio extends TypertRemoteService {
   static inject = ['storageDomain', 'tools'];
   private projects?: ProjectStore;
   private handoffs?:HandoffStore;
+  private attachments?:AttachmentStore;
   private initializationError?: string;
 
   constructor(ctx: Context) {
     super(ctx, 'creativeStudio');
     ctx.effect(async () => {
       const disposers:Cleanup[]=[];
-      const cleanup=async()=>{this.projects=undefined;this.handoffs=undefined;await disposeAll(disposers);};
+      const cleanup=async()=>{this.projects=undefined;this.handoffs=undefined;this.attachments=undefined;await disposeAll(disposers);};
       try {
       const domain = await ctx.storageDomain.open(defineDomain({
         name: 'garnerzag_creative_studio', version: 1, layout: 'per-record',
-        tables: { projects: domainTable<string, Project>(ProjectSchema), handoffs:domainTable<string,StoredHandoff>(StoredHandoffSchema) },
+        tables: { projects: domainTable<string, Project>(ProjectSchema), handoffs:domainTable<string,StoredHandoff>(StoredHandoffSchema), attachments:domainTable<string,StoredAttachment>(StoredAttachmentSchema) },
       }));
       disposers.push(()=>domain.close());
       const store = new ProjectStore(domain.table('projects'));
       this.projects = store;
       this.handoffs=new HandoffStore(domain.table('handoffs'));
+      this.attachments=new AttachmentStore(domain.table('attachments'));
       const tools = ctx.get('tools') as ProposalToolRegistry | undefined;
       if (!tools) throw new Error('TOOLS_UNAVAILABLE');
       for(const definition of proposalTools(store))disposers.push(tools.register(definition, {
@@ -99,6 +104,42 @@ export default class CreativeStudio extends TypertRemoteService {
   readHandoffChunk(id:string,handoffId:string,offset:number,maxBytes:number):HandoffChunk{this.userStore().get(id);if(!this.handoffs)throw new Error('STORAGE_NOT_READY');return this.handoffs.chunk(id,handoffId,offset,maxBytes);}
 
   @Remote
+  async uploadAttachment(id:string,expectedProjectRevision:number,expectedContentRevision:number,input:{name:string;mime:string;base64:string}):Promise<ProjectSnapshot>{
+    const store=this.userStore();
+    const attachments=this.attachments;
+    if(!attachments)throw new Error('STORAGE_NOT_READY');
+    const current=store.get(id);
+    if(current.projectRevision!==expectedProjectRevision||current.contentRevision!==expectedContentRevision)throw new Error('CONFLICT');
+    const bytes=Buffer.from(input.base64,'base64');
+    if(!bytes.length)throw new Error('ATTACHMENT_EMPTY');
+    if(bytes.length>MAX_ATTACHMENT_BYTES)throw new Error('ATTACHMENT_TOO_LARGE');
+    const attachmentId=randomUUID();
+    await attachments.put(id,attachmentId,bytes);
+    try{
+      return await store.attach(id,expectedProjectRevision,{id:attachmentId,name:input.name,mime:input.mime,size:bytes.length,createdAt:new Date().toISOString()});
+    }catch(error){
+      await attachments.remove(id,attachmentId).catch(()=>undefined);
+      throw error;
+    }
+  }
+
+  @Remote
+  async deleteAttachment(id:string,expectedProjectRevision:number,attachmentId:string):Promise<ProjectSnapshot>{
+    const store=this.userStore();
+    const snapshot=await store.detach(id,expectedProjectRevision,attachmentId);
+    if(this.attachments)await this.attachments.remove(id,attachmentId);
+    return snapshot;
+  }
+
+  @Remote
+  readAttachmentChunk(id:string,attachmentId:string,offset:number,maxBytes:number):AttachmentChunk{
+    const project=this.userStore().get(id);
+    if(!project.attachments.some(item=>item.id===attachmentId))throw new Error('ATTACHMENT_NOT_FOUND');
+    if(!this.attachments)throw new Error('STORAGE_NOT_READY');
+    return this.attachments.chunk(id,attachmentId,offset,maxBytes);
+  }
+
+  @Remote
   confirmTaskPlan(id:string,expectedProjectRevision:number,versionId:string):Promise<ProjectSnapshot>{return this.userStore().confirmTasks(id,expectedProjectRevision,versionId);}
 
   @Remote
@@ -127,6 +168,7 @@ export default class CreativeStudio extends TypertRemoteService {
     const store=this.userStore();
     await store.remove(id,expectedProjectRevision);
     if(this.handoffs)await this.handoffs.purge(id);
+    if(this.attachments)await this.attachments.purge(id);
     return this.listProjects();
   }
 

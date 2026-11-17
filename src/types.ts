@@ -2,6 +2,8 @@
 export interface ResearchEvidencePage {text:string;nextOffset:number|null;total:number}
 export interface HandoffInfo { handoffId:string; projectId:string; versionId:string; ready:boolean; manifestDigest:string; archiveSha256:string; size:number }
 export interface HandoffChunk {base64:string;nextOffset:number|null;total:number;packageId:string}
+export interface AttachmentInfo { id:string; name:string; mime:string; size:number; kind:'image'|'text'|'other'; createdAt:string }
+export interface AttachmentChunk {base64:string;nextOffset:number|null;total:number;attachmentId:string}
 export interface HandoffIssue {code:string;id:string;message:string}
 export interface HandoffReadinessResult {versionId:string;ready:boolean;blockers:HandoffIssue[];warnings:HandoffIssue[]}
 export interface StudioHealth {
@@ -107,6 +109,7 @@ export interface ProjectSnapshot extends ProjectHead {
   schemaVersion: 1;
   nodes: RequirementNode[];
   architecture: ArchitectureNode[];
+  attachments: AttachmentInfo[];
 }
 export interface WorkspaceOption { id:string;title:string;path:string }
 /** One routable provider/model route the Host can start a session with. */

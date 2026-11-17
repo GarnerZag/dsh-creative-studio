@@ -12,6 +12,7 @@ import { randomUUID } from 'node:crypto';
 import { abandonProposalJob, beginProposalJob, confirmJobBrief, editJobBrief, submitJobBrief, submitJobProposal } from '../domain/jobs.js';
 import { saveProposal, adoptProposal, rejectProposal } from '../domain/proposals.js';
 import type { Brief, ProposalInput } from '../domain/project.js';
+import {addAttachment,removeAttachment,type AttachmentInput} from '../domain/attachments.js';
 import { approveReviewedVersion, type ApprovalReview } from '../domain/approval-review.js';
 import { editArchitecture, type ArchitectureEdit } from '../domain/architecture.js';
 import type { KvTable } from '@deepseek-ai/dsh-storage-domain';
@@ -28,6 +29,20 @@ export class ProjectStore {
   researchEvidence(id:string,sessionId:string,jobId:string,evidence:CapturedResearchResult):Promise<Project>{return this.table.update(id,current=>appendResearchEvidence(current,sessionId,jobId,evidence));}
   acceptReport(projectId:string,expectedProjectRevision:number,reportId:string,accepted:boolean):Promise<Project>{return this.table.update(projectId,current=>{if(current.projectRevision!==expectedProjectRevision)throw new Error('CONFLICT');return setReportAcceptance(current,reportId,accepted);});}
   report(projectId:string,sessionId:string,input:unknown):Promise<Project>{return this.table.update(projectId,current=>submitReport(current,sessionId,input));}
+
+  attach(id: string, expectedProjectRevision: number, input: AttachmentInput): Promise<Project> {
+    return this.table.update(id, current => {
+      if (current.projectRevision !== expectedProjectRevision) throw new Error('CONFLICT');
+      return validateProject(addAttachment(current, input));
+    });
+  }
+
+  detach(id: string, expectedProjectRevision: number, attachmentId: string): Promise<Project> {
+    return this.table.update(id, current => {
+      if (current.projectRevision !== expectedProjectRevision) throw new Error('CONFLICT');
+      return validateProject(removeAttachment(current, attachmentId));
+    });
+  }
 
   list(): Array<{ id: string; name: string; projectRevision: number; contentRevision: number }> {
     return Array.from(this.table.entries(), ([, p]) => ({ id: p.id, name: p.name, projectRevision: p.projectRevision, contentRevision: p.contentRevision }));

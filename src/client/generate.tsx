@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {researchSeed} from './research-seed.js';
 import {ModelSelect} from './model-picker.js';
+import { AttachmentsPanel, type AttachmentActions } from './attachments.js';
 import type {WorkspaceOption,ProjectSnapshot,ModelCatalogView,ModelChoice,BriefInfo,JobReply} from '../types.js';
 function BriefCard({brief,t}:{brief:BriefInfo;t:(key:string)=>string}):React.ReactElement {
  const list=(label:string,items:string[],ordered=false):React.ReactElement|null=>items.length===0?null:<><dt>{label}</dt><dd>{ordered?<ol className="cs-brief-list">{items.map((text,i)=><li key={i}>{text}</li>)}</ol>:<ul className="cs-brief-list">{items.map((text,i)=><li key={i}>{text}</li>)}</ul>}</dd></>;
@@ -68,7 +69,7 @@ function JobReplyBlock({jobId,active,t,load,refreshKey,canEnd,endAttempt}:{jobId
   {canEnd&&!reply?.running&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={loading} onClick={endAttempt}>{t('jobReplyEndAttempt')}</button><small className="cs-hint">{t('jobReplyEndHint')}</small></div>}
  </section>;
 }
-export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels,continueJob,abandonJob,editBrief,readReply}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void;continueJob:(jobId:string,answers:string,confirmed:boolean)=>Promise<ProjectSnapshot>;abandonJob:(jobId:string)=>Promise<ProjectSnapshot>;editBrief:(jobId:string,brief:BriefInfo)=>Promise<ProjectSnapshot>;readReply:(jobId:string)=>Promise<JobReply>}):React.ReactElement {
+export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,listModels,continueJob,abandonJob,editBrief,readReply,attachments,onProject}:{project:ProjectSnapshot;busy:boolean;t:(key:string)=>string;listWorkspaces:()=>Promise<WorkspaceOption[]>;listModels:()=>Promise<ModelCatalogView>;generate:(request:string,workspaceId:string,model:ModelChoice|undefined)=>void;refresh:()=>void;continueJob:(jobId:string,answers:string,confirmed:boolean)=>Promise<ProjectSnapshot>;abandonJob:(jobId:string)=>Promise<ProjectSnapshot>;editBrief:(jobId:string,brief:BriefInfo)=>Promise<ProjectSnapshot>;readReply:(jobId:string)=>Promise<JobReply>;attachments:AttachmentActions;onProject:(next:ProjectSnapshot)=>void}):React.ReactElement {
  const [request,setRequest]=React.useState(''),[workspace,setWorkspace]=React.useState(''),[model,setModel]=React.useState<ModelChoice|undefined>(undefined);
  const [workspaces,setWorkspaces]=React.useState<WorkspaceOption[]>([]),[workspaceError,setWorkspaceError]=React.useState(''),[refreshKey,setRefreshKey]=React.useState(0);
  const [answers,setAnswers]=React.useState(''),[lastProject,setLastProject]=React.useState<ProjectSnapshot>(project),[busyLocal,setBusyLocal]=React.useState(false),[error,setError]=React.useState(''),[editOpen,setEditOpen]=React.useState(false);
@@ -77,6 +78,7 @@ export function GeneratePanel({project,busy,t,generate,refresh,listWorkspaces,li
  React.useEffect(()=>{let live=true;setWorkspaceError('');void listWorkspaces().then(items=>{if(live){setWorkspaces(items);setWorkspace(id=>{if(items.some(w=>w.id===id))return id;let remembered='';try{remembered=localStorage.getItem('cs.workspaceId')??'';}catch{remembered='';}if(remembered&&items.some(w=>w.id===remembered))return remembered;return items.length===1?items[0]!.id:'';});}}).catch(e=>{if(live){setWorkspaceError(String(e));setWorkspaces([]);setWorkspace('');}});return()=>{live=false;};},[listWorkspaces,refreshKey]);
  const job=project.proposalJob,active=job&&!['finished','failed'].includes(job.status);
  return <section><p className="cs-lead">{t('generateNotice')}</p>
+ <AttachmentsPanel project={project} t={t} busy={busy} actions={{upload:async(p,f)=>{const next=await attachments.upload(p,f);onProject(next);return next;},remove:async(p,id)=>{const next=await attachments.remove(p,id);onProject(next);return next;},read:attachments.read}}/>
  <form onSubmit={e=>{e.preventDefault();if(request.trim()&&workspace.trim()&&window.confirm(t('generateConfirm')))generate(request.trim(),workspace.trim(),model);}}>
  <label>{t('roughIdea')}<textarea rows={5} value={request} onChange={e=>setRequest(e.target.value)} placeholder={t('roughIdeaHint')} disabled={busy||!!active} onKeyDown={e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();(e.currentTarget.form as HTMLFormElement|null)?.requestSubmit();}}}/><small className="cs-hint">{t('ideaShortcutHint')}</small></label>
  {project.researchJob?.status==='finished'&&project.researchJob.conclusion&&<div className="cs-row-actions"><button type="button" className="cs-quiet" disabled={busy||!!active} onClick={()=>{if(window.confirm(t('researchSeedConfirm')))setRequest(researchSeed(project.researchJob));}}>{t('researchSeed')}</button></div>}
