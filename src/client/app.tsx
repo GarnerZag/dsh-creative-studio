@@ -152,7 +152,7 @@ const styles = `
 .creative-studio-root .cs-file-button input{position:absolute;inset:0;opacity:0;cursor:inherit;width:100%;height:100%}
 .creative-studio-root .cs-attachments{display:flex;flex-direction:column;gap:8px;margin:0 0 16px;padding:12px;border:1px solid var(--cs-border);border-radius:12px;background-color:var(--cs-surface)}
 .creative-studio-root .cs-attachments .cs-toolbar{align-items:center;flex-wrap:wrap;gap:12px;margin:0}
-.creative-studio-root .cs-attachment-list{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.creative-studio-root .cs-attachment-list{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
 .creative-studio-root .cs-attachment-list li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}
 .creative-studio-root .cs-attachment-open{display:flex;align-items:center;gap:8px;min-height:44px;padding:4px 8px;text-align:left;border-color:transparent;background:transparent;max-inline-size:100%}
 .creative-studio-root .cs-attachment-open:hover{border-color:var(--cs-border)}

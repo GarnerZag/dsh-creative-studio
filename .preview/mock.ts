@@ -75,6 +75,11 @@ const demo: DemoSceneData = {
 export const project: ProjectSnapshot = {
   id: 'p1', name: '创意工坊 · 需求梳理', projectRevision: 3, contentRevision: 7, schemaVersion: 1,
   nodes, architecture,
+  attachments:[
+    {id:'att-doc',name:'需求草稿-20261117.md',mime:'text/markdown',size:4821,kind:'text',createdAt:'2026-11-17T03:10:00.000Z'},
+    {id:'att-shot',name:'首页截图.png',mime:'image/png',size:184320,kind:'image',createdAt:'2026-11-17T03:11:00.000Z'},
+    {id:'att-pdf',name:'竞品分析.pdf',mime:'application/pdf',size:921600,kind:'other',createdAt:'2026-11-17T03:12:00.000Z'},
+  ],
   references: [{
     id: 'r1', name: 'Linear', sourceKind: 'url', location: 'https://linear.app', origin: 'manual',
     notes: '借鉴其命令面板与键盘优先的交互密度。', license: 'unknown',

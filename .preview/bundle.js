@@ -30696,6 +30696,14 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(bytes < 10 * 1024 ? 1 : 0)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
+  function describeError(message, t2) {
+    if (message.includes("CONFLICT")) return t2("attachmentConflict");
+    if (message.includes("ATTACHMENT_LIMIT")) return t2("attachmentLimit");
+    if (message.includes("ATTACHMENT_TOO_LARGE")) return t2("attachmentTooLargeServer");
+    if (message.includes("ATTACHMENT_NOT_FOUND")) return t2("attachmentGone");
+    if (message.includes("HTTP 404") || message.includes("not found")) return t2("attachmentUnavailable");
+    return message;
+  }
   function readBase64(file2) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -30712,6 +30720,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     const [error51, setError] = import_react.default.useState("");
     const [urls, setUrls] = import_react.default.useState({});
     const [openId, setOpenId] = import_react.default.useState(null);
+    const [dragging, setDragging] = import_react.default.useState(false);
     const disabled = busy || localBusy;
     const list = project2.attachments ?? [];
     const images = list.filter((item) => item.kind === "image");
@@ -30746,7 +30755,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       setError("");
       setLocalBusy(true);
       try {
-        const room = MAX_FILES - list.length;
+        let current = project2;
+        let room = MAX_FILES - list.length;
         for (const file2 of Array.from(files)) {
           if (file2.size > MAX_BYTES) {
             setError(t2("attachmentTooLarge").replace("{name}", file2.name));
@@ -30757,10 +30767,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
             break;
           }
           const base643 = await readBase64(file2);
-          await actions2.upload(project2, { name: file2.name, mime: file2.type || "application/octet-stream", base64: base643 });
+          current = await actions2.upload(current, { name: file2.name, mime: file2.type || "application/octet-stream", base64: base643 });
+          room -= 1;
         }
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : String(caught));
+        setError(describeError(caught instanceof Error ? caught.message : String(caught), t2));
       } finally {
         setLocalBusy(false);
       }
@@ -30779,35 +30790,76 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         });
         if (openId === attachmentId) setOpenId(null);
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : String(caught));
+        setError(describeError(caught instanceof Error ? caught.message : String(caught), t2));
       } finally {
         setLocalBusy(false);
       }
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("section", { className: "cs-attachments", "aria-label": t2("attachmentsTitle"), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "cs-toolbar", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("label", { className: "cs-file-button", children: [
-          localBusy ? t2("attachmentBusy") : t2("attachmentAdd"),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { type: "file", multiple: true, disabled, onChange: (event) => {
-            void add(event.currentTarget.files);
-            event.currentTarget.value = "";
-          } })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-hint", children: t2("attachmentsHint") })
-      ] }),
-      error51 && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { role: "alert", className: "cs-error", children: error51 }),
-      list.length === 0 ? null : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("ul", { className: "cs-attachment-list", children: list.map((item) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("li", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("button", { type: "button", className: "cs-attachment-open", disabled, "aria-expanded": openId === item.id, onClick: () => setOpenId(openId === item.id ? null : item.id), children: [
-          item.kind === "image" && urls[item.id] ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("img", { src: urls[item.id], alt: "", width: 40, height: 40 }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-attachment-badge", "aria-hidden": "true", children: item.kind === "text" ? "TXT" : "FILE" }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-attachment-name", children: item.name }),
-          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-hint", children: formatSize2(item.size) })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { type: "button", className: "cs-quiet", disabled, "aria-label": `${t2("attachmentRemove")} ${item.name}`, onClick: () => {
-          void remove(item.id);
-        }, children: t2("attachmentRemove") }),
-        openId === item.id && item.kind === "image" && urls[item.id] && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("img", { className: "cs-attachment-preview", src: urls[item.id], alt: item.name })
-      ] }, item.id)) })
-    ] });
+    const counts = { text: 0, image: 0, other: 0 };
+    for (const item of list) counts[item.kind] += 1;
+    const material = [];
+    if (counts.text) material.push(t2("attachmentMaterialText").replace("{n}", String(counts.text)));
+    if (counts.image) material.push(t2("attachmentMaterialImage").replace("{n}", String(counts.image)));
+    if (counts.other) material.push(t2("attachmentMaterialOther").replace("{n}", String(counts.other)));
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(
+      "section",
+      {
+        className: dragging ? "cs-attachments cs-drop" : "cs-attachments",
+        "aria-label": t2("attachmentsTitle"),
+        onDragOver: (event) => {
+          event.preventDefault();
+          if (!disabled) setDragging(true);
+        },
+        onDragLeave: (event) => {
+          if (event.currentTarget === event.target) setDragging(false);
+        },
+        onDrop: (event) => {
+          event.preventDefault();
+          setDragging(false);
+          if (!disabled) void add(event.dataTransfer.files);
+        },
+        onPaste: (event) => {
+          if (disabled) return;
+          const files = Array.from(event.clipboardData.files ?? []).filter((file2) => file2.type.startsWith("image/"));
+          if (!files.length) return;
+          event.preventDefault();
+          const transfer = new DataTransfer();
+          files.forEach((file2) => transfer.items.add(file2));
+          void add(transfer.files);
+        },
+        tabIndex: 0,
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "cs-toolbar", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("label", { className: "cs-file-button", children: [
+              localBusy ? t2("attachmentBusy") : t2("attachmentAdd"),
+              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { type: "file", multiple: true, disabled, onChange: (event) => {
+                void add(event.currentTarget.files);
+                event.currentTarget.value = "";
+              } })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-hint", children: t2("attachmentsHint") }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-hint", children: t2("attachmentDrop") }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-hint", children: t2("attachmentPaste") })
+          ] }),
+          error51 && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { role: "alert", className: "cs-error", children: error51 }),
+          list.length === 0 ? null : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("ul", { className: "cs-attachment-list", children: list.map((item) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("li", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("button", { type: "button", className: "cs-attachment-open", disabled, "aria-expanded": openId === item.id, onClick: () => setOpenId(openId === item.id ? null : item.id), children: [
+              item.kind === "image" && urls[item.id] ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("img", { src: urls[item.id], alt: "", width: 40, height: 40 }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-attachment-badge", "aria-hidden": "true", children: item.kind === "text" ? "TXT" : item.kind === "image" ? "IMG" : "FILE" }),
+              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-attachment-name", children: item.name }),
+              /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: "cs-hint", children: formatSize2(item.size) })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("button", { type: "button", className: "cs-quiet", disabled, "aria-label": `${t2("attachmentRemove")} ${item.name}`, onClick: () => {
+              void remove(item.id);
+            }, children: t2("attachmentRemove") }),
+            openId === item.id && item.kind === "image" && urls[item.id] && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("img", { className: "cs-attachment-preview", src: urls[item.id], alt: item.name })
+          ] }, item.id)) }),
+          material.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("p", { className: "cs-hint", children: [
+            t2("attachmentMaterial"),
+            material.join(t2("listJoin"))
+          ] })
+        ]
+      }
+    );
   }
 
   // ../src/client/generate.tsx
@@ -32384,13 +32436,14 @@ ${r.featureIdeas.join("\n")}` });
     }
     return lines;
   }
-  function requirementsMarkdown(name, nodes2, labels) {
+  function requirementsMarkdown(name, nodes2, labels, material = []) {
     if (!nodes2.length) return `${labels.empty}
 `;
     const byId = new Map(nodes2.map((node) => [node.id, node]));
     const lines = [`# ${name}`, `${labels.root}`, "", ...linesFor(nodes2, childrenOf(nodes2, null), 0, labels, byId)];
     const orphans = orphanDetected(nodes2);
     if (orphans.length) lines.push("", ...linesFor(nodes2, orphans, 0, labels, byId));
+    if (material.length && labels.attachments) lines.push("", `## ${labels.attachments}`, "", ...material.map((item) => `- ${item.name} (${item.kind})`));
     return `${lines.join("\n")}
 `;
   }
@@ -32540,7 +32593,7 @@ ${r.featureIdeas.join("\n")}` });
           /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", className: "cs-primary", disabled: busy, onClick: () => addNode(selected), children: selected ? t2("addChild") : t2("addRoot") }),
           /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", disabled: busy || !selected, title: selected ? t2("selectRootHint") : t2("selectNode"), onClick: () => choose(null), children: selected ? t2("clearSelection") : t2("selectRoot") }),
           /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { type: "button", title: t2("exportMarkdown"), onClick: () => {
-            const text = requirementsMarkdown(project2.name, project2.nodes, { root: t2("exportRootLabel"), priorityHigh: t2("exportPriorityHigh"), priorityLow: t2("exportPriorityLow"), acceptance: t2("exportAcceptance"), depends: t2("exportDepends"), desktop: t2("exportDesktop"), mobile: t2("exportMobile"), empty: t2("exportEmpty") });
+            const text = requirementsMarkdown(project2.name, project2.nodes, { attachments: t2("attachmentsTitle"), root: t2("exportRootLabel"), priorityHigh: t2("exportPriorityHigh"), priorityLow: t2("exportPriorityLow"), acceptance: t2("exportAcceptance"), depends: t2("exportDepends"), desktop: t2("exportDesktop"), mobile: t2("exportMobile"), empty: t2("exportEmpty") }, project2.attachments ?? []);
             const url2 = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
             const a = document.createElement("a");
             a.href = url2;
@@ -32775,7 +32828,7 @@ ${r.featureIdeas.join("\n")}` });
       });
     };
     const stages = project2 ? [
-      { id: "idea", label: t2("stageIdea"), hint: t2("stageHintIdea"), badge: project2.proposalJob?.status === "submitted" ? t2("badgeAwaitingModel") : project2.proposals.length ? `${project2.proposals.length}${t2("badgeCandidates")}` : void 0, blocks: [
+      { id: "idea", label: t2("stageIdea"), hint: t2("stageHintIdea"), badge: [project2.proposalJob?.status === "submitted" ? t2("badgeAwaitingModel") : project2.proposals.length ? `${project2.proposals.length}${t2("badgeCandidates")}` : void 0, (project2.attachments ?? []).length ? `${(project2.attachments ?? []).length}${t2((project2.attachments ?? []).length === 1 ? "badgeAttachmentsOne" : "badgeAttachments")}` : void 0].filter(Boolean).join(" \xB7 ") || void 0, blocks: [
         { id: "generate", label: t2("generateTitle"), content: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(GeneratePanel, { listWorkspaces: api.listWorkspaces, listModels: api.listModels, attachments: { upload: api.uploadAttachment, remove: api.deleteAttachment, read: api.readAttachment }, onProject: (next) => {
           setProject(next);
           void api.list().then((items) => setProjects(items)).catch(() => void 0);
@@ -33107,13 +33160,14 @@ ${r.featureIdeas.join("\n")}` });
 .creative-studio-root .cs-demo-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.creative-studio-root .cs-demo-head h3{margin:0}
 .creative-studio-root .cs-demo-actions{display:flex;align-items:center;gap:8px}.creative-studio-root .cs-demo-controls{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:12px 0}.creative-studio-root .cs-stale{margin:8px 0;font-size:var(--cs-text-sm);line-height:20px}.creative-studio-root .cs-job-status{margin-top:12px}.creative-studio-root .cs-job-status .cs-status{display:flex;align-items:center;gap:8px;margin:0;font-size:var(--cs-text-sm);line-height:20px;color:var(--cs-muted)}.creative-studio-root .cs-status-dot{width:8px;height:8px;border-radius:50%;background:var(--cs-muted);flex:none}
 .creative-studio-root .cs-help{margin-top:8px}.creative-studio-root .cs-help>summary{padding:4px 0;min-height:24px;cursor:pointer;font-size:var(--cs-text-sm);color:var(--cs-muted)}.creative-studio-root .cs-help>summary:hover{color:var(--cs-text)}
-.creative-studio-root .cs-canvas-search{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}.creative-studio-root .cs-search-results{display:flex;flex-wrap:wrap;gap:8px}.creative-studio-root .cs-search-results button{max-inline-size:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.creative-studio-root .cs-file-button{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:4px 12px;border:1px solid var(--cs-border);border-radius:8px;font-size:var(--cs-text-sm);line-height:20px;cursor:pointer;background:transparent}
+.creative-studio-root .cs-canvas-search{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}.creative-studio-root .cs-search-results{display:flex;flex-wrap:wrap;gap:8px}.creative-studio-root .cs-search-results button{max-inline-size:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.creative-studio-root .cs-attachments.cs-drop{outline:2px dashed var(--cs-accent);outline-offset:4px;border-radius:12px;background:var(--cs-soft)}
+.creative-studio-root .cs-file-button{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:4px 12px;border:1px solid var(--cs-border);border-radius:8px;font-size:var(--cs-text-sm);line-height:20px;cursor:pointer;background:transparent}
 .creative-studio-root .cs-file-button:hover{border-color:var(--cs-accent)}
 .creative-studio-root .cs-file-button:has(input:disabled){opacity:.5;cursor:not-allowed}
 .creative-studio-root .cs-file-button input{position:absolute;inset:0;opacity:0;cursor:inherit;width:100%;height:100%}
 .creative-studio-root .cs-attachments{display:flex;flex-direction:column;gap:8px;margin:0 0 16px;padding:12px;border:1px solid var(--cs-border);border-radius:12px;background-color:var(--cs-surface)}
 .creative-studio-root .cs-attachments .cs-toolbar{align-items:center;flex-wrap:wrap;gap:12px;margin:0}
-.creative-studio-root .cs-attachment-list{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.creative-studio-root .cs-attachment-list{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
 .creative-studio-root .cs-attachment-list li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}
 .creative-studio-root .cs-attachment-open{display:flex;align-items:center;gap:8px;min-height:44px;padding:4px 8px;text-align:left;border-color:transparent;background:transparent;max-inline-size:100%}
 .creative-studio-root .cs-attachment-open:hover{border-color:var(--cs-border)}
@@ -33332,6 +33386,11 @@ ${r.featureIdeas.join("\n")}` });
     schemaVersion: 1,
     nodes,
     architecture,
+    attachments: [
+      { id: "att-doc", name: "\u9700\u6C42\u8349\u7A3F-20261117.md", mime: "text/markdown", size: 4821, kind: "text", createdAt: "2026-11-17T03:10:00.000Z" },
+      { id: "att-shot", name: "\u9996\u9875\u622A\u56FE.png", mime: "image/png", size: 184320, kind: "image", createdAt: "2026-11-17T03:11:00.000Z" },
+      { id: "att-pdf", name: "\u7ADE\u54C1\u5206\u6790.pdf", mime: "application/pdf", size: 921600, kind: "other", createdAt: "2026-11-17T03:12:00.000Z" }
+    ],
     references: [{
       id: "r1",
       name: "Linear",
@@ -33499,12 +33558,24 @@ ${r.featureIdeas.join("\n")}` });
 
   // dict.json
   var dict_default = {
+    badgeAttachmentsOne: " \u4EFD\u8D44\u6599",
+    badgeAttachments: " \u4EFD\u8D44\u6599",
+    attachmentDrop: "\u4E5F\u53EF\u4EE5\u628A\u6587\u4EF6\u76F4\u63A5\u62D6\u5230\u8FD9\u91CC\u3002",
+    attachmentPaste: "\u622A\u56FE\u53EF\u4EE5\u5148\u590D\u5236\uFF0C\u70B9\u4E00\u4E0B\u8FD9\u4E2A\u533A\u57DF\u518D\u6309 Ctrl/\u2318+V \u7C98\u8D34\u3002",
     attachmentsTitle: "\u53C2\u8003\u8D44\u6599\uFF08\u53EF\u9009\uFF09",
     attachmentsHint: "\u53EF\u4EE5\u4F20\u9700\u6C42\u6587\u6863\u3001\u622A\u56FE\u3001\u7ADE\u54C1\u8D44\u6599\uFF0C\u7528\u6765\u8865\u5145\u8BF4\u660E\u4F60\u7684\u60F3\u6CD5\u3002\u5355\u4E2A\u6587\u4EF6\u6700\u5927 3 MB\uFF0C\u6700\u591A 20 \u4E2A\u3002",
     attachmentAdd: "\u9009\u62E9\u6587\u4EF6",
     attachmentBusy: "\u4E0A\u4F20\u4E2D\u2026",
     attachmentTooLarge: "\u300C{name}\u300D\u8D85\u8FC7 3 MB\uFF0C\u6CA1\u6709\u4E0A\u4F20\u3002",
     attachmentLimit: "\u6700\u591A\u53EA\u80FD\u653E 20 \u4E2A\u6587\u4EF6\uFF0C\u5148\u79FB\u9664\u4E00\u4E9B\u518D\u4F20\u3002",
+    attachmentConflict: "\u9879\u76EE\u5728\u522B\u5904\u88AB\u6539\u8FC7\u4E86\uFF0C\u5237\u65B0\u4E00\u4E0B\u9875\u9762\u518D\u4F20\u3002",
+    attachmentGone: "\u8FD9\u4E2A\u6587\u4EF6\u5DF2\u7ECF\u4E0D\u5728\u4E86\uFF0C\u5237\u65B0\u4E00\u4E0B\u770B\u770B\u3002",
+    attachmentTooLargeServer: "\u6587\u4EF6\u592A\u5927\uFF0C\u670D\u52A1\u5668\u6CA1\u6709\u63A5\u6536\uFF0C\u6362\u4E2A\u5C0F\u4E00\u70B9\u7684\u3002",
+    attachmentUnavailable: "\u4E0A\u4F20\u529F\u80FD\u8FD8\u6CA1\u52A0\u8F7D\uFF0C\u9700\u8981\u5728\u5BBF\u4E3B\u673A\u91CD\u542F\u4E00\u6B21 Web \u670D\u52A1\u3002",
+    attachmentMaterial: "\u8FD9\u4E9B\u8D44\u6599\u4F1A\u968F\u60F3\u6CD5\u4E00\u8D77\u4EA4\u7ED9\u6A21\u578B\uFF1A",
+    attachmentMaterialText: "{n} \u4EFD\u6587\u6863\u4F1A\u8BFB\u53D6\u5185\u5BB9",
+    attachmentMaterialImage: "{n} \u5F20\u622A\u56FE\u53EA\u4F5C\u63D0\u793A\uFF08\u6A21\u578B\u770B\u4E0D\u5230\u56FE\uFF09",
+    attachmentMaterialOther: "{n} \u4EFD\u5176\u4ED6\u6587\u4EF6\u53EA\u8BB0\u5F55\u6587\u4EF6\u540D",
     attachmentRemove: "\u79FB\u9664",
     confirmProjectChange: "\u5207\u6362\u6216\u65B0\u5EFA\u9879\u76EE\u4F1A\u5173\u95ED\u5F53\u524D\u7F16\u8F91\u533A\uFF0C\u672A\u4FDD\u5B58\u7684\u8868\u5355\u548C\u672C\u5730 Demo \u9884\u89C8\u5C06\u4E22\u5F03\u3002\u786E\u8BA4\u7EE7\u7EED\uFF1F\u5DF2\u4FDD\u5B58\u6570\u636E\u4E0D\u4F1A\u5220\u9664\u3002",
     editorConflict: "\u8FDC\u7AEF\u4FEE\u6539\u4E0E\u672A\u4FDD\u5B58\u7F16\u8F91\u51B2\u7A81\u3002\u5DF2\u4FDD\u7559\u8F93\u5165\u5E76\u6682\u505C\u4FDD\u5B58\uFF1B\u8BF7\u6838\u5BF9\u540E\u91CD\u65B0\u8F7D\u5165\u3002",

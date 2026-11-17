@@ -1,0 +1,16 @@
+import { chromium } from 'playwright';
+const ctx = await chromium.launch({ headless: true, executablePath: '/dsh-home/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome', viewport: { width: 1440, height: 1100 } });
+const page = await ctx.newPage();
+const errs = [];
+page.on('pageerror', error => errs.push(String(error).slice(0, 160)));
+await page.goto('http://127.0.0.1:8791/light-workspace.html?screen=workspace', { waitUntil: 'networkidle' });
+await page.waitForTimeout(1600);
+const panel = page.locator('.cs-attachments');
+const found = await panel.count();
+const text = found ? await panel.first().innerText() : null;
+const items = await page.locator('.cs-attachment-list li').count();
+if (found) await panel.first().scrollIntoViewIfNeeded().catch(() => undefined);
+await page.waitForTimeout(300);
+await page.screenshot({ path: 'review/attachments-material.png', fullPage: false });
+console.log(JSON.stringify({ found, items, text: text?.replace(/\n/g, ' | ').slice(0, 400), errs }));
+await ctx.close();

@@ -113,6 +113,13 @@ export function AttachmentsPanel({ project, t, busy, actions }: { project: Proje
     }
   };
 
+  const counts = { text: 0, image: 0, other: 0 };
+  for (const item of list) counts[item.kind] += 1;
+  const material: string[] = [];
+  if (counts.text) material.push(t('attachmentMaterialText').replace('{n}', String(counts.text)));
+  if (counts.image) material.push(t('attachmentMaterialImage').replace('{n}', String(counts.image)));
+  if (counts.other) material.push(t('attachmentMaterialOther').replace('{n}', String(counts.other)));
+
   return (
     <section
       className={dragging ? 'cs-attachments cs-drop' : 'cs-attachments'}
@@ -150,7 +157,7 @@ export function AttachmentsPanel({ project, t, busy, actions }: { project: Proje
                 <button type="button" className="cs-attachment-open" disabled={disabled} aria-expanded={openId === item.id} onClick={() => setOpenId(openId === item.id ? null : item.id)}>
                   {item.kind === 'image' && urls[item.id]
                     ? <img src={urls[item.id]} alt="" width={40} height={40} />
-                    : <span className="cs-attachment-badge" aria-hidden="true">{item.kind === 'text' ? 'TXT' : 'FILE'}</span>}
+                    : <span className="cs-attachment-badge" aria-hidden="true">{item.kind === 'text' ? 'TXT' : item.kind === 'image' ? 'IMG' : 'FILE'}</span>}
                   <span className="cs-attachment-name">{item.name}</span>
                   <span className="cs-hint">{formatSize(item.size)}</span>
                 </button>
@@ -160,6 +167,7 @@ export function AttachmentsPanel({ project, t, busy, actions }: { project: Proje
             ))}
           </ul>
         )}
+      {material.length > 0 && <p className="cs-hint">{t('attachmentMaterial')}{material.join(t('listJoin'))}</p>}
     </section>
   );
 }
