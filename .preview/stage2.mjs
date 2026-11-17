@@ -1,0 +1,18 @@
+import {chromium} from 'playwright';
+const ctx=await chromium.launchPersistentContext('/dsh-home/.cache/creative-studio-browser-profile',{headless:true,executablePath:'/dsh-home/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome',viewport:{width:1440,height:1150}});
+const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(String(e).slice(0,120)));
+const open=async(wait=1400)=>{await page.getByRole('button',{name:'Creative Studio'}).click({timeout:60000});await page.waitForTimeout(wait);};
+const cur=()=>page.evaluate(()=>document.querySelector('.cs-steps button[aria-current="step"]')?.textContent??'');
+await page.goto('http://192.168.31.188:3080/',{waitUntil:'domcontentloaded'});await open();
+const idx=(await page.locator('.cs-project-card').allTextContents()).findIndex(t=>t.includes('Structured handoff probe'));
+await page.locator('.cs-project-card').nth(idx).click();await page.waitForTimeout(1500);
+const first=await cur();
+await page.locator('.cs-steps button').nth(3).click();await page.waitForTimeout(600);
+const picked=await cur();
+await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1500);
+await open();
+const idx2=(await page.locator('.cs-project-card').allTextContents()).findIndex(t=>t.includes('Structured handoff probe'));
+await page.locator('.cs-project-card').nth(idx2).click();await page.waitForTimeout(1500);
+const restored=await cur();
+console.log(JSON.stringify({first,picked,restored,errs}));
+await ctx.close();

@@ -8,13 +8,15 @@ export interface Stage { id: string; label: string; hint: string; blocks: StageB
 export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Stage[];demo:(compare:boolean)=>React.ReactNode;t:(key:string)=>string}):React.ReactElement{
   const key=`creative-studio-layout:${projectId}`;
   const [layout,setLayout]=React.useState(()=>{try{return parseLayout(localStorage.getItem(key));}catch{return parseLayout(null);}});
-  const [stage,setStage]=React.useState(stages[0]?.id??'');
+  const stageKey=`creative-studio-stage:${projectId}`;
+  const [stage,setStage]=React.useState(()=>{try{const saved=localStorage.getItem(stageKey);return stages.some(s=>s.id===saved)?String(saved):stages[0]?.id??'';}catch{return stages[0]?.id??'';}});
   const [focus,setFocus]=React.useState(false);
   const grid=React.useRef<HTMLDivElement>(null);
   const shell=React.useRef<HTMLElement>(null);
   const [narrow,setNarrow]=React.useState(false);
   React.useEffect(()=>{const el=shell.current;if(!el)return;const observer=new ResizeObserver(()=>setNarrow(el.clientWidth<1080));observer.observe(el);setNarrow(el.clientWidth<1080);return()=>observer.disconnect();},[]);
   const split=layout.split;
+  const goStage=(id:string)=>{setStage(id);try{localStorage.setItem(stageKey,id);}catch{/* storage is optional */}};
   const change=(next:typeof layout)=>{setLayout(next);try{localStorage.setItem(key,JSON.stringify(next));}catch{/* storage is optional */}};
   const resize=(x:number)=>{const box=grid.current?.getBoundingClientRect();if(box&&box.width>0)change({...layout,split:Math.max(30,Math.min(70,(x-box.left)/box.width*100))});};
   const active=stages.find(s=>s.id===stage)??stages[0]??{id:'',label:'',hint:'',blocks:[]};
@@ -31,7 +33,7 @@ export function Workbench({projectId,stages,demo,t}:{projectId:string;stages:Sta
     {list.map(block=><section key={block.id} id={withNav?`cs-block-${block.id}`:undefined} className="cs-block" aria-label={block.label}>{block.content}</section>)}
   </>;
   return <section className="cs-workbench" ref={shell}>
-    <ol className="cs-steps" aria-label={t('stages')}>{stages.map((item,index)=><li key={item.id}><button type="button" aria-current={active.id===item.id?'step':undefined} onClick={()=>{if(item.id!==stage&&hasUnsavedEdits()&&!window.confirm(t('discardStageEdit')))return;setStage(item.id);}}><span className="cs-step-index" aria-hidden="true">{index+1}</span>{item.label}{item.badge&&<small className="cs-step-badge">{item.badge}</small>}</button></li>)}</ol>
+    <ol className="cs-steps" aria-label={t('stages')}>{stages.map((item,index)=><li key={item.id}><button type="button" aria-current={active.id===item.id?'step':undefined} onClick={()=>{if(item.id!==stage&&hasUnsavedEdits()&&!window.confirm(t('discardStageEdit')))return;goStage(item.id);}}><span className="cs-step-index" aria-hidden="true">{index+1}</span>{item.label}{item.badge&&<small className="cs-step-badge">{item.badge}</small>}</button></li>)}</ol>
     <div className="cs-toolbar">
       {!narrow&&<button type="button" title={t('layoutExploreHint')} aria-pressed={!compare} onClick={()=>change({...layout,compare:false})}>{t('layoutExplore')}</button>}
       {!narrow&&<button type="button" title={t('layoutCompareHint')} aria-pressed={compare} onClick={()=>change({...layout,compare:true})}>{t('layoutCompare')}</button>}
