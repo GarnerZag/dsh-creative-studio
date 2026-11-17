@@ -229,7 +229,7 @@ const styles = `
 .creative-studio-root .cs-block{padding:12px 16px;border:1px solid var(--cs-border);border-radius:12px;background:var(--cs-surface);margin:0 0 12px}
 .creative-studio-root .cs-block:last-child{margin-bottom:0}
 .creative-studio-root .cs-block>h4{margin:0 0 8px}
-.creative-studio-root .cs-pane-scroll{max-height:40vh;overflow:auto}.creative-studio-root .cs-pane-single{max-height:none;overflow:visible}
+.creative-studio-root .cs-pane-scroll{max-height:none;overflow:visible}.creative-studio-root .cs-pane-single{max-height:none;overflow:visible}
 .creative-studio-root .cs-checks{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 12px}
 .creative-studio-root .cs-checks>label{display:inline-flex;align-items:center;gap:8px;margin:0;min-height:24px}
 .creative-studio-root .cs-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
